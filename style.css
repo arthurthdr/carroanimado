@@ -1,0 +1,200 @@
+body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    width: 90%;
+    max-width: 960px;
+}
+
+#carro-container,
+#carro-esportivo-container,
+#caminhao-container,
+#moto-container,
+#bicicleta-container {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin: 10px;
+    text-align: center;
+    width: 30%;
+    min-width: 300px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    position: relative;
+}
+
+#carro-imagem,
+#esportivo-imagem,
+#caminhao-imagem,
+#moto-imagem,
+#bicicleta-imagem {
+    width: 100%;
+    max-width: 250px;
+    height: auto;
+    margin-bottom: 15px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#carro-container p,
+#carro-esportivo-container p,
+#caminhao-container p,
+#moto-container p,
+#bicicleta-container p {
+    color: #555;
+    margin: 5px 0;
+}
+
+/* Posicionamento e estilo dos botões */
+#controles, #controles-esportivo, #controles-caminhao, #controles-moto, #controles-bicicleta {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+}
+
+button {
+    padding: 8px 16px;
+    margin: 5px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    color: white;
+}
+
+#ligar, #ligar-esportivo, #ligar-caminhao, #ligar-moto {
+    background-color: #28a745;
+}
+
+#ligar:hover, #ligar-esportivo:hover, #ligar-caminhao:hover, #ligar-moto:hover {
+    background-color: #218838;
+}
+
+#desligar, #desligar-esportivo, #desligar-caminhao, #desligar-moto {
+    background-color: #dc3545;
+}
+
+#desligar:hover, #desligar-esportivo:hover, #desligar-caminhao:hover, #desligar-moto:hover {
+    background-color: #c82333;
+}
+
+#acelerar, #acelerar-esportivo, #acelerar-caminhao, #acelerar-moto, #acelerar-bicicleta {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+#acelerar:hover, #acelerar-esportivo:hover, #acelerar-caminhao:hover, #acelerar-moto:hover, #acelerar-bicicleta:hover {
+    background-color: #e0a800;
+}
+
+#frear, #frear-esportivo, #frear-caminhao, #frear-moto, #frear-bicicleta {
+    background-color: #17a2b8;
+}
+
+#frear:hover, #frear-esportivo:hover, #frear-caminhao:hover, #frear-moto:hover, #frear-bicicleta:hover {
+    background-color: #138496;
+}
+
+#mudarCor, #mudarCor-esportivo, #mudarCor-caminhao, #mudarCor-moto, #mudarCor-bicicleta {
+    background-color: #6c757d;
+}
+
+#mudarCor:hover, #mudarCor-esportivo:hover, #mudarCor-caminhao:hover, #mudarCor-moto:hover, #mudarCor-bicicleta:hover {
+    background-color: #5a6268;
+}
+
+#ativar-turbo {
+    background-color: #007bff;
+}
+
+#ativar-turbo:hover {
+    background-color: #0069d9;
+}
+
+#desativar-turbo {
+    background-color: #6c757d;
+}
+
+#desativar-turbo:hover {
+    background-color: #5a6268;
+}
+
+#carregar-caminhao {
+    background-color: #28a745;
+}
+
+#carregar-caminhao:hover {
+    background-color: #218838;
+}
+
+#quantidade-carga {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+/* Estilos para a nova seção de informações */
+#informacoesVeiculo {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    text-align: left;
+    width: 80%;
+}
+
+/* Estilos para a seção de seleção de veículo */
+#selecaoVeiculo {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#selecaoVeiculo button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#selecaoVeiculo button:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #carro-container,
+    #carro-esportivo-container,
+    #caminhao-container,
+    #moto-container,
+    #bicicleta-container {
+        width: 80%;
+        min-width: auto;
+    }
+}
