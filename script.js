@@ -12,6 +12,34 @@ document.getElementById("animar").addEventListener("click", () => {
     }
 });
 
+// Elementos de áudio
+const somBuzina = document.getElementById("som-buzina");
+const somAcelerar = document.getElementById("som-acelerar");
+const somFrear = document.getElementById("som-frear");
+const somLigar = document.getElementById("som-ligar");
+const somDesligar = document.getElementById("som-desligar");
+
+// Funções auxiliares
+function tocarSom(elementoAudio) {
+    elementoAudio.currentTime = 0;
+    elementoAudio.play();
+}
+
+function atualizarBarraDeProgresso(elementoId, velocidade) {
+    const barraProgresso = document.getElementById(elementoId);
+    barraProgresso.style.width = `${velocidade}%`;
+}
+
+function atualizarEstadoNaTela(elementoId, ligado) {
+    const estadoElement = document.getElementById(elementoId);
+    estadoElement.textContent = ligado ? "Ligado" : "Desligado";
+    estadoElement.style.color = ligado ? "green" : "red";
+}
+
+function exibirAlerta(mensagem) {
+    alert(mensagem); // Ou atualizar um elemento HTML na tela
+}
+
 // Classe Veiculo
 class Veiculo {
     constructor(modelo, cor) {
@@ -22,44 +50,56 @@ class Veiculo {
     }
 
     ligar() {
-        if (!this.ligado) {
-            this.ligado = true;
-            console.log("Veículo ligado!");
-        } else {
-            console.log("O veículo já está ligado.");
+        if (this.ligado) {
+            exibirAlerta("O veículo já está ligado.");
+            return;
         }
+        this.ligado = true;
+        console.log("Veículo ligado!");
+        tocarSom(somLigar);
         this.atualizarEstadoNaTela();
     }
 
     desligar() {
-        if (this.ligado) {
-            this.ligado = false;
-            this.velocidade = 0;
-            console.log("Veículo desligado!");
-        } else {
-            console.log("O veículo já está desligado.");
+        if (!this.ligado) {
+            exibirAlerta("O veículo já está desligado.");
+            return;
         }
+        this.ligado = false;
+        this.velocidade = 0;
+        console.log("Veículo desligado!");
+        tocarSom(somDesligar);
         this.atualizarEstadoNaTela();
-        this.atualizarVelocidadeNaTela(); // Resetar a velocidade ao desligar
+        this.atualizarVelocidadeNaTela();
     }
 
     acelerar(incremento) {
-        if (this.ligado) {
-            this.velocidade += incremento;
-            console.log(`Acelerando! Velocidade atual: ${this.velocidade} km/h`);
-        } else {
-            console.log("O carro precisa estar ligado para acelerar.");
+        if (!this.ligado) {
+            exibirAlerta("O carro precisa estar ligado para acelerar.");
+            return;
         }
+        if (this.velocidade >= 100) {
+            exibirAlerta("O veículo já está na velocidade máxima.");
+            return;
+        }
+        this.velocidade += incremento;
+        console.log(`Acelerando! Velocidade atual: ${this.velocidade} km/h`);
+        tocarSom(somAcelerar);
         this.atualizarVelocidadeNaTela();
     }
 
     frear(decremento) {
-        if (this.ligado) {
-            this.velocidade = Math.max(0, this.velocidade - decremento);
-            console.log(`Freando! Velocidade atual: ${this.velocidade} km/h`);
-        } else {
-            console.log("O carro precisa estar ligado para frear.");
+        if (!this.ligado) {
+            exibirAlerta("O carro precisa estar ligado para frear.");
+            return;
         }
+        if (this.velocidade === 0) {
+            exibirAlerta("O veículo já está parado.");
+            return;
+        }
+        this.velocidade = Math.max(0, this.velocidade - decremento);
+        console.log(`Freando! Velocidade atual: ${this.velocidade} km/h`);
+        tocarSom(somFrear);
         this.atualizarVelocidadeNaTela();
     }
 
@@ -70,15 +110,13 @@ class Veiculo {
     }
 
     getVelocidade() {
-      return this.velocidade;
+        return this.velocidade;
     }
 
-    // Novo método exibirInformacoes() na classe Veiculo
     exibirInformacoes() {
         return `Modelo: ${this.modelo}, Cor: ${this.cor}, Estado: ${this.ligado ? "Ligado" : "Desligado"}, Velocidade: ${this.velocidade} km/h`;
     }
 
-    // Métodos para atualizar a interface (a serem sobrescritos nas subclasses)
     atualizarVelocidadeNaTela() {
         // Método a ser sobrescrito
     }
@@ -96,18 +134,28 @@ class Veiculo {
 class Carro extends Veiculo {
     constructor(modelo, cor) {
         super(modelo, cor);
+        this.adicionarBotaoBuzina("controles", () => tocarSom(somBuzina));
     }
 
     atualizarVelocidadeNaTela() {
         document.getElementById("velocidade").textContent = this.velocidade;
+        atualizarBarraDeProgresso("barra-progresso-carro", this.velocidade);
     }
 
     atualizarEstadoNaTela() {
-        document.getElementById("estado").textContent = this.ligado ? "Ligado" : "Desligado";
+        atualizarEstadoNaTela("estado", this.ligado);
     }
 
     atualizarCorNaTela() {
         document.getElementById("cor").textContent = this.cor;
+    }
+
+    adicionarBotaoBuzina(containerId, onClick) {
+        const container = document.getElementById(containerId);
+        const button = document.createElement("button");
+        button.textContent = "Buzinar";
+        button.addEventListener("click", onClick);
+        container.appendChild(button);
     }
 }
 
@@ -115,18 +163,19 @@ class Carro extends Veiculo {
 class CarroEsportivo extends Veiculo {
     constructor(modelo, cor) {
         super(modelo, cor);
+        this.adicionarBotaoBuzina("controles-esportivo", () => tocarSom(somBuzina));
         this.turboAtivado = false;
     }
 
     ativarTurbo() {
-        if (this.ligado) {
-            this.turboAtivado = true;
-            this.acelerar(50);
-            document.getElementById("turbo").textContent = "Ativado";
-            console.log("Turbo ativado!");
-        } else {
-            console.log("Ligue o carro esportivo primeiro!");
+        if (!this.ligado) {
+            exibirAlerta("Ligue o carro esportivo primeiro!");
+            return;
         }
+        this.turboAtivado = true;
+        this.acelerar(50);
+        document.getElementById("turbo").textContent = "Ativado";
+        console.log("Turbo ativado!");
     }
 
     desativarTurbo() {
@@ -136,20 +185,32 @@ class CarroEsportivo extends Veiculo {
     }
 
     atualizarVelocidadeNaTela() {
-        document.getElementById("velocidade-esportivo").textContent = this.getVelocidade(); // Usa getVelocidade
+        document.getElementById("velocidade-esportivo").textContent = this.getVelocidade();
+        atualizarBarraDeProgresso("barra-progresso-esportivo", this.velocidade);
     }
 
     atualizarEstadoNaTela() {
-        document.getElementById("estado-esportivo").textContent = this.ligado ? "Ligado" : "Desligado";
+        atualizarEstadoNaTela("estado-esportivo", this.ligado);
     }
 
     atualizarCorNaTela() {
         document.getElementById("cor-esportivo").textContent = this.cor;
     }
 
-    // Sobrescrevendo exibirInformacoes() para CarroEsportivo
     exibirInformacoes() {
         return `${super.exibirInformacoes()}, Turbo: ${this.turboAtivado ? "Ativado" : "Desativado"}`;
+    }
+
+    adicionarBotaoBuzina(containerId, onClick) {
+        const container = document.getElementById(containerId);
+        const button = document.createElement("button");
+        button.textContent = "Buzinar";
+        button.addEventListener("click", onClick);
+        container.appendChild(button);
+    }
+
+    carregar() {
+        exibirAlerta("Um carro esportivo não pode ser carregado.");
     }
 }
 
@@ -157,35 +218,52 @@ class CarroEsportivo extends Veiculo {
 class Caminhao extends Veiculo {
     constructor(modelo, cor, capacidadeCarga) {
         super(modelo, cor);
+        this.adicionarBotaoBuzina("controles-caminhao", () => tocarSom(somBuzina));
         this.capacidadeCarga = capacidadeCarga;
         this.cargaAtual = 0;
     }
 
     carregar(quantidade) {
-        if (this.cargaAtual + quantidade <= this.capacidadeCarga) {
-            this.cargaAtual += quantidade;
-            document.getElementById("carga-atual").textContent = this.cargaAtual;
-            console.log(`Caminhão carregado com ${quantidade} kg. Carga atual: ${this.cargaAtual} kg`);
-        } else {
-            console.log("Carga excede a capacidade máxima do caminhão!");
+        if (quantidade <= 0) {
+            exibirAlerta("A quantidade a carregar deve ser maior que zero.");
+            return;
         }
+        if (this.cargaAtual + quantidade > this.capacidadeCarga) {
+            exibirAlerta("Carga excede a capacidade máxima do caminhão!");
+            return;
+        }
+        this.cargaAtual += quantidade;
+        document.getElementById("carga-atual").textContent = this.cargaAtual;
+        console.log(`Caminhão carregado com ${quantidade} kg. Carga atual: ${this.cargaAtual} kg`);
     }
 
     atualizarVelocidadeNaTela() {
-        document.getElementById("velocidade-caminhao").textContent = this.getVelocidade(); // Usa getVelocidade
+        document.getElementById("velocidade-caminhao").textContent = this.getVelocidade();
+        atualizarBarraDeProgresso("barra-progresso-caminhao", this.velocidade);
     }
 
     atualizarEstadoNaTela() {
-        document.getElementById("estado-caminhao").textContent = this.ligado ? "Ligado" : "Desligado";
+        atualizarEstadoNaTela("estado-caminhao", this.ligado);
     }
 
     atualizarCorNaTela() {
         document.getElementById("cor-caminhao").textContent = this.cor;
     }
 
-    // Sobrescrevendo exibirInformacoes() para Caminhao
     exibirInformacoes() {
         return `${super.exibirInformacoes()}, Capacidade de Carga: ${this.capacidadeCarga} kg, Carga Atual: ${this.cargaAtual} kg`;
+    }
+
+    adicionarBotaoBuzina(containerId, onClick) {
+        const container = document.getElementById(containerId);
+        const button = document.createElement("button");
+        button.textContent = "Buzinar";
+        button.addEventListener("click", onClick);
+        container.appendChild(button);
+    }
+
+    ativarTurbo() {
+        exibirAlerta("Caminhões não têm turbo.");
     }
 }
 
@@ -193,18 +271,28 @@ class Caminhao extends Veiculo {
 class Moto extends Veiculo {
     constructor(modelo, cor) {
         super(modelo, cor);
+        this.adicionarBotaoBuzina("controles-moto", () => tocarSom(somBuzina));
     }
 
     atualizarVelocidadeNaTela() {
         document.getElementById("velocidade-moto").textContent = this.velocidade;
+        atualizarBarraDeProgresso("barra-progresso-moto", this.velocidade);
     }
 
     atualizarEstadoNaTela() {
-        document.getElementById("estado-moto").textContent = this.ligado ? "Ligado" : "Desligado";
+        atualizarEstadoNaTela("estado-moto", this.ligado);
     }
 
     atualizarCorNaTela() {
         document.getElementById("cor-moto").textContent = this.cor;
+    }
+
+    adicionarBotaoBuzina(containerId, onClick) {
+        const container = document.getElementById(containerId);
+        const button = document.createElement("button");
+        button.textContent = "Buzinar";
+        button.addEventListener("click", onClick);
+        container.appendChild(button);
     }
 }
 
@@ -212,11 +300,9 @@ class Moto extends Veiculo {
 class Bicicleta extends Veiculo {
     constructor(modelo, cor) {
         super(modelo, cor);
-        this.velocidade = 0; // Bicicleta começa com velocidade 0
-        this.ligado = false; // Bicicleta não pode ser ligada/desligada
+        // A bicicleta não tem buzina, nem som de ligar/desligar
     }
 
-     // A bicicleta não pode ser ligada/desligada
     ligar() {
         console.log("A bicicleta não pode ser ligada.");
     }
@@ -226,19 +312,30 @@ class Bicicleta extends Veiculo {
     }
 
     acelerar(incremento) {
+        if (this.velocidade >= 30) {
+            exibirAlerta("A bicicleta já está na velocidade máxima.");
+            return;
+        }
         this.velocidade += incremento;
         console.log(`Pedalando! Velocidade atual: ${this.velocidade} km/h`);
+        tocarSom(somAcelerar);
         this.atualizarVelocidadeNaTela();
     }
 
     frear(decremento) {
+        if (this.velocidade === 0) {
+            exibirAlerta("A bicicleta já está parada.");
+            return;
+        }
         this.velocidade = Math.max(0, this.velocidade - decremento);
         console.log(`Freando a bicicleta! Velocidade atual: ${this.velocidade} km/h`);
+        tocarSom(somFrear);
         this.atualizarVelocidadeNaTela();
     }
 
     atualizarVelocidadeNaTela() {
         document.getElementById("velocidade-bicicleta").textContent = this.velocidade;
+        atualizarBarraDeProgresso("barra-progresso-bicicleta", this.velocidade);
     }
 
     atualizarCorNaTela() {
@@ -246,7 +343,7 @@ class Bicicleta extends Veiculo {
     }
 
     exibirInformacoes() {
-        return `${super.exibirInformacoes()}`; // Informações básicas
+        return `${super.exibirInformacoes()}`;
     }
 
     atualizarEstadoNaTela() {
@@ -264,23 +361,23 @@ const minhaBicicleta = new Bicicleta("Caloi", "Azul");
 // Inicializar informações na tela
 document.getElementById("modelo").textContent = meuCarro.modelo;
 document.getElementById("cor").textContent = meuCarro.cor;
-document.getElementById("estado").textContent = meuCarro.ligado ? "Ligado" : "Desligado";
+atualizarEstadoNaTela("estado", meuCarro.ligado);
 document.getElementById("velocidade").textContent = meuCarro.velocidade;
 
 document.getElementById("modelo-esportivo").textContent = meuCarroEsportivo.modelo;
 document.getElementById("cor-esportivo").textContent = meuCarroEsportivo.cor;
-document.getElementById("estado-esportivo").textContent = meuCarroEsportivo.ligado ? "Ligado" : "Desligado";
+atualizarEstadoNaTela("estado-esportivo", meuCarroEsportivo.ligado);
 document.getElementById("velocidade-esportivo").textContent = meuCarroEsportivo.velocidade;
 
 document.getElementById("modelo-caminhao").textContent = meuCaminhao.modelo;
 document.getElementById("cor-caminhao").textContent = meuCaminhao.cor;
-document.getElementById("estado-caminhao").textContent = meuCaminhao.ligado ? "Ligado" : "Desligado";
+atualizarEstadoNaTela("estado-caminhao", meuCaminhao.ligado);
 document.getElementById("velocidade-caminhao").textContent = meuCaminhao.velocidade;
 document.getElementById("capacidade-carga").textContent = meuCaminhao.capacidadeCarga;
 
 document.getElementById("modelo-moto").textContent = minhaMoto.modelo;
 document.getElementById("cor-moto").textContent = minhaMoto.cor;
-document.getElementById("estado-moto").textContent = minhaMoto.ligado ? "Ligado" : "Desligado";
+atualizarEstadoNaTela("estado-moto", minhaMoto.ligado);
 document.getElementById("velocidade-moto").textContent = minhaMoto.velocidade;
 
 document.getElementById("modelo-bicicleta").textContent = minhaBicicleta.modelo;
@@ -381,7 +478,7 @@ document.getElementById("ligar-moto").addEventListener("click", () => {
     minhaMoto.ligar();
 });
 
-document.getElementById("desligar-moto").addEventListener("click", () => {
+document.getElementById("desligar").addEventListener("click", () => {
     minhaMoto.desligar();
 });
 
@@ -393,11 +490,10 @@ document.getElementById("frear-moto").addEventListener("click", () => {
     minhaMoto.frear(5);
 });
 
-document.getElementById("mudarCor-moto").addEventListener("click", () => {
+document.getElementById("mudarCor").addEventListener("click", () => {
     const novaCor = prompt("Digite a nova cor da moto:");
     if (novaCor) {
         minhaMoto.mudarCor(novaCor);
-        document.getElementById("cor-moto").textContent = minhaMoto.cor;
     }
 });
 
@@ -414,39 +510,67 @@ document.getElementById("mudarCor-bicicleta").addEventListener("click", () => {
     const novaCor = prompt("Digite a nova cor da bicicleta:");
     if (novaCor) {
         minhaBicicleta.mudarCor(novaCor);
-         document.getElementById("cor-bicicleta").textContent = minhaBicicleta.cor;
     }
 });
 
 // Nova funcionalidade para exibir informações
 
 // Função para exibir as informações no elemento HTML
-function exibirInformacoesNaTela(informacoes) {
-    document.getElementById("informacoesVeiculo").textContent = informacoes;
+function exibirInformacoesNaTela(veiculo) {
+    const informacoesVeiculoDiv = document.getElementById("informacoesVeiculo");
+    informacoesVeiculoDiv.innerHTML = ""; // Limpa informações anteriores
+
+    // Cria um elemento de imagem
+    const imagem = document.createElement("img");
+    let imageName = '';
+
+    // Lógica para determinar o nome da imagem com base no tipo de veículo
+    if (veiculo.constructor.name === 'Moto') {
+        imageName = 'moto.webp';
+    } else if (veiculo.constructor.name === 'CarroEsportivo') {
+        imageName = 'carroesportivo.jpg'; // Nome específico para o carro esportivo
+    } else {
+        imageName = `${veiculo.constructor.name.toLowerCase()}.jpg`;
+    }
+
+    imagem.src = `img/${imageName}`; // Ajusta o caminho da imagem
+    imagem.alt = `Imagem do ${veiculo.constructor.name}`;
+    imagem.style.maxWidth = "200px"; // Define um tamanho máximo para a imagem
+    imagem.style.marginBottom = "10px"; // Adiciona um espaço abaixo da imagem
+
+    // Adiciona a imagem ao div de informações
+    informacoesVeiculoDiv.appendChild(imagem);
+
+    // Cria um elemento de parágrafo para as informações
+    const informacoesParagrafo = document.createElement("p");
+    informacoesParagrafo.textContent = veiculo.exibirInformacoes();
+
+    // Adiciona o parágrafo ao div de informações
+    informacoesVeiculoDiv.appendChild(informacoesParagrafo);
 }
 
 // Eventos para os botões de seleção de veículo
 document.getElementById("selecionarCarro").addEventListener("click", () => {
-    exibirInformacoesNaTela(meuCarro.exibirInformacoes());
+    exibirInformacoesNaTela(meuCarro);
 });
 
 document.getElementById("selecionarCarroEsportivo").addEventListener("click", () => {
-    exibirInformacoesNaTela(meuCarroEsportivo.exibirInformacoes());
+    exibirInformacoesNaTela(meuCarroEsportivo);
 });
 
 document.getElementById("selecionarCaminhao").addEventListener("click", () => {
-    exibirInformacoesNaTela(meuCaminhao.exibirInformacoes());
+    exibirInformacoesNaTela(meuCaminhao);
 });
 
 document.getElementById("selecionarMoto").addEventListener("click", () => {
-    exibirInformacoesNaTela(minhaMoto.exibirInformacoes());
+    exibirInformacoesNaTela(minhaMoto);
 });
 
 document.getElementById("selecionarBicicleta").addEventListener("click", () => {
-    exibirInformacoesNaTela(minhaBicicleta.exibirInformacoes());
+    exibirInformacoesNaTela(minhaBicicleta);
 });
 
-// Inicializar cores na tela
+// Inicializar informações na tela
 document.getElementById("cor").textContent = meuCarro.cor;
 document.getElementById("cor-esportivo").textContent = meuCarroEsportivo.cor;
 document.getElementById("cor-caminhao").textContent = meuCaminhao.cor;

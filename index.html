@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carro Interativo</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
     <h1>Meu Carro</h1>
 
@@ -15,6 +17,9 @@
         <p>Cor: <span id="cor"></span></p>
         <p>Estado: <span id="estado">Desligado</span></p>
         <p>Velocidade: <span id="velocidade">0</span> km/h</p>
+        <div class="barra-progresso-container">
+            <div id="barra-progresso-carro" class="barra-progresso"></div>
+        </div>
 
         <div id="controles">
             <button id="ligar">Ligar</button>
@@ -24,16 +29,24 @@
             <button id="mudarCor">Mudar Cor</button>
             <button id="animar">Animar</button>
         </div>
+        <audio id="som-buzina" src="sounds/buzina.mp3" preload="auto"></audio>
+        <audio id="som-acelerar" src="sounds/carroacelerando.mp3" preload="auto"></audio>
+        <audio id="som-frear" src="sounds/freio.mp3" preload="auto"></audio>
+        <audio id="som-ligar" src="sounds/carrodesligando.mp3" preload="auto"></audio>
+        <audio id="som-desligar" src="sounds/carrodesligando.mp3" preload="auto"></audio>
     </div>
 
     <h2>Carro Esportivo</h2>
     <div id="carro-esportivo-container">
-        <img id="esportivo-imagem" src="img/esportivo.jpg" alt="">
+        <img id="esportivo-imagem" src="img/carroesportivo.jpg" alt="">
         <p>Modelo: <span id="modelo-esportivo"></span></p>
         <p>Cor: <span id="cor-esportivo"></span></p>
         <p>Estado: <span id="estado-esportivo">Desligado</span></p>
         <p>Velocidade: <span id="velocidade-esportivo">0</span> km/h</p>
         <p>Turbo: <span id="turbo">Desativado</span></p>
+        <div class="barra-progresso-container">
+            <div id="barra-progresso-esportivo" class="barra-progresso"></div>
+        </div>
 
         <div id="controles-esportivo">
             <button id="ligar-esportivo">Ligar</button>
@@ -44,6 +57,11 @@
             <button id="desativar-turbo">Desativar Turbo</button>
             <button id="mudarCor-esportivo">Mudar Cor</button>
         </div>
+        <audio id="som-buzina" src="sounds/buzina.mp3" preload="auto"></audio>
+        <audio id="som-acelerar" src="sounds/acelerar.mp3" preload="auto"></audio>
+        <audio id="som-frear" src="sounds/frear.mp3" preload="auto"></audio>
+        <audio id="som-ligar" src="sounds/ligar.mp3" preload="auto"></audio>
+        <audio id="som-desligar" src="sounds/desligar.mp3" preload="auto"></audio>
     </div>
 
     <h2>Caminhão</h2>
@@ -55,6 +73,9 @@
         <p>Velocidade: <span id="velocidade-caminhao">0</span> km/h</p>
         <p>Capacidade de Carga: <span id="capacidade-carga"></span> kg</p>
         <p>Carga Atual: <span id="carga-atual">0</span> kg</p>
+        <div class="barra-progresso-container">
+            <div id="barra-progresso-caminhao" class="barra-progresso"></div>
+        </div>
 
         <div id="controles-caminhao">
             <button id="ligar-caminhao">Ligar</button>
@@ -65,6 +86,11 @@
             <button id="carregar-caminhao">Carregar</button>
             <button id="mudarCor-caminhao">Mudar Cor</button>
         </div>
+        <audio id="som-buzina" src="sounds/buzina.mp3" preload="auto"></audio>
+        <audio id="som-acelerar" src="sounds/acelerar.mp3" preload="auto"></audio>
+        <audio id="som-frear" src="sounds/frear.mp3" preload="auto"></audio>
+        <audio id="som-ligar" src="sounds/ligar.mp3" preload="auto"></audio>
+        <audio id="som-desligar" src="sounds/desligar.mp3" preload="auto"></audio>
     </div>
 
     <h2>Moto</h2>
@@ -74,6 +100,9 @@
         <p>Cor: <span id="cor-moto"></span></p>
         <p>Estado: <span id="estado-moto">Desligado</span></p>
         <p>Velocidade: <span id="velocidade-moto">0</span> km/h</p>
+        <div class="barra-progresso-container">
+            <div id="barra-progresso-moto" class="barra-progresso"></div>
+        </div>
 
         <div id="controles-moto">
             <button id="ligar-moto">Ligar</button>
@@ -82,6 +111,11 @@
             <button id="frear-moto">Frear</button>
             <button id="mudarCor-moto">Mudar Cor</button>
         </div>
+        <audio id="som-buzina" src="sounds/buzina.mp3" preload="auto"></audio>
+        <audio id="som-acelerar" src="sounds/acelerar.mp3" preload="auto"></audio>
+        <audio id="som-frear" src="sounds/frear.mp3" preload="auto"></audio>
+        <audio id="som-ligar" src="sounds/ligar.mp3" preload="auto"></audio>
+        <audio id="som-desligar" src="sounds/desligar.mp3" preload="auto"></audio>
     </div>
 
     <h2>Bicicleta</h2>
@@ -90,13 +124,19 @@
         <p>Modelo: <span id="modelo-bicicleta"></span></p>
         <p>Cor: <span id="cor-bicicleta"></span></p>
         <p>Velocidade: <span id="velocidade-bicicleta">0</span> km/h</p>
+        <div class="barra-progresso-container">
+            <div id="barra-progresso-bicicleta" class="barra-progresso"></div>
+        </div>
 
         <div id="controles-bicicleta">
             <button id="acelerar-bicicleta">Acelerar</button>
             <button id="frear-bicicleta">Frear</button>
             <button id="mudarCor-bicicleta">Mudar Cor</button>
         </div>
-    </div>
+        <audio id="som-buzina" src="sounds/buzina.mp3" preload="auto"></audio>
+        <audio id="som-acelerar" src="sounds/acelerar.mp3" preload="auto"></audio>
+        <audio id="som-frear" src="sounds/frear.mp3" preload="auto"></audio>
+       </div>
 
     <!-- Nova seção para exibir informações -->
     <h2>Informações do Veículo</h2>
@@ -113,4 +153,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

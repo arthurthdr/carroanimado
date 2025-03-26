@@ -8,7 +8,8 @@ body {
     background-color: #f4f4f4;
 }
 
-h1, h2 {
+h1,
+h2 {
     text-align: center;
     color: #333;
     margin-bottom: 10px;
@@ -63,7 +64,11 @@ h1, h2 {
 }
 
 /* Posicionamento e estilo dos botões */
-#controles, #controles-esportivo, #controles-caminhao, #controles-moto, #controles-bicicleta {
+#controles,
+#controles-esportivo,
+#controles-caminhao,
+#controles-moto,
+#controles-bicicleta {
     position: relative;
     width: 100%;
     text-align: center;
@@ -80,45 +85,81 @@ button {
     color: white;
 }
 
-#ligar, #ligar-esportivo, #ligar-caminhao, #ligar-moto {
+#ligar,
+#ligar-esportivo,
+#ligar-caminhao,
+#ligar-moto {
     background-color: #28a745;
 }
 
-#ligar:hover, #ligar-esportivo:hover, #ligar-caminhao:hover, #ligar-moto:hover {
+#ligar:hover,
+#ligar-esportivo:hover,
+#ligar-caminhao:hover,
+#ligar-moto:hover {
     background-color: #218838;
 }
 
-#desligar, #desligar-esportivo, #desligar-caminhao, #desligar-moto {
+#desligar,
+#desligar-esportivo,
+#desligar-caminhao,
+#desligar-moto {
     background-color: #dc3545;
 }
 
-#desligar:hover, #desligar-esportivo:hover, #desligar-caminhao:hover, #desligar-moto:hover {
+#desligar:hover,
+#desligar-esportivo:hover,
+#desligar-caminhao:hover,
+#desligar-moto:hover {
     background-color: #c82333;
 }
 
-#acelerar, #acelerar-esportivo, #acelerar-caminhao, #acelerar-moto, #acelerar-bicicleta {
+#acelerar,
+#acelerar-esportivo,
+#acelerar-caminhao,
+#acelerar-moto,
+#acelerar-bicicleta {
     background-color: #ffc107;
     color: #212529;
 }
 
-#acelerar:hover, #acelerar-esportivo:hover, #acelerar-caminhao:hover, #acelerar-moto:hover, #acelerar-bicicleta:hover {
+#acelerar:hover,
+#acelerar-esportivo:hover,
+#acelerar-caminhao:hover,
+#acelerar-moto:hover,
+#acelerar-bicicleta:hover {
     background-color: #e0a800;
 }
 
-#frear, #frear-esportivo, #frear-caminhao, #frear-moto, #frear-bicicleta {
+#frear,
+#frear-esportivo,
+#frear-caminhao,
+#frear-moto,
+#frear-bicicleta {
     background-color: #17a2b8;
 }
 
-#frear:hover, #frear-esportivo:hover, #frear-caminhao:hover, #frear-moto:hover, #frear-bicicleta:hover {
+#frear:hover,
+#frear-esportivo:hover,
+#frear-caminhao:hover,
+#frear-moto:hover,
+#frear-bicicleta:hover {
     background-color: #138496;
 }
 
-#mudarCor, #mudarCor-esportivo, #mudarCor-caminhao, #mudarCor-moto, #mudarCor-bicicleta {
-    background-color: #6c757d;
+#mudarCor,
+#mudarCor-esportivo,
+#mudarCor-caminhao,
+#mudarCor-moto,
+#mudarCor-bicicleta {
+    background-color: #642f88;
 }
 
-#mudarCor:hover, #mudarCor-esportivo:hover, #mudarCor-caminhao:hover, #mudarCor-moto:hover, #mudarCor-bicicleta:hover {
-    background-color: #5a6268;
+#mudarCor:hover,
+#mudarCor-esportivo:hover,
+#mudarCor-caminhao:hover,
+#mudarCor-moto:hover,
+#mudarCor-bicicleta:hover {
+    background-color: #391a46;
 }
 
 #ativar-turbo {
@@ -197,4 +238,20 @@ button {
         width: 80%;
         min-width: auto;
     }
+}
+
+.barra-progresso-container {
+    width: 100%;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+    height: 10px;
+    overflow: hidden;
+}
+
+.barra-progresso {
+    width: 0%;
+    height: 100%;
+    background-color: blue;
+    transition: width 0.1s ease;
 }
