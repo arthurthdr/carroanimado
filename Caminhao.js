@@ -29,7 +29,19 @@ class Caminhao extends Veiculo {
      * @returns {void}
      */
     carregar(qtd) {
-        // Implementação do carregamento do caminhão
+        const quantidade = parseFloat(qtd);
+        if (isNaN(quantidade) || quantidade <= 0) {
+            exibirNotificacao("Quantidade de carga inválida.", 'erro');
+            return;
+        }
+        if (this.cargaAtual + quantidade > this.capacidadeCarga) {
+            exibirNotificacao("Carga excede a capacidade.", 'aviso');
+            this.cargaAtual = this.capacidadeCarga;
+        } else {
+            this.cargaAtual += quantidade;
+        }
+        this.atualizarCargaNaTela();
+        exibirNotificacao(`Caminhão carregado com ${quantidade} kg.`, 'sucesso');
     }
 
     /**
@@ -38,7 +50,19 @@ class Caminhao extends Veiculo {
      * @returns {void}
      */
     descarregar(qtd) {
-       // Implementação do descarregamento do caminhão
+        const quantidade = parseFloat(qtd);
+        if (isNaN(quantidade) || quantidade <= 0) {
+            exibirNotificacao("Quantidade de descarga inválida.", 'erro');
+            return;
+        }
+        if (this.cargaAtual - quantidade < 0) {
+            exibirNotificacao("Descarga excede a carga atual.", 'aviso');
+            this.cargaAtual = 0;
+        } else {
+            this.cargaAtual -= quantidade;
+        }
+        this.atualizarCargaNaTela();
+        exibirNotificacao(`Caminhão descarregado com ${quantidade} kg.`, 'sucesso');
     }
 
     /**
@@ -46,7 +70,9 @@ class Caminhao extends Veiculo {
      * @returns {void}
      */
     atualizarCargaNaTela() {
-        // Implementação da atualização da carga na tela
+        const el = this._findElement('carga-atual');
+        if (el) el.textContent = this.cargaAtual.toFixed(0) + ' kg';
+        this.atualizarCardCompletoNaTela();
     }
 
     /**
@@ -54,6 +80,17 @@ class Caminhao extends Veiculo {
      * @returns {void}
      */
     atualizarDetalhesVisiveis() {
-        // Implementação da atualização dos detalhes visíveis
+        this.atualizarCargaNaTela();
+    }
+
+    /**
+     * Converte o caminhão para um objeto JSON (para LocalStorage).
+     * @returns {object} - Um objeto JSON representando o caminhão.
+     */
+    toJSON() {
+        const obj = super.toJSON();
+        obj.capacidadeCarga = this.capacidadeCarga;
+        obj.cargaAtual = this.cargaAtual;
+        return obj;
     }
 }

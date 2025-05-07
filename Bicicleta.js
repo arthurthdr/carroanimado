@@ -42,7 +42,7 @@ class Bicicleta extends Veiculo {
      * @returns {void}
      */
     adicionarManutencao() {
-       // Implementação da adição de manutenção para bicicleta
+        // Implementação da adição de manutenção para bicicleta
     }
 
     /**

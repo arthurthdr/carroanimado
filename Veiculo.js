@@ -38,7 +38,11 @@ class Veiculo {
      * @returns {void}
      */
     ligar() {
-        // Implementação específica para cada tipo de veículo
+        if (this.tipoVeiculo === 'Bicicleta') return; //Bicicleta não liga
+        this.ligado = true;
+        this.atualizarEstadoNaTela();
+        tocarSom(sons.ligar);
+        exibirNotificacao(`${this.tipoVeiculo} ${this.modelo} ligado(a).`, 'sucesso');
     }
 
     /**
@@ -46,7 +50,13 @@ class Veiculo {
      * @returns {void}
      */
     desligar() {
-       // Implementação específica para cada tipo de veículo
+        if (this.tipoVeiculo === 'Bicicleta') return; //Bicicleta não desliga
+        this.ligado = false;
+        this.velocidade = 0;
+        this.atualizarEstadoNaTela();
+        this.atualizarVelocidadeNaTela();
+        tocarSom(sons.desligar);
+        exibirNotificacao(`${this.tipoVeiculo} ${this.modelo} desligado(a).`, 'aviso');
     }
 
     /**
@@ -55,7 +65,13 @@ class Veiculo {
      * @returns {void}
      */
     acelerar(incBase) {
-        // Implementação específica para cada tipo de veículo
+        if (this.tipoVeiculo === 'Bicicleta' && !this.ligado) this.ligar();
+        if (!this.ligado) { exibirNotificacao(`${this.tipoVeiculo} ${this.modelo} precisa estar ligado(a).`, 'aviso'); return; }
+        const inc = incBase || 10;
+        const vMax = this.getVelocidadeMaxima();
+        this.velocidade = Math.min(vMax, this.velocidade + inc);
+        this.atualizarVelocidadeNaTela();
+        tocarSom(sons.acelerar);
     }
 
     /**
@@ -64,7 +80,10 @@ class Veiculo {
      * @returns {void}
      */
     frear(dec) {
-        // Implementação específica para cada tipo de veículo
+        const decremento = dec || 7;
+        this.velocidade = Math.max(0, this.velocidade - decremento);
+        this.atualizarVelocidadeNaTela();
+        tocarSom(sons.frear);
     }
 
     /**
@@ -73,7 +92,10 @@ class Veiculo {
      * @returns {void}
      */
     mudarCor(nCor) {
-       // Implementação específica para cada tipo de veículo
+        if (!nCor || typeof nCor !== 'string' || nCor.trim() === '') { exibirNotificacao("Cor inválida.", 'erro'); return; }
+        this.cor = nCor.trim();
+        this.atualizarCorNaTela();
+        exibirNotificacao(`${this.tipoVeiculo} ${this.modelo} agora é ${this.cor}.`, 'sucesso');
     }
 
     /**
@@ -90,7 +112,16 @@ class Veiculo {
      * @returns {boolean} - True se a manutenção foi adicionada com sucesso, false caso contrário.
      */
     adicionarManutencao(mObj) {
-       // Implementação específica para cada tipo de veículo
+        if (!mObj || !(mObj instanceof Manutencao) || !mObj.validarDados()) {
+            exibirNotificacao("Dados de manutenção inválidos.", 'erro');
+            console.error("Manutenção inválida:", mObj);
+            return false;
+        }
+        this.historicoManutencao.push(mObj);
+        this.historicoManutencao.sort((a, b) => (a.getDataObjeto() || 0) - (b.getDataObjeto() || 0));
+        salvarGaragemNoLocalStorage();
+        this.exibirInformacoesDetalhes();
+        return true;
     }
 
     /**
@@ -100,7 +131,10 @@ class Veiculo {
      * @protected
      */
     _filtrarEOrdenarManutencoes(fData) {
-        // Implementação específica para cada tipo de veículo
+        let lista = this.historicoManutencao;
+        if (typeof fData === 'function') lista = lista.filter(fData);
+        lista.sort((a, b) => (a.getDataObjeto() || 0) - (b.getDataObjeto() || 0));
+        return lista;
     }
 
     /**
@@ -108,7 +142,14 @@ class Veiculo {
      * @returns {string} - Uma string formatada com o histórico de manutenções.
      */
     getHistoricoManutencaoFormatado() {
-        return ""; // Implementação específica para cada tipo de veículo
+        if (!this.historicoManutencao || this.historicoManutencao.length === 0) return 'Nenhuma manutenção registrada.';
+        let texto = '';
+        this.historicoManutencao.forEach(m => {
+            texto += `Data: ${m.data}, Tipo: ${m.tipo}, Custo: R$ ${m.custo.toFixed(2)}`;
+            if (m.descricao) texto += `, Descrição: ${m.descricao}`;
+            texto += '\n';
+        });
+        return texto;
     }
 
     /**
@@ -116,7 +157,7 @@ class Veiculo {
      * @returns {string} - Uma string formatada com os agendamentos futuros.
      */
     getAgendamentosFuturosFormatado() {
-       return ""; // Implementação específica para cada tipo de veículo
+        return "N/A"; // Por enquanto, não implementamos agendamentos futuros
     }
 
     /**
@@ -124,7 +165,13 @@ class Veiculo {
      * @returns {void}
      */
     atualizarVelocidadeNaTela() {
-        // Implementação específica para cada tipo de veículo
+        const el = this._findElement('velocidade');
+        if (el) el.textContent = this.velocidade.toFixed(this instanceof Caminhao ? 1 : 0) + ' km/h';
+        const elP = this._findElement('barra-progresso');
+        if (elP) {
+            const perc = (this.velocidade / this.getVelocidadeMaxima()) * 100;
+            atualizarBarraDeProgresso(elP, perc);
+        }
     }
 
     /**
@@ -132,7 +179,11 @@ class Veiculo {
      * @returns {void}
      */
     atualizarEstadoNaTela() {
-        // Implementação específica para cada tipo de veículo
+        const el = this._findElement('estado');
+        if (el) {
+            el.textContent = this.ligado ? 'Ligado' : 'Desligado';
+            el.style.color = this.ligado ? 'green' : 'red';
+        }
     }
 
     /**
@@ -140,7 +191,9 @@ class Veiculo {
      * @returns {void}
      */
     atualizarCorNaTela() {
-       // Implementação específica para cada tipo de veículo
+        const el = this._findElement('cor');
+        if (el) el.textContent = this.cor;
+        this.atualizarCardCompletoNaTela();
     }
 
     /**
@@ -148,7 +201,11 @@ class Veiculo {
      * @returns {void}
      */
     atualizarCardCompletoNaTela() {
-        // Implementação específica para cada tipo de veículo
+        const card = document.getElementById(this.id);
+        if (card) {
+            const html = gerarHTMLVeiculo(this);
+            card.outerHTML = html;
+        }
     }
 
     /**
@@ -156,7 +213,15 @@ class Veiculo {
      * @returns {void}
      */
     adicionarBotaoBuzina() {
-       // Implementação específica para cada tipo de veículo
+        const controlesDiv = this._findElement('controles');
+        if (controlesDiv && !controlesDiv.querySelector('.buzina-btn')) {
+            const btn = document.createElement('button');
+            btn.textContent = 'Buzinar';
+            btn.className = 'buzina-btn';
+            btn.dataset.action = 'buzinar';
+            btn.dataset.id = this.id;
+            controlesDiv.appendChild(btn);
+        }
     }
 
     /**
@@ -164,7 +229,37 @@ class Veiculo {
      * @returns {string} - Uma string formatada com as informações do veículo.
      */
     exibirInformacoesDetalhes() {
-        return ""; // Implementação específica para cada tipo de veículo
+        const imgN = this.tipoVeiculo.toLowerCase(), imgE = '.jpg', imgS = `img/${imgN}${imgE}`;
+        let html = `
+            <h3>${this.tipoVeiculo} ${this.modelo}</h3>
+            <img src="${imgS}" alt="Imagem ${this.modelo}" class="detalhes-imagem" onerror="this.src='img/placeholder.png'">
+            <div class="detalhes-info-basica">
+                <p><strong>Modelo:</strong> <span>${this.modelo}</span></p>
+                <p><strong>Cor:</strong> <span id="${this.id}_cor">${this.cor}</span></p>
+                <p><strong>Estado:</strong> <span id="${this.id}_estado" style="color:${this.ligado ? 'green' : 'red'}">${this.ligado ? 'Ligado' : 'Desligado'}</span></p>
+                <p><strong>Velocidade:</strong> <span id="${this.id}_velocidade">${this.velocidade.toFixed(this instanceof Caminhao ? 1 : 0)} km/h</span></p>
+        `;
+
+        if (this instanceof CarroEsportivo) {
+            html += `<p><strong>Turbo:</strong> <span id="${this.id}_turbo" style="color:orange">${this.turboAtivado ? 'Ativado' : 'Desativado'}</span></p>`;
+        }
+
+        if (this instanceof Caminhao) {
+            html += `<p><strong>Capacidade de Carga:</strong> <span>${this.capacidadeCarga.toFixed(0)} kg</span></p>`;
+            html += `<p><strong>Carga Atual:</strong> <span>${this.cargaAtual.toFixed(0)} kg</span></p>`;
+        }
+
+        html += `</div><h4>Histórico de Manutenção</h4>`;
+        if (this.historicoManutencao.length === 0) {
+            html += `<p class="detalhes-sem-manutencao">Nenhuma manutenção registrada.</p>`;
+        } else {
+            html += `<pre class="detalhes-historico">${this.getHistoricoManutencaoFormatado()}</pre>`;
+        }
+
+        html += `<h4>Próximos Agendamentos</h4>`;
+        html += `<pre id="agendamentos-futuros-conteudo">${this.getAgendamentosFuturosFormatado()}</pre>`;
+
+        return html;
     }
 
     /**
@@ -172,6 +267,22 @@ class Veiculo {
      * @returns {object} - Um objeto JSON representando o veículo.
      */
     toJSON() {
-        return {}; // Implementação específica para cada tipo de veículo
+        const obj = {
+            modelo: this.modelo,
+            cor: this.cor,
+            tipoVeiculo: this.tipoVeiculo,
+            id: this.id,
+            ligado: this.ligado,
+            velocidade: this.velocidade,
+            historicoManutencao: this.historicoManutencao,
+        };
+
+        if (this instanceof CarroEsportivo) obj.turboAtivado = this.turboAtivado;
+        if (this instanceof Caminhao) {
+            obj.capacidadeCarga = this.capacidadeCarga;
+            obj.cargaAtual = this.cargaAtual;
+        }
+
+        return obj;
     }
 }

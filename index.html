@@ -1,26 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Garagem Inteligente</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> -->
 </head>
-
 <body>
     <h1>Garagem Inteligente</h1>
 
-    <!-- Área de Notificações -->
     <div id="notificacoes" class="notificacoes-container"></div>
 
-    <!-- Botão para mostrar/ocultar formulário de adição -->
     <div class="add-veiculo-controls">
         <button id="mostrar-form-add">Adicionar Novo Veículo +</button>
     </div>
 
-    <!-- Formulário para Adicionar Veículo (inicialmente oculto) -->
     <div id="add-veiculo-form-container" class="add-veiculo-container" style="display: none;">
         <h2>Adicionar Novo Veículo</h2>
         <form id="form-add-veiculo">
@@ -40,50 +34,39 @@
             <label for="add-cor">Cor:</label>
             <input type="text" id="add-cor" placeholder="Ex: Prata, Vermelha" required>
 
-            <!-- Campos específicos (inicialmente ocultos) -->
             <div id="campo-capacidade-carga" class="campo-opcional">
-                 <label for="add-capacidade-carga">Capacidade Carga (kg):</label>
-                 <input type="number" id="add-capacidade-carga" placeholder="5000" min="0">
+                <label for="add-capacidade-carga">Capacidade Carga (kg):</label>
+                <input type="number" id="add-capacidade-carga" placeholder="5000" min="0">
             </div>
-            <!-- Adicionar outros campos opcionais aqui se necessário -->
 
             <div class="form-add-buttons">
-                 <button type="submit">Adicionar à Garagem</button>
-                 <button type="button" id="cancelar-add-veiculo">Cancelar</button>
+                <button type="submit">Adicionar à Garagem</button>
+                <button type="button" id="cancelar-add-veiculo">Cancelar</button>
             </div>
         </form>
     </div>
 
-    <!-- Container Principal da Garagem (será preenchido pelo JS) -->
     <div id="garagem-container" class="container">
-        <!-- Os cards dos veículos serão gerados aqui pelo JavaScript -->
-        <p id="garagem-vazia-msg" style="display: none; width: 100%; text-align: center; color: #6c757d; margin-top: 30px;">Sua garagem está vazia. Adicione um veículo!</p>
+        <p id="garagem-vazia-msg" style="display: none;">Sua garagem está vazia. Adicione um veículo!</p>
     </div>
 
-    <!-- REMOVIDO: Seção de Seleção de Veículo -->
-    <!-- <div id="selecaoVeiculo" class="selecao-container"> ... </div> -->
-
-    <!-- Seção para exibir informações e agendamento (agora modal ou similar) -->
-    <!-- Vamos simplificar por agora: ela ainda existe mas é preenchida ao clicar em "Detalhes" -->
     <div id="detalhes-e-agendamento" class="detalhes-container" style="display: none;">
         <h2>Detalhes e Manutenção do Veículo Selecionado</h2>
-        <button id="fechar-detalhes" class="close-btn" style="position: absolute; top: 20px; right: 20px;">×</button>
-        <div id="informacoesVeiculo">
-            <!-- Conteúdo será preenchido via JS -->
-        </div>
+        <button id="fechar-detalhes" class="close-btn">×</button>
+        <div id="informacoesVeiculo"></div>
         <div id="agendamento-form-container" style="display: none;">
-             <h3>Agendar Nova Manutenção</h3>
-             <form id="form-agendamento">
-                 <label for="agenda-data">Data:</label>
-                 <input type="date" id="agenda-data" required>
-                 <label for="agenda-tipo">Tipo de Serviço:</label>
-                 <input type="text" id="agenda-tipo" placeholder="Ex: Troca de óleo" required>
-                 <label for="agenda-custo">Custo (R$):</label>
-                 <input type="number" id="agenda-custo" step="0.01" min="0" placeholder="150.00" required>
-                 <label for="agenda-descricao">Descrição (Opcional):</label>
-                 <textarea id="agenda-descricao" rows="2"></textarea>
-                 <button type="submit">Agendar/Registrar</button>
-             </form>
+            <h3>Agendar Nova Manutenção</h3>
+            <form id="form-agendamento">
+                <label for="agenda-data">Data:</label>
+                <input type="date" id="agenda-data" required>
+                <label for="agenda-tipo">Tipo de Serviço:</label>
+                <input type="text" id="agenda-tipo" placeholder="Ex: Troca de óleo" required>
+                <label for="agenda-custo">Custo (R$):</label>
+                <input type="number" id="agenda-custo" step="0.01" min="0" placeholder="150.00" required>
+                <label for="agenda-descricao">Descrição (Opcional):</label>
+                <textarea id="agenda-descricao" rows="2"></textarea>
+                <button type="submit">Agendar/Registrar</button>
+            </form>
         </div>
         <div id="agendamentos-futuros-container" style="display: none;">
             <h4>Próximos Agendamentos</h4>
@@ -91,32 +74,24 @@
         </div>
     </div>
 
-    <!-- Áudios (mantidos fora do container principal) -->
     <audio id="som-buzina" src="sounds/buzina.mp3" preload="auto"></audio>
     <audio id="som-acelerar" src="sounds/carroacelerando.mp3" preload="auto"></audio>
     <audio id="som-frear" src="sounds/freio.mp3" preload="auto"></audio>
-    <audio id="som-ligar" src="sounds/carrodesligando.mp3" preload="auto"></audio> <!-- CORRIGIDO: usar som ligar -->
+    <audio id="som-ligar" src="sounds/carrodesligando.mp3" preload="auto"></audio>
     <audio id="som-desligar" src="sounds/carrodesligando.mp3" preload="auto"></audio>
-    <audio id="som-adicionar" src="sounds/success-add.mp3" preload="auto"></audio> <!-- NOVO: Som opcional para adicionar -->
+    <audio id="som-adicionar" src="sounds/success-add.mp3" preload="auto"></audio>
 
-
-    <!-- Scripts -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> -->
-    
-    <script src="Manutencao.js"></script>
-    <script src="Veiculo.js"></script>
-    <script src="Carro.js"></script>
-    <script src="CarroEsportivo.js"></script>
-    <script src="Caminhao.js"></script>
-    <script src="Moto.js"></script>
-    <script src="Bicicleta.js"></script>
-    <script src="script.js"></script>
-            <footer>
-                <p>© 2024 Arthur - IFPR. Todos os direitos reservados.</p>
-                <p>Projeto Garagem Inteligente - Informática para Internet</p>
-            </footer>
-        
-        </body>
-        </html>
+    <script src="js/classes/Manutencao.js"></script>
+    <script src="js/classes/Veiculo.js"></script>
+    <script src="js/classes/Carro.js"></script>
+    <script src="js/classes/Carroesportivo.js"></script>
+    <script src="js/classes/Caminhao.js"></script>
+    <script src="js/classes/Moto.js"></script>
+    <script src="js/classes/Bicicleta.js"></script>
+    <script src="js/script.js"></script>
+    <footer>
+        <p>© 2024 Arthur - IFPR. Todos os direitos reservados.</p>
+        <p>Projeto Garagem Inteligente - Informática para Internet</p>
+    </footer>
 </body>
 </html>

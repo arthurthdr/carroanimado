@@ -26,7 +26,11 @@ class CarroEsportivo extends Veiculo {
      * @returns {void}
      */
     ativarTurbo() {
-        // Implementação da ativação do turbo
+        if (this.turboAtivado) return;
+        this.turboAtivado = true;
+        this.atualizarEstadoTurboNaTela();
+        exibirNotificacao(`${this.tipoVeiculo} ${this.modelo}: TURBO ATIVADO!`, 'sucesso');
+        this.atualizarCardCompletoNaTela();
     }
 
     /**
@@ -34,7 +38,11 @@ class CarroEsportivo extends Veiculo {
      * @returns {void}
      */
     desativarTurbo() {
-       // Implementação da desativação do turbo
+        if (!this.turboAtivado) return;
+        this.turboAtivado = false;
+        this.atualizarEstadoTurboNaTela();
+        exibirNotificacao(`${this.tipoVeiculo} ${this.modelo}: Turbo desativado.`, 'aviso');
+        this.atualizarCardCompletoNaTela();
     }
 
     /**
@@ -42,7 +50,8 @@ class CarroEsportivo extends Veiculo {
      * @returns {void}
      */
     atualizarEstadoTurboNaTela() {
-        // Implementação da atualização do estado do turbo na tela
+        const el = this._findElement('turbo');
+        if (el) el.textContent = this.turboAtivado ? 'Ativado' : 'Desativado';
     }
 
     /**
@@ -50,6 +59,16 @@ class CarroEsportivo extends Veiculo {
      * @returns {void}
      */
     atualizarDetalhesVisiveis() {
-        // Implementação da atualização dos detalhes visíveis
+        this.atualizarEstadoTurboNaTela();
+    }
+
+    /**
+     * Converte o carro esportivo para um objeto JSON (para LocalStorage).
+     * @returns {object} - Um objeto JSON representando o carro esportivo.
+     */
+    toJSON() {
+        const obj = super.toJSON();
+        obj.turboAtivado = this.turboAtivado;
+        return obj;
     }
 }
