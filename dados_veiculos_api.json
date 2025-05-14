@@ -1,0 +1,30 @@
+[
+  {
+    "id": "carro_1747220074828",
+    "valorFIPE": 45000.00,
+    "recallPendente": false,
+    "dica": "Mantenha a manutenção em dia para evitar problemas futuros.",
+    "seguradoraRecomendada": "Porto Seguro"
+  },
+  {
+    "id": "moto_1747220567987",
+    "valorFIPE": 12000.00,
+    "recallPendente": true,
+    "dica": "Verifique os pneus regularmente para garantir a segurança.",
+    "seguradoraRecomendada": "SulAmérica"
+  },
+  {
+    "id": "caminhao_1747220987654",
+    "valorFIPE": 150000.00,
+    "recallPendente": false,
+    "dica": "Respeite os limites de carga para evitar acidentes.",
+    "seguradoraRecomendada": "Liberty Seguros"
+  },
+  {
+    "id": "carroesportivo_1747221345234",
+    "valorFIPE": 90000.00,
+    "recallPendente": false,
+    "dica": "Não abuse da velocidade, este carro não te dará super poderes.",
+    "seguradoraRecomendada": "HDI Seguros"
+  }
+]

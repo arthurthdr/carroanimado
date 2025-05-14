@@ -4,33 +4,28 @@
 class Veiculo {
     /**
      * Cria uma instância de Veiculo.
-     * @param {string} modelo - O modelo do veículo.
-     * @param {string} cor - A cor do veículo.
-     * @param {string} tipoVeiculo - O tipo do veículo (Carro, CarroEsportivo, Caminhao, Moto, Bicicleta).
+     * @param {string} m - O modelo do veículo.
+     * @param {string} c - A cor do veículo.
+     * @param {string} tipo - O tipo do veículo (ex: "Carro", "Moto").
      * @param {string} id - O ID único do veículo.
-     * @throws {Error} - Lança um erro se o tipo ou o ID forem inválidos.
      */
-    constructor(modelo, cor, tipoVeiculo, id) {
-        if (!tipoVeiculo || !['Carro', 'CarroEsportivo', 'Caminhao', 'Moto', 'Bicicleta'].includes(tipoVeiculo)) throw new Error("Tipo inválido.");
-        if (!id || typeof id !== 'string' || id.trim() === '') throw new Error("ID inválido.");
-
-        this.modelo = modelo ? String(modelo).trim() : 'Desconhecido';
-        this.cor = cor ? String(cor).trim() : 'Desconhecida';
-        this.tipoVeiculo = tipoVeiculo;
+    constructor(m, c, tipo, id) {
+        if (!tipo) throw new Error("Tipo é obrigatório.");
+        this.modelo = m;
+        this.cor = c;
+        this.tipoVeiculo = tipo;
         this.id = id;
-        this.ligado = false;
         this.velocidade = 0;
+        this.ligado = false;
         this.historicoManutencao = [];
     }
 
     /**
-     * Encontra um elemento DOM específico do veículo.
-     * @param {string} suf - O sufixo do ID do elemento.
-     * @returns {HTMLElement|null} - O elemento DOM encontrado ou null se não encontrado.
-     * @protected
+     * Retorna a velocidade máxima do veículo. (Método abstrato)
+     * @returns {number} - A velocidade máxima do veículo.
      */
-    _findElement(suf) {
-        return document.getElementById(`${this.id}_${suf}`);
+    getVelocidadeMaxima() {
+        return 100;
     }
 
     /**
@@ -38,11 +33,12 @@ class Veiculo {
      * @returns {void}
      */
     ligar() {
-        if (this.tipoVeiculo === 'Bicicleta') return; //Bicicleta não liga
+        if (this.ligado) return;
         this.ligado = true;
         this.atualizarEstadoNaTela();
-        tocarSom(sons.ligar);
+        tocarSom(sons.ligar); // Tocar som ao ligar
         exibirNotificacao(`${this.tipoVeiculo} ${this.modelo} ligado(a).`, 'sucesso');
+        this.atualizarCardCompletoNaTela();
     }
 
     /**
@@ -50,144 +46,117 @@ class Veiculo {
      * @returns {void}
      */
     desligar() {
-        if (this.tipoVeiculo === 'Bicicleta') return; //Bicicleta não desliga
+        if (!this.ligado) return;
         this.ligado = false;
-        this.velocidade = 0;
         this.atualizarEstadoNaTela();
-        this.atualizarVelocidadeNaTela();
-        tocarSom(sons.desligar);
+        tocarSom(sons.desligar); // Tocar som ao desligar
         exibirNotificacao(`${this.tipoVeiculo} ${this.modelo} desligado(a).`, 'aviso');
+        this.atualizarCardCompletoNaTela();
     }
 
     /**
      * Acelera o veículo.
-     * @param {number} incBase - O incremento base de velocidade.
+     * @param {number} incremento - O valor a ser incrementado na velocidade.
      * @returns {void}
      */
-    acelerar(incBase) {
-        if (this.tipoVeiculo === 'Bicicleta' && !this.ligado) this.ligar();
-        if (!this.ligado) { exibirNotificacao(`${this.tipoVeiculo} ${this.modelo} precisa estar ligado(a).`, 'aviso'); return; }
-        const inc = incBase || 10;
-        const vMax = this.getVelocidadeMaxima();
-        this.velocidade = Math.min(vMax, this.velocidade + inc);
+    acelerar(incremento) {
+        const inc = Math.abs(parseFloat(incremento) || 10);
+        const max = this.getVelocidadeMaxima();
+        if (this.velocidade + inc > max) {
+            this.velocidade = max;
+            exibirNotificacao(`${this.tipoVeiculo} ${this.modelo}: Velocidade máxima atingida!`, 'aviso');
+        } else {
+            this.velocidade += inc;
+        }
         this.atualizarVelocidadeNaTela();
-        tocarSom(sons.acelerar);
+        tocarSom(sons.acelerar); // Tocar som ao acelerar
+        this.atualizarCardCompletoNaTela();
     }
 
     /**
      * Freia o veículo.
-     * @param {number} dec - O decremento de velocidade.
+     * @param {number} decremento - O valor a ser decrementado da velocidade.
      * @returns {void}
      */
-    frear(dec) {
-        const decremento = dec || 7;
-        this.velocidade = Math.max(0, this.velocidade - decremento);
+    frear(decremento) {
+        const dec = Math.abs(parseFloat(decremento) || 10);
+        if (this.velocidade - dec < 0) {
+            this.velocidade = 0;
+        } else {
+            this.velocidade -= dec;
+        }
         this.atualizarVelocidadeNaTela();
-        tocarSom(sons.frear);
+        tocarSom(sons.frear); // Tocar som ao frear
+        this.atualizarCardCompletoNaTela();
     }
 
     /**
      * Muda a cor do veículo.
-     * @param {string} nCor - A nova cor do veículo.
+     * @param {string} novaCor - A nova cor do veículo.
      * @returns {void}
      */
-    mudarCor(nCor) {
-        if (!nCor || typeof nCor !== 'string' || nCor.trim() === '') { exibirNotificacao("Cor inválida.", 'erro'); return; }
-        this.cor = nCor.trim();
+    mudarCor(novaCor) {
+        if (!novaCor || typeof novaCor !== 'string' || novaCor.trim().length < 3) {
+            exibirNotificacao("Cor inválida.", 'erro');
+            return;
+        }
+        this.cor = novaCor.trim();
         this.atualizarCorNaTela();
-        exibirNotificacao(`${this.tipoVeiculo} ${this.modelo} agora é ${this.cor}.`, 'sucesso');
-    }
-
-    /**
-     * Retorna a velocidade máxima do veículo.
-     * @returns {number} - A velocidade máxima.
-     */
-    getVelocidadeMaxima() {
-        return 100;
+        exibirNotificacao(`${this.tipoVeiculo} ${this.modelo}: Cor alterada para ${this.cor}.`, 'sucesso');
+        this.atualizarCardCompletoNaTela();
     }
 
     /**
      * Adiciona uma manutenção ao histórico do veículo.
-     * @param {Manutencao} mObj - O objeto Manutencao a ser adicionado.
+     * @param {Manutencao} manutencao - A manutenção a ser adicionada.
      * @returns {boolean} - True se a manutenção foi adicionada com sucesso, false caso contrário.
      */
-    adicionarManutencao(mObj) {
-        if (!mObj || !(mObj instanceof Manutencao) || !mObj.validarDados()) {
-            exibirNotificacao("Dados de manutenção inválidos.", 'erro');
-            console.error("Manutenção inválida:", mObj);
+    adicionarManutencao(manutencao) {
+        if (!(manutencao instanceof Manutencao) || !manutencao.validarDados()) {
+            console.error("Manutenção inválida:", manutencao);
+            exibirNotificacao("Dados da manutenção inválidos.", 'erro');
             return false;
         }
-        this.historicoManutencao.push(mObj);
+        this.historicoManutencao.push(manutencao);
         this.historicoManutencao.sort((a, b) => (a.getDataObjeto() || 0) - (b.getDataObjeto() || 0));
-        salvarGaragemNoLocalStorage();
-        this.exibirInformacoesDetalhes();
+        this.atualizarHistoricoNaTela();
         return true;
     }
 
     /**
-     * Filtra e ordena as manutenções do veículo.
-     * @param {Function} fData - Uma função de filtro para as datas.
-     * @returns {Array<Manutencao>} - Um array de manutenções filtradas e ordenadas.
-     * @protected
-     */
-    _filtrarEOrdenarManutencoes(fData) {
-        let lista = this.historicoManutencao;
-        if (typeof fData === 'function') lista = lista.filter(fData);
-        lista.sort((a, b) => (a.getDataObjeto() || 0) - (b.getDataObjeto() || 0));
-        return lista;
-    }
-
-    /**
-     * Retorna o histórico de manutenções formatado para exibição.
-     * @returns {string} - Uma string formatada com o histórico de manutenções.
+     * Formata o histórico de manutenção do veículo para exibição.
+     * @returns {string} - O histórico de manutenção formatado.
      */
     getHistoricoManutencaoFormatado() {
-        if (!this.historicoManutencao || this.historicoManutencao.length === 0) return 'Nenhuma manutenção registrada.';
-        let texto = '';
-        this.historicoManutencao.forEach(m => {
-            texto += `Data: ${m.data}, Tipo: ${m.tipo}, Custo: R$ ${m.custo.toFixed(2)}`;
-            if (m.descricao) texto += `, Descrição: ${m.descricao}`;
-            texto += '\n';
-        });
-        return texto;
+        if (!Array.isArray(this.historicoManutencao) || this.historicoManutencao.length === 0) {
+            return "Nenhuma manutenção registrada.";
+        }
+        return this.historicoManutencao.map(m => {
+            const dataFormatada = m.getDataObjeto()?.toLocaleDateString('pt-BR') || 'Data Inválida';
+            return `${dataFormatada} - ${m.tipo} (R$ ${m.custo.toFixed(2)}) - ${m.descricao || 'Sem descrição'}`;
+        }).join('\n');
     }
 
     /**
-     * Retorna os agendamentos futuros formatados para exibição.
-     * @returns {string} - Uma string formatada com os agendamentos futuros.
+     * Formata os agendamentos futuros do veículo para exibição.
+     * @returns {string} - Os agendamentos futuros formatados.
      */
     getAgendamentosFuturosFormatado() {
-        return "N/A"; // Por enquanto, não implementamos agendamentos futuros
+        return this.getHistoricoManutencaoFormatado(); // Por enquanto, reaproveita o histórico
     }
 
     /**
-     * Atualiza a velocidade exibida na tela.
-     * @returns {void}
-     */
-    atualizarVelocidadeNaTela() {
-        const el = this._findElement('velocidade');
-        if (el) el.textContent = this.velocidade.toFixed(this instanceof Caminhao ? 1 : 0) + ' km/h';
-        const elP = this._findElement('barra-progresso');
-        if (elP) {
-            const perc = (this.velocidade / this.getVelocidadeMaxima()) * 100;
-            atualizarBarraDeProgresso(elP, perc);
-        }
-    }
-
-    /**
-     * Atualiza o estado (ligado/desligado) exibido na tela.
+     * Atualiza o estado do veículo exibido na tela.
      * @returns {void}
      */
     atualizarEstadoNaTela() {
         const el = this._findElement('estado');
-        if (el) {
-            el.textContent = this.ligado ? 'Ligado' : 'Desligado';
-            el.style.color = this.ligado ? 'green' : 'red';
-        }
+        if (el) el.textContent = this.ligado ? 'Ligado' : 'Desligado';
+        this.atualizarCardCompletoNaTela();
     }
 
     /**
-     * Atualiza a cor exibida na tela.
+     * Atualiza a cor do veículo exibida na tela.
      * @returns {void}
      */
     atualizarCorNaTela() {
@@ -197,92 +166,88 @@ class Veiculo {
     }
 
     /**
-     * Atualiza todas as informações do card do veículo na tela.
+     * Atualiza a velocidade do veículo exibida na tela.
+     * @returns {void}
+     */
+    atualizarVelocidadeNaTela() {
+        const el = this._findElement('velocidade');
+        if (el) el.textContent = this.velocidade.toFixed(0) + ' km/h';
+        const elP = this._findElement('barra-progresso');
+        if (elP) {
+            const perc = (this.velocidade / this.getVelocidadeMaxima()) * 100;
+            atualizarBarraDeProgresso(elP, perc);
+        }
+        this.atualizarCardCompletoNaTela();
+    }
+
+    /**
+     * Atualiza o histórico de manutenção exibido na tela.
+     * @returns {void}
+     */
+    atualizarHistoricoNaTela() {
+        // (Por implementar)
+        this.atualizarCardCompletoNaTela();
+    }
+
+    /**
+     * Converte o veículo para um objeto JSON (para LocalStorage).
+     * @returns {object} - Um objeto JSON representando o veículo.
+     */
+    toJSON() {
+        return {
+            modelo: this.modelo,
+            cor: this.cor,
+            tipoVeiculo: this.tipoVeiculo,
+            id: this.id,
+            velocidade: this.velocidade,
+            ligado: this.ligado,
+            historicoManutencao: this.historicoManutencao.map(m => m.toJSON())
+        };
+    }
+
+    /**
+     * Exibe as informações detalhadas do veículo.
+     * @returns {string} - HTML formatado com as informações do veículo.
+     */
+    exibirInformacoesDetalhes() {
+        const historicoHTML = this.getHistoricoManutencaoFormatado();
+        return `
+            <div class="detalhes-info-basica">
+                <h3>${this.tipoVeiculo} ${this.modelo}</h3>
+                <img src="img/${this.tipoVeiculo.toLowerCase()}.jpg" alt="Imagem ${this.modelo}" class="detalhes-imagem">
+                <p><strong>Modelo:</strong> <span>${this.modelo}</span></p>
+                <p><strong>Cor:</strong> <span id="${this.id}_cor">${this.cor}</span></p>
+                <p><strong>Estado:</strong> <span id="${this.id}_estado">${this.ligado ? 'Ligado' : 'Desligado'}</span></p>
+                <p><strong>Velocidade:</strong> <span id="${this.id}_velocidade">${this.velocidade.toFixed(0)} km/h</span></p>
+            </div>
+            <div class="detalhes-historico">
+                <h4>Histórico de Manutenção</h4>
+                <pre>${historicoHTML}</pre>
+            </div>
+            <div class="detalhes-agendamentos">
+                <h4>Agendamentos Futuros</h4>
+                <pre>${this.getAgendamentosFuturosFormatado()}</pre>
+            </div>
+        `;
+    }
+
+    /**
+     * Encontra um elemento dentro do card do veículo.
+     * @param {string} elemento - O ID do elemento a ser encontrado.
+     * @returns {HTMLElement|null} - O elemento encontrado ou null se não encontrado.
+     */
+    _findElement(elemento) {
+        return document.getElementById(`${this.id}_${elemento}`);
+    }
+
+    /**
+     * Atualiza o card completo do veículo na tela.
      * @returns {void}
      */
     atualizarCardCompletoNaTela() {
         const card = document.getElementById(this.id);
         if (card) {
-            const html = gerarHTMLVeiculo(this);
-            card.outerHTML = html;
+            card.outerHTML = gerarHTMLVeiculo(this);
         }
-    }
-
-    /**
-     * Adiciona o botão de buzina ao card do veículo.
-     * @returns {void}
-     */
-    adicionarBotaoBuzina() {
-        const controlesDiv = this._findElement('controles');
-        if (controlesDiv && !controlesDiv.querySelector('.buzina-btn')) {
-            const btn = document.createElement('button');
-            btn.textContent = 'Buzinar';
-            btn.className = 'buzina-btn';
-            btn.dataset.action = 'buzinar';
-            btn.dataset.id = this.id;
-            controlesDiv.appendChild(btn);
-        }
-    }
-
-    /**
-     * Exibe as informações detalhadas do veículo no modal.
-     * @returns {string} - Uma string formatada com as informações do veículo.
-     */
-    exibirInformacoesDetalhes() {
-        const imgN = this.tipoVeiculo.toLowerCase(), imgE = '.jpg', imgS = `img/${imgN}${imgE}`;
-        let html = `
-            <h3>${this.tipoVeiculo} ${this.modelo}</h3>
-            <img src="${imgS}" alt="Imagem ${this.modelo}" class="detalhes-imagem" onerror="this.src='img/placeholder.png'">
-            <div class="detalhes-info-basica">
-                <p><strong>Modelo:</strong> <span>${this.modelo}</span></p>
-                <p><strong>Cor:</strong> <span id="${this.id}_cor">${this.cor}</span></p>
-                <p><strong>Estado:</strong> <span id="${this.id}_estado" style="color:${this.ligado ? 'green' : 'red'}">${this.ligado ? 'Ligado' : 'Desligado'}</span></p>
-                <p><strong>Velocidade:</strong> <span id="${this.id}_velocidade">${this.velocidade.toFixed(this instanceof Caminhao ? 1 : 0)} km/h</span></p>
-        `;
-
-        if (this instanceof CarroEsportivo) {
-            html += `<p><strong>Turbo:</strong> <span id="${this.id}_turbo" style="color:orange">${this.turboAtivado ? 'Ativado' : 'Desativado'}</span></p>`;
-        }
-
-        if (this instanceof Caminhao) {
-            html += `<p><strong>Capacidade de Carga:</strong> <span>${this.capacidadeCarga.toFixed(0)} kg</span></p>`;
-            html += `<p><strong>Carga Atual:</strong> <span>${this.cargaAtual.toFixed(0)} kg</span></p>`;
-        }
-
-        html += `</div><h4>Histórico de Manutenção</h4>`;
-        if (this.historicoManutencao.length === 0) {
-            html += `<p class="detalhes-sem-manutencao">Nenhuma manutenção registrada.</p>`;
-        } else {
-            html += `<pre class="detalhes-historico">${this.getHistoricoManutencaoFormatado()}</pre>`;
-        }
-
-        html += `<h4>Próximos Agendamentos</h4>`;
-        html += `<pre id="agendamentos-futuros-conteudo">${this.getAgendamentosFuturosFormatado()}</pre>`;
-
-        return html;
-    }
-
-    /**
-     * Converte o veículo para um objeto JSON.
-     * @returns {object} - Um objeto JSON representando o veículo.
-     */
-    toJSON() {
-        const obj = {
-            modelo: this.modelo,
-            cor: this.cor,
-            tipoVeiculo: this.tipoVeiculo,
-            id: this.id,
-            ligado: this.ligado,
-            velocidade: this.velocidade,
-            historicoManutencao: this.historicoManutencao,
-        };
-
-        if (this instanceof CarroEsportivo) obj.turboAtivado = this.turboAtivado;
-        if (this instanceof Caminhao) {
-            obj.capacidadeCarga = this.capacidadeCarga;
-            obj.cargaAtual = this.cargaAtual;
-        }
-
-        return obj;
     }
 }

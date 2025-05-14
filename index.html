@@ -53,7 +53,11 @@
     <div id="detalhes-e-agendamento" class="detalhes-container" style="display: none;">
         <h2>Detalhes e Manutenção do Veículo Selecionado</h2>
         <button id="fechar-detalhes" class="close-btn">×</button>
-        <div id="informacoesVeiculo"></div>
+        <div id="informacoesVeiculo">
+            <div id="detalhesExtrasContainer">
+                <!-- Os detalhes extras serão inseridos aqui -->
+            </div>
+        </div>
         <div id="agendamento-form-container" style="display: none;">
             <h3>Agendar Nova Manutenção</h3>
             <form id="form-agendamento">
@@ -72,6 +76,14 @@
             <h4>Próximos Agendamentos</h4>
             <pre id="agendamentos-futuros-conteudo"></pre>
         </div>
+    </div>
+
+     <div id="planejar-viagem-container" class="planejar-viagem-container">
+        <h2>Planejar Viagem</h2>
+        <label for="destino-viagem">Digite a cidade de destino:</label>
+        <input type="text" id="destino-viagem" placeholder="Digite a cidade de destino">
+        <button id="verificar-clima-btn">Verificar Clima</button>
+        <div id="previsao-tempo-resultado"></div>
     </div>
 
     <audio id="som-buzina" src="sounds/buzina.mp3" preload="auto"></audio>
