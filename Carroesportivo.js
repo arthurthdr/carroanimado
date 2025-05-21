@@ -23,7 +23,6 @@ class CarroEsportivo extends Veiculo {
 
     /**
      * Ativa o turbo do carro esportivo.
-     * @returns {void}
      */
     ativarTurbo() {
         if (this.turboAtivado) return;
@@ -35,7 +34,6 @@ class CarroEsportivo extends Veiculo {
 
     /**
      * Desativa o turbo do carro esportivo.
-     * @returns {void}
      */
     desativarTurbo() {
         if (!this.turboAtivado) return;
@@ -47,7 +45,6 @@ class CarroEsportivo extends Veiculo {
 
     /**
      * Atualiza o estado do turbo exibido na tela.
-     * @returns {void}
      */
     atualizarEstadoTurboNaTela() {
         const el = this._findElement('turbo');
@@ -56,7 +53,6 @@ class CarroEsportivo extends Veiculo {
 
     /**
      * Atualiza as informações detalhadas visíveis do carro esportivo.
-     * @returns {void}
      */
     atualizarDetalhesVisiveis() {
         this.atualizarEstadoTurboNaTela();
@@ -64,7 +60,6 @@ class CarroEsportivo extends Veiculo {
 
     /**
      * Converte o carro esportivo para um objeto JSON (para LocalStorage).
-     * @returns {object} - Um objeto JSON representando o carro esportivo.
      */
     toJSON() {
         const obj = super.toJSON();

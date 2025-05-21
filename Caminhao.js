@@ -25,8 +25,6 @@ class Caminhao extends Veiculo {
 
     /**
      * Carrega o caminhão com uma determinada quantidade de carga.
-     * @param {number} qtd - A quantidade de carga a ser adicionada.
-     * @returns {void}
      */
     carregar(qtd) {
         const quantidade = parseFloat(qtd);
@@ -46,8 +44,6 @@ class Caminhao extends Veiculo {
 
     /**
      * Descarrega o caminhão com uma determinada quantidade de carga.
-     * @param {number} qtd - A quantidade de carga a ser removida.
-     * @returns {void}
      */
     descarregar(qtd) {
         const quantidade = parseFloat(qtd);
@@ -67,7 +63,6 @@ class Caminhao extends Veiculo {
 
     /**
      * Atualiza a carga exibida na tela.
-     * @returns {void}
      */
     atualizarCargaNaTela() {
         const el = this._findElement('carga-atual');
@@ -77,7 +72,6 @@ class Caminhao extends Veiculo {
 
     /**
      * Atualiza as informações detalhadas visíveis do caminhão.
-     * @returns {void}
      */
     atualizarDetalhesVisiveis() {
         this.atualizarCargaNaTela();
@@ -85,7 +79,6 @@ class Caminhao extends Veiculo {
 
     /**
      * Converte o caminhão para um objeto JSON (para LocalStorage).
-     * @returns {object} - Um objeto JSON representando o caminhão.
      */
     toJSON() {
         const obj = super.toJSON();

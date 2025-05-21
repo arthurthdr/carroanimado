@@ -30,7 +30,6 @@ class Veiculo {
 
     /**
      * Liga o veículo.
-     * @returns {void}
      */
     ligar() {
         if (this.ligado) return;
@@ -43,7 +42,6 @@ class Veiculo {
 
     /**
      * Desliga o veículo.
-     * @returns {void}
      */
     desligar() {
         if (!this.ligado) return;
@@ -56,8 +54,6 @@ class Veiculo {
 
     /**
      * Acelera o veículo.
-     * @param {number} incremento - O valor a ser incrementado na velocidade.
-     * @returns {void}
      */
     acelerar(incremento) {
         const inc = Math.abs(parseFloat(incremento) || 10);
@@ -75,8 +71,6 @@ class Veiculo {
 
     /**
      * Freia o veículo.
-     * @param {number} decremento - O valor a ser decrementado da velocidade.
-     * @returns {void}
      */
     frear(decremento) {
         const dec = Math.abs(parseFloat(decremento) || 10);
@@ -92,8 +86,6 @@ class Veiculo {
 
     /**
      * Muda a cor do veículo.
-     * @param {string} novaCor - A nova cor do veículo.
-     * @returns {void}
      */
     mudarCor(novaCor) {
         if (!novaCor || typeof novaCor !== 'string' || novaCor.trim().length < 3) {
@@ -147,7 +139,6 @@ class Veiculo {
 
     /**
      * Atualiza o estado do veículo exibido na tela.
-     * @returns {void}
      */
     atualizarEstadoNaTela() {
         const el = this._findElement('estado');
@@ -157,7 +148,6 @@ class Veiculo {
 
     /**
      * Atualiza a cor do veículo exibida na tela.
-     * @returns {void}
      */
     atualizarCorNaTela() {
         const el = this._findElement('cor');
@@ -167,7 +157,6 @@ class Veiculo {
 
     /**
      * Atualiza a velocidade do veículo exibida na tela.
-     * @returns {void}
      */
     atualizarVelocidadeNaTela() {
         const el = this._findElement('velocidade');
@@ -182,7 +171,6 @@ class Veiculo {
 
     /**
      * Atualiza o histórico de manutenção exibido na tela.
-     * @returns {void}
      */
     atualizarHistoricoNaTela() {
         // (Por implementar)
@@ -191,7 +179,6 @@ class Veiculo {
 
     /**
      * Converte o veículo para um objeto JSON (para LocalStorage).
-     * @returns {object} - Um objeto JSON representando o veículo.
      */
     toJSON() {
         return {
@@ -207,7 +194,6 @@ class Veiculo {
 
     /**
      * Exibe as informações detalhadas do veículo.
-     * @returns {string} - HTML formatado com as informações do veículo.
      */
     exibirInformacoesDetalhes() {
         const historicoHTML = this.getHistoricoManutencaoFormatado();
@@ -233,8 +219,6 @@ class Veiculo {
 
     /**
      * Encontra um elemento dentro do card do veículo.
-     * @param {string} elemento - O ID do elemento a ser encontrado.
-     * @returns {HTMLElement|null} - O elemento encontrado ou null se não encontrado.
      */
     _findElement(elemento) {
         return document.getElementById(`${this.id}_${elemento}`);
@@ -242,7 +226,6 @@ class Veiculo {
 
     /**
      * Atualiza o card completo do veículo na tela.
-     * @returns {void}
      */
     atualizarCardCompletoNaTela() {
         const card = document.getElementById(this.id);

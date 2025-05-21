@@ -23,7 +23,6 @@ class Bicicleta extends Veiculo {
 
     /**
      * Bikes não ligam.
-     * @returns {void}
      */
     ligar() {
         // Implementação da ação de ligar a bicicleta
@@ -31,7 +30,6 @@ class Bicicleta extends Veiculo {
 
     /**
      * Bikes não desligam.
-     * @returns {void}
      */
     desligar() {
         // Implementação da ação de desligar a bicicleta
@@ -39,7 +37,6 @@ class Bicicleta extends Veiculo {
 
     /**
      * Bikes não possuem manutenção.
-     * @returns {void}
      */
     adicionarManutencao() {
         // Implementação da adição de manutenção para bicicleta
@@ -63,7 +60,6 @@ class Bicicleta extends Veiculo {
 
     /**
      * Bicicletas não possuem buzina.
-     * @returns {void}
      */
     adicionarBotaoBuzina() {
         // Implementação da adição do botão de buzina para bicicleta
