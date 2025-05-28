@@ -670,16 +670,14 @@ async function exibirDetalhesExtras(veiculoId) {
 }
 
 async function buscarPrevisaoDetalhada(cidade) {
-    try{
+    try {
         console.log("[DEBUG] buscarPrevisaoDetalhada() chamada com cidade =", cidade);
-        // ATENÇÃO: ARMAZENAR A API KEY DIRETAMENTE NO CÓDIGO FRONTEND É INSEGURO!
-        // Em uma aplicação real, a chave NUNCA deve ficar exposta aqui.
-        // A forma correta envolve um backend (Node.js, Serverless) atuando como proxy.
-        // Para FINS DIDÁTICOS nesta atividade, vamos usá-la aqui temporariamente.
-        const apiKey =b35a17a87dd4682376499cc8ba4658ab; // <-- SUBSTITUA PELA SUA CHAVE (LEMBRE-SE DO ALERTA DE SEGURANÇA!!!)
+        const apiKey = "b35a17a87dd4682376499cc8ba4658ab"; // Substitua pela sua chave!
         const url = `https://api.openweathermap.org/data/2.5/forecast?q=${cidade}&appid=${apiKey}&units=metric&lang=pt_br`;
 
         const response = await fetch(url);
+
+        console.log("Status da resposta:", response.status); // ADICIONE ESTA LINHA
 
         if (!response.ok) {
             const errorData = await response.json();
@@ -689,15 +687,15 @@ async function buscarPrevisaoDetalhada(cidade) {
         const data = await response.json();
         console.log("Dados da previsão detalhada:", data);
         return data;
-    }catch(e){
-        console.log("erro no buscarPrevisaoDetalhada")
+    } catch (e) {
+        console.log("erro no buscarPrevisaoDetalhada:", e); // Modifique esta linha
     }
 }
 /**
  * Exibe a previsão detalhada na interface do usuário.
  */
 function exibirPrevisaoDetalhada(previsaoDiaria, nomeCidade) {
-    try {
+    try{
         console.log("[DEBUG] exibirPrevisaoDetalhada() chamada com nomeCidade =", nomeCidade);
         if (!previsaoTempoResultado) {
             console.error("Elemento de resultado da previsão do tempo não encontrado.");
@@ -777,8 +775,8 @@ async function handleVerificarClimaClick() {
             previsaoTempoResultado.textContent = "Erro ao buscar previsão.";
         }
     } catch (e) {
-        console.log("erro no handleVerificarClimaClick");
-    }
+    console.error("Erro no handleVerificarClimaClick:", e);
+}
 }
 
 /**
@@ -853,7 +851,25 @@ function setupEventListeners() {
         garagemContainer?.addEventListener('click', handleVehicleAction);
 
         if (verificarClimaBtn) {
-            verificarClimaBtn.addEventListener('click', handleVerificarClimaClick);
+            verificarClimaBtn.addEventListener('click', async () => {
+                console.log("Botão 'Verificar Clima' clicado!");
+                const cidade = destinoViagemInput.value;
+                if (!cidade) {
+                    exibirNotificacao("Por favor, digite o nome de uma cidade.", 'aviso');
+                    return;
+                }
+
+                previsaoTempoResultado.textContent = "Buscando previsão...";
+
+                const previsao = await buscarPrevisaoDetalhada(cidade);
+
+                if (previsao) {
+                    const previsaoProcessada = processarDadosForecast(previsao);
+                    exibirPrevisaoDetalhada(previsaoProcessada, cidade);
+                } else {
+                    previsaoTempoResultado.textContent = "Erro ao buscar previsão.";
+                }
+            });
         } else {
             console.warn("Botão 'Verificar Clima' não encontrado!");
         }
@@ -937,3 +953,5 @@ window.setupEventListeners = setupEventListeners;
 window.verificarAgendamentosProximos = verificarAgendamentosProximos;
 window.fecharDetalhes = fecharDetalhes;
 window.reconstruirVeiculo = reconstruirVeiculo;
+window.processarDadosForecast = processarDadosForecast;
+window.exibirPrevisaoDetalhada = exibirPrevisaoDetalhada;
