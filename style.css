@@ -1,19 +1,17 @@
 /* === Estilos Globais Modernizados === */
 :root {
-    --cor-fundo: #f0f2f5; /* Cinza muito claro */
-    --cor-texto-base: #343a40; /* Cinza escuro quase preto */
-    --cor-azul-escuro: #0a2540; /* Azul bem escuro */
-    --cor-azul-medio: #0d6efd; /* Azul padrão Bootstrap (para detalhes e links) */
-    --cor-branco: #ffffff;
-    --cor-borda-sutil: #dee2e6;
+    --cor-fundo: #f5f5f0;       /* Branco/Cinza Amarelado Suave */
+    --cor-primaria: #0a2540;    /* Azul Escuro (Quase Preto) */
+    --cor-texto-base: #343a40; /* Cinza Escuro (Texto Principal) */
+    --cor-borda-sutil: #dee2e6;  /* Borda Cinza Clara */
     --sombra-suave: 0 4px 12px rgba(0, 0, 0, 0.08);
     --sombra-media: 0 6px 20px rgba(0, 0, 0, 0.1);
     --border-radius-padrao: 8px;
-    --border-radius-maior: 12px;
+    --fonte-principal: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; /* Fontes de sistema modernas */
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; /* Fontes de sistema modernas */
+    font-family: var(--fonte-principal);
     background-color: var(--cor-fundo);
     color: var(--cor-texto-base);
     margin: 0;
@@ -25,8 +23,8 @@ body {
 }
 
 h1, h2, h3, h4 {
-    color: var(--cor-azul-escuro);
-    font-weight: 600; /* Um pouco mais de peso */
+    color: var(--cor-primaria);
+    font-weight: 600;
     margin-top: 1.5em;
     margin-bottom: 0.8em;
 }
@@ -53,22 +51,24 @@ p {
 }
 
 a {
-    color: var(--cor-azul-medio);
+    color: var(--cor-primaria);
     text-decoration: none;
     transition: color 0.2s ease;
 }
-a:hover { color: var(--cor-azul-escuro); }
+
+a:hover {
+    color: #1a4a7a; /* Azul um pouco mais claro no hover */
+}
 
 /* --- Rodapé (Azul Escuro com Texto Branco) --- */
 footer {
     width: 100%; /* Ocupa toda a largura da área principal */
-    max-width: 1600px; /* Mesma largura máxima do container principal */
     margin: 40px auto 0 auto; /* Margem superior e centraliza horizontalmente */
     padding: 25px 15px; /* Aumenta padding vertical */
     text-align: center; /* Centraliza o texto */
     font-size: 0.9em;  /* Aumentado */
-    color: var(--cor-branco); /* <<< LETRAS BRANCAS */
-    background-color: var(--cor-azul-escuro); /* <<< FUNDO AZUL ESCURO */
+    color: var(--cor-fundo); /* <<< LETRAS BRANCAS */
+    background-color: var(--cor-primaria); /* <<< FUNDO AZUL ESCURO */
     border-top: 1px solid rgba(255, 255, 255, 0.1); /* Borda branca sutil */
     box-sizing: border-box; /* Garante que padding não aumente a largura */
 }
@@ -87,28 +87,32 @@ footer p {
         font-size: 0.85em; /* Aumentado também no mobile */
     }
 }
+
 /* --- Botão Adicionar Veículo (Global) --- */
 .add-veiculo-controls {
     text-align: center;
     margin-bottom: 30px;
 }
+
 #mostrar-form-add {
     padding: 12px 28px;
     font-size: 1.1em;
     font-weight: 500;
-    background-color: var(--cor-azul-escuro); /* Azul escuro como base */
-    color: var(--cor-branco);
+    background-color: var(--cor-primaria); /* Azul escuro como base */
+    color: var(--cor-fundo);
     border: none;
     border-radius: var(--border-radius-padrao);
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.1s ease;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+
 #mostrar-form-add:hover {
     background-color: #1a4a7a; /* Azul um pouco mais claro no hover */
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
+
 #mostrar-form-add:active {
     transform: translateY(0);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -116,33 +120,37 @@ footer p {
 
 /* --- Formulário de Adição --- */
 .add-veiculo-container {
-    background-color: var(--cor-branco);
+    background-color: var(--cor-fundo);
     border: 1px solid var(--cor-borda-sutil);
-    border-radius: var(--border-radius-maior); /* Mais arredondado */
+    border-radius: var(--border-radius-padrao); /* Mais arredondado */
     padding: 30px 35px; /* Mais padding */
     margin: 0 auto 35px auto;
     width: 90%;
     max-width: 650px;
     box-shadow: var(--sombra-suave);
 }
+
 .add-veiculo-container h2 {
     text-align: center;
     margin-top: 0;
     border-bottom: none; /* Remove borda do h2 aqui */
     margin-bottom: 1.5em;
 }
+
 #form-add-veiculo {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 15px 20px; /* Aumenta gap */
     align-items: center;
 }
+
 #form-add-veiculo label {
     text-align: right;
     font-weight: 500; /* Peso médio */
     color: var(--cor-texto-base);
     font-size: 0.95em;
 }
+
 #form-add-veiculo input[type="text"],
 #form-add-veiculo input[type="number"],
 #form-add-veiculo select {
@@ -154,12 +162,14 @@ footer p {
     box-sizing: border-box;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
 #form-add-veiculo input:focus,
 #form-add-veiculo select:focus {
-    border-color: var(--cor-azul-medio);
+    border-color: var(--cor-primaria);
     box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15); /* Sombra de foco azul suave */
     outline: none;
 }
+
 .campo-opcional {
     display: none;
     grid-column: 1 / -1;
@@ -172,6 +182,7 @@ footer p {
     padding-top: 10px;
     border-top: 1px dashed var(--cor-borda-sutil); /* Separador sutil */
 }
+
 .campo-opcional.visivel { display: grid; }
 .campo-opcional label { text-align: right; }
 
@@ -182,6 +193,7 @@ footer p {
     gap: 15px;
     margin-top: 25px;
 }
+
 .form-add-buttons button {
     padding: 10px 22px;
     border-radius: var(--border-radius-padrao);
@@ -191,19 +203,23 @@ footer p {
     font-weight: 500;
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
+
 .form-add-buttons button[type="submit"] {
-    background-color: var(--cor-azul-escuro); /* Azul escuro */
-    color: var(--cor-branco);
+    background-color: var(--cor-primaria); /* Azul escuro */
+    color: var(--cor-fundo);
 }
+
 .form-add-buttons button[type="submit"]:hover {
     background-color: #1a4a7a;
     box-shadow: var(--sombra-suave);
 }
+
 .form-add-buttons button[type="button"] { /* Cancelar */
     background-color: #f8f9fa; /* Fundo claro */
     color: var(--cor-texto-base);
     border: 1px solid var(--cor-borda-sutil);
 }
+
 .form-add-buttons button[type="button"]:hover {
     background-color: #e9ecef; /* Escurece levemente */
 }
@@ -220,7 +236,7 @@ footer p {
 }
 
 .veiculo-container {
-    background-color: var(--cor-branco);
+    background-color: var(--cor-fundo);
     border: 1px solid transparent; /* Borda transparente inicial */
     padding: 20px 25px; /* Mais padding */
     text-align: center;
@@ -228,13 +244,14 @@ footer p {
     min-width: 310px;
     max-width: 360px;
     box-shadow: var(--sombra-suave);
-    border-radius: var(--border-radius-maior);
+    border-radius: var(--border-radius-padrao);
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
     position: relative;
     transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
 }
+
 .veiculo-container:hover {
     transform: translateY(-3px);
     box-shadow: var(--sombra-media);
@@ -245,7 +262,7 @@ footer p {
     font-size: 1.25em; /* Pouco menor */
     margin-top: 0;
     margin-bottom: 15px;
-    color: var(--cor-azul-escuro);
+    color: var(--cor-primaria);
     border-bottom: none; /* Remove borda do h2 */
 }
 
@@ -264,13 +281,11 @@ footer p {
     margin: 4px 0; /* Menos espaço vertical */
     font-size: 0.9em;
 }
+
 .veiculo-container p span { /* Valor (modelo, cor, etc.) */
     font-weight: 500;
     color: var(--cor-texto-base); /* Cor base para os valores */
 }
-.veiculo-container p span[style*="color:red"] { color: #dc3545 !important; } /* Garante cor estado */
-.veiculo-container p span[style*="color:green"] { color: #198754 !important; } /* Garante cor estado */
-.veiculo-container p span[style*="color:orange"] { color: #fd7e14 !important; } /* Garante cor turbo */
 
 /* Barra de Progresso */
 .barra-progresso-container {
@@ -284,16 +299,13 @@ footer p {
     position: relative;
     z-index: 1;
 }
+
 .barra-progresso {
     height: 100%;
-    background-color: var(--cor-azul-medio); /* Usa azul como padrão */
+    background-color: var(--cor-primaria); /* Usa azul como padrão */
     transition: width 0.4s ease-out, background-color 0.4s ease;
     border-radius: 4px;
 }
-/* Cores da barra (definidas pelo JS, mas podemos ter um fallback/base) */
-.barra-progresso[style*="background-color: rgb(255, 193, 7);"] { /* Amarelo/Laranja */ }
-.barra-progresso[style*="background-color: rgb(220, 53, 69);"] { /* Vermelho */ }
-
 
 /* Controles do Veículo */
 .controles-veiculo {
@@ -332,14 +344,17 @@ footer p {
     vertical-align: middle;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* Sombra bem leve */
 }
+
 .controles-veiculo button:hover {
      transform: translateY(-1px);
      box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Sombra aumenta no hover */
 }
+
 .controles-veiculo button:active {
     transform: translateY(0);
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
+
 .controles-veiculo button:disabled {
     background-color: #ccc !important; /* Usa !important para garantir override */
     color: #777 !important;
@@ -354,45 +369,55 @@ footer p {
 /* Ligar / Carregar */
 .controles-veiculo button[data-action="ligar"],
 .controles-veiculo button[data-action="carregar"] { background-color: #28a745; color: white; }
+
 .controles-veiculo button[data-action="ligar"]:hover,
 .controles-veiculo button[data-action="carregar"]:hover { background-color: #218838; }
 
 /* Desligar */
 .controles-veiculo button[data-action="desligar"] { background-color: #dc3545; color: white; }
+
 .controles-veiculo button[data-action="desligar"]:hover { background-color: #c82333; }
 
 /* Acelerar / Descarregar */
 .controles-veiculo button[data-action="acelerar"],
 .controles-veiculo button[data-action="descarregar"] { background-color: #ffc107; color: #343a40; } /* Texto escuro */
+
 .controles-veiculo button[data-action="acelerar"]:hover,
 .controles-veiculo button[data-action="descarregar"]:hover { background-color: #e0a800; }
 
 /* Frear */
 .controles-veiculo button[data-action="frear"] { background-color: #17a2b8; color: white; }
+
 .controles-veiculo button[data-action="frear"]:hover { background-color: #138496; }
 
 /* Mudar Cor */
 .controles-veiculo button[data-action="mudarCor"] { background-color: #6f42c1; color: white; }
+
 .controles-veiculo button[data-action="mudarCor"]:hover { background-color: #5a32a3; }
 
 /* Turbo */
 .controles-veiculo button[data-action="ativarTurbo"] { background-color: #fd7e14; color: white; }
+
 .controles-veiculo button[data-action="ativarTurbo"]:hover { background-color: #e66a0a; }
+
 .controles-veiculo button[data-action="desativarTurbo"] { background-color: #6c757d; color: white; }
+
 .controles-veiculo button[data-action="desativarTurbo"]:hover { background-color: #5a6268; }
 
 /* Buzina (adicionada via JS) */
 .controles-veiculo .buzina-btn[data-action="buzinar"] { background-color: #6c757d; color: white; }
+
 .controles-veiculo .buzina-btn[data-action="buzinar"]:hover { background-color: #5a6268; }
 
 /* Animar */
 .controles-veiculo button[data-action="animar"] { background-color: #0dcaf0; color: #000;} /* Texto preto */
+
 .controles-veiculo button[data-action="animar"]:hover { background-color: #0baccc;}
 
 /* Botão Detalhes */
 .controles-veiculo button[data-action="detalhes"].detalhes-veiculo-btn {
-    background-color: var(--cor-azul-escuro); /* Usa azul escuro */
-    color: var(--cor-branco);
+    background-color: var(--cor-primaria); /* Usa azul escuro */
+    color: var(--cor-fundo);
     padding: 9px 15px;
     font-size: 0.9em;
     margin-top: 12px;
@@ -400,65 +425,110 @@ footer p {
     margin-left: auto;
     margin-right: auto;
 }
+
 .controles-veiculo button[data-action="detalhes"].detalhes-veiculo-btn:hover {
     background-color: #1a4a7a; /* Hover do azul escuro */
 }
-/* --- FIM BOTÕES NOS CARDS --- */
 
+/* Botão "Ver Detalhes Extras" */
+.controles-veiculo button[data-action="verDetalhesExtras"] {
+    background-color: var(--cor-primaria); /* Usa azul escuro */
+    color: var(--cor-fundo);
+}
+
+.controles-veiculo button[data-action="verDetalhesExtras"]:hover {
+    background-color: #1a4a7a; /* Hover do azul escuro */
+}
+
+/* --- FIM BOTÕES NOS CARDS --- */
 
 /* Botão Remover (X) - Estilo Reforçado */
 .remover-veiculo-btn[data-action="remover"] {
     position: absolute;
     top: 8px; right: 8px; width: 28px; height: 28px;
-    background-color: rgba(52, 58, 64, 0.6); color: var(--cor-branco);
+    background-color: rgba(52, 58, 64, 0.6); color: var(--cor-fundo);
     border: none; border-radius: 50%; font-size: 16px; font-weight: bold;
     line-height: 28px; text-align: center; cursor: pointer;
     transition: all 0.2s ease; padding: 0; z-index: 10; opacity: 0.7;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
+
 .veiculo-container:hover .remover-veiculo-btn[data-action="remover"] { opacity: 1; }
+
 .remover-veiculo-btn[data-action="remover"]:hover { background-color: #dc3545; transform: scale(1.1); opacity: 1; }
+
 .remover-veiculo-btn[data-action="remover"]:active { transform: scale(1.0); }
 
 /* --- Modal de Detalhes --- */
 .detalhes-container {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
     width: 90%; max-width: 750px; max-height: 90vh; overflow-y: auto; z-index: 1060;
-    background-color: var(--cor-branco); border: none;
-    border-radius: var(--border-radius-maior);
+    background-color: var(--cor-fundo); border: none;
+    border-radius: var(--border-radius-padrao);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     padding: 30px 40px 40px 40px; display: none;
 }
+
 .detalhes-container h2 {
-    margin-top: 0; color: var(--cor-azul-escuro); font-size: 1.7em;
-    border-bottom: 2px solid var(--cor-azul-medio); padding-bottom: 0.5em;
+    margin-top: 0; color: var(--cor-primaria); font-size: 1.7em;
+    border-bottom: 2px solid var(--cor-primaria); padding-bottom: 0.5em;
     margin-bottom: 1.5em; text-align: left;
 }
+
 #fechar-detalhes.close-btn {
     position: absolute; top: 20px; right: 25px;
     background: none; border: none; font-size: 2.5em; line-height: 1;
     color: #adb5bd; cursor: pointer; padding: 5px; z-index: 1061; transition: color 0.2s ease;
 }
+
 #fechar-detalhes.close-btn:hover { color: var(--cor-texto-base); }
 
 /* Conteúdo Interno do Modal */
 #informacoesVeiculo { margin-bottom: 30px; overflow: hidden; }
+
 #informacoesVeiculo h3 {
-    margin-top: 0; margin-bottom: 20px; color: var(--cor-azul-escuro); font-size: 1.4em;
+    margin-top: 0; margin-bottom: 20px; color: var(--cor-primaria); font-size: 1.4em;
     float: none; width: 100%; padding-right: 0; text-align: left; font-weight: 600;
 }
+
 #informacoesVeiculo h4 {
     margin-top: 25px; margin-bottom: 10px; color: var(--cor-texto-base); font-size: 1.15em;
     border-bottom: 1px solid #e9ecef; padding-bottom: 8px; clear: both; font-weight: 500;
 }
+
 .detalhes-imagem {
     max-width: 130px; max-height: 130px; object-fit: contain; float: right;
     margin-left: 25px; margin-bottom: 15px; border-radius: var(--border-radius-padrao);
     border: 1px solid #f0f2f5; position: relative; top: -10px;
 }
+
 .detalhes-info-basica { clear: none; margin-top: 0; padding-right: 160px; }
+
 .detalhes-info-basica p { line-height: 1.7; color: #495057; margin-top: 8px; font-size: 0.95em; }
+
 .detalhes-info-basica p strong { color: var(--cor-texto-base); font-weight: 500; }
+
+#detalhesExtrasContainer {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    background-color: white; /* Fundo branco para destacar */
+    box-shadow: var(--sombra-suave);
+}
+
+#detalhesExtrasContainer h3 {
+    font-size: 1.25em;
+    margin-bottom: 15px;
+    color: var(--cor-primaria);
+    border-bottom: 1px solid var(--cor-borda-sutil);
+    padding-bottom: 8px;
+}
+
+#detalhesExtrasContainer p {
+    color: #6c757d;
+    margin-bottom: 8px;
+}
 
 .detalhes-historico pre, #agendamentos-futuros-conteudo {
     white-space: pre-wrap; word-wrap: break-word; font-size: 0.9em;
@@ -467,105 +537,120 @@ footer p {
     background-color: #f8f9fa; border-radius: var(--border-radius-padrao);
     max-height: 200px; overflow-y: auto; line-height: 1.6; clear: both; margin-top: 10px;
 }
+
 #agendamentos-futuros-conteudo { background-color: #fff9e6; border-color: #ffeeba; }
+
 .detalhes-sem-manutencao { font-style: italic; color: #6c757d; clear: both; margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: var(--border-radius-padrao); text-align: center; }
 
 /* Formulário Agendamento no Modal */
 #agendamento-form-container { margin-top: 30px; padding-top: 25px; border-top: 1px solid #e9ecef; clear: both; }
-#agendamento-form-container h3 { text-align: left; color: var(--cor-azul-escuro); margin-bottom: 20px; font-size: 1.25em; border-bottom: none; }
+
+#agendamento-form-container h3 { text-align: left; color: var(--cor-primaria); margin-bottom: 20px; font-size: 1.25em; border-bottom: none; }
+
 #form-agendamento { display: grid; grid-template-columns: auto 1fr; gap: 15px 18px; align-items: center; }
+
 #form-agendamento label { text-align: right; font-weight: 500; color: var(--cor-texto-base); font-size: 0.9em; }
-#form-agendamento input[type="date"],
-#form-agendamento input[type="text"],
-#form-agendamento input[type="number"],
-#form-agendamento textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--cor-borda-sutil); border-radius: var(--border-radius-padrao); font-size: 0.95em; box-sizing: border-box; }
-#form-agendamento input:focus,
-#form-agendamento textarea:focus { border-color: var(--cor-azul-medio); box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15); outline: none; }
-#form-agendamento textarea { resize: vertical; grid-column: 2 / 3; min-height: 70px; }
-#form-agendamento label[for="agenda-descricao"] { align-self: start; padding-top: 10px; }
-#form-agendamento button[type="submit"] { grid-column: 2 / 3; justify-self: start; padding: 11px 24px; background-color: var(--cor-azul-escuro); font-size: 1em; color: white; font-weight: 500; border-radius: var(--border-radius-padrao); border: none; cursor: pointer; transition: background-color 0.2s ease; }
-#form-agendamento button[type="submit"]:hover { background-color: #1a4a7a; }
 
-/* Agendamentos Futuros */
-#agendamentos-futuros-container { margin-top: 30px; padding-top: 20px; border-top: 1px dashed var(--cor-borda-sutil); clear: both; }
-#agendamentos-futuros-container h4 { text-align: left; color: #c82333; margin-bottom: 15px; font-size: 1.15em; border-bottom: none; }
-
-/* Overlay Fundo Modal */
-body.modal-aberto::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(10, 37, 64, 0.6); z-index: 1055; }
-
-/* --- Notificações --- */
-.notificacoes-container {
-    position: fixed; top: 20px; right: 20px; width: 340px;
-    z-index: 1070; display: flex; flex-direction: column; gap: 12px;
-}
-.notificacao {
-    border: 1px solid var(--cor-borda-sutil); border-left-width: 5px;
-    padding: 16px 45px 16px 20px; border-radius: var(--border-radius-padrao);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 0.95em;
-    opacity: 0; transform: translateX(110%); transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    position: relative; cursor: pointer; background-color: var(--cor-branco);
-    word-wrap: break-word; color: var(--cor-texto-base);
-}
-.notificacao.show { opacity: 1; transform: translateX(0); }
-.notificacao.info { border-left-color: #0d6efd; background-color: #e7f3ff; color: #0551b3; }
-.notificacao.sucesso { border-left-color: #198754; background-color: #d1e7dd; color: #0f5132; }
-.notificacao.aviso { border-left-color: #ffc107; background-color: #fff3cd; color: #664d03; }
-.notificacao.erro { border-left-color: #dc3545; background-color: #f8d7da; color: #842029; }
-
-.notificacao .close-btn {
-    position: absolute; top: 50%; right: 12px; transform: translateY(-50%);
-    background: none; border: none; font-size: 1.8em; line-height: 1;
-    color: inherit; opacity: 0.6; cursor: pointer; padding: 5px; transition: opacity 0.2s;
-}
-.notificacao:hover .close-btn { opacity: 0.9; }
-.notificacao .close-btn:hover { opacity: 1; }
-
-/* Animação Mover Carro */
-@keyframes mover { 0%, 100% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(0, -3px) rotate(0.5deg); } }
-.mover-animacao { animation: mover 0.6s ease-in-out infinite alternate; }
-
-/* --- Responsividade --- */
-@media (max-width: 1300px) {
-    .container { max-width: 1100px; }
-    .veiculo-container { width: calc(50% - 40px); max-width: 400px; }
-}
-@media (max-width: 767px) { /* Mobile */
-    body { padding: 15px; }
-    h1 { font-size: 1.8em; margin-bottom: 1.2em; }
-    .container { flex-direction: column; align-items: center; width: 100%; gap: 20px; }
-    .veiculo-container { width: 95%; max-width: 450px; min-width: unset; margin-bottom: 0; }
-    .add-veiculo-container { width: 95%; padding: 25px 20px; }
-    #form-add-veiculo { grid-template-columns: 1fr; gap: 12px; }
-    #form-add-veiculo label, .campo-opcional label { text-align: left; margin-bottom: -5px; }
-    .campo-opcional { grid-template-columns: 1fr; }
-    .form-add-buttons { flex-direction: column; gap: 10px; }
-    .form-add-buttons button { width: 100%; }
-    .detalhes-container { width: 95%; padding: 20px 15px; max-height: 90vh; }
-    #informacoesVeiculo h3 { font-size: 1.25em; text-align: center; margin-bottom: 15px; }
-    .detalhes-imagem { float: none; display: block; margin: 5px auto 15px; max-width: 100px; top: 0; }
-    .detalhes-info-basica { padding-right: 0; text-align: left; }
-    #form-agendamento { grid-template-columns: 1fr; }
-    #form-agendamento label { text-align: left; margin-bottom: -8px; }
-    #form-agendamento label[for="agenda-descricao"] { padding-top: 0; }
-    #form-agendamento button[type="submit"], #form-agendamento textarea { grid-column: 1 / 2; }
-    #form-agendamento button[type="submit"] { width: 100%; justify-self: center; }
-    .notificacoes-container { width: 90%; left: 5%; right: 5%; top: 10px; transform: none; }
-}
-@media (max-width: 480px) {
-    h1 { font-size: 1.6em; }
-    .veiculo-container { padding: 15px; } /* Aumenta padding interno card */
-    .veiculo-container h2 { font-size: 1.15em; }
-    .veiculo-container p { font-size: 0.88em; }
-    .controles-veiculo button { padding: 6px 10px; font-size: 0.78em;}
-    .controles-veiculo input[data-input="carga"] { width: 60px; padding: 6px 8px;}
-    #mostrar-form-add { font-size: 1em; padding: 10px 20px; }
-    #form-add-veiculo input, #form-add-veiculo select { font-size: 0.9em; padding: 10px 12px;}
-    .form-add-buttons button { font-size: 0.9em; }
-    .detalhes-container h2 { font-size: 1.25em; }
-    #form-agendamento input, #form-agendamento textarea { font-size: 0.9em; padding: 9px 11px;}
-    .notificacao { font-size: 0.85em; padding: 12px 35px 12px 15px;}
-    .notificacao .close-btn { font-size: 1.5em; top: 48%; right: 8px; }
+/* --- Planejador de Viagem --- */
+.planejar-viagem-container {
+    background-color: var(--cor-fundo);
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px;
+    box-shadow: var(--sombra-suave);
 }
 
-/* Estilo Erro Renderização */
-.error-card { border: 2px solid red; background-color: #fff0f0; color: red; padding: 20px; text-align: center; }
+.planejar-viagem-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.planejar-viagem-container input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    margin-bottom: 10px;
+}
+
+.planejar-viagem-container button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--border-radius-padrao);
+    cursor: pointer;
+    background-color: var(--cor-primaria);
+    color: var(--cor-fundo);
+    transition: background-color 0.3s ease;
+}
+
+.planejar-viagem-container button:hover {
+    background-color: #1a4a7a;
+}
+
+#previsao-tempo-resultado {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    background-color: #fff;
+}
+
+/* Estilos para a previsão detalhada (adicionar conforme necessário) */
+.previsao-dia {
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+}
+
+.previsao-dia h4 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+    color: var(--cor-primaria);
+}
+
+.previsao-dia img {
+    width: 50px;
+    height: auto;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.previsao-tempo-resultado {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around; /* Distribui os itens */
+    gap: 10px; /* Espaçamento entre os dias */
+}
+
+.previsao-tempo-resultado .previsao-dia {
+    flex: 1 1 150px; /* Distribui o espaço disponível */
+    text-align: center; /* Centraliza o conteúdo */
+    padding: 10px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    background-color: #fff; /* Fundo branco */
+    box-shadow: var(--sombra-suave);
+}
+
+.previsao-tempo-resultado .previsao-dia h4 {
+    font-size: 1em;
+    margin-bottom: 5px;
+    color: var(--cor-primaria);
+}
+
+.previsao-tempo-resultado .previsao-dia img {
+    width: 40px;
+    height: auto;
+    margin-bottom: 5px;
+}
+
+.previsao-tempo-resultado .previsao-dia p {
+    font-size: 0.85em;
+    color: #555;
+}

@@ -927,6 +927,73 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Script FINAL');
 });
 
+function processarDadosForecast(dadosBrutosDaAPI) {
+    console.log("[DEBUG] processarDadosForecast() chamada.");
+    if (!dadosBrutosDaAPI || !dadosBrutosDaAPI.list || dadosBrutosDaAPI.list.length === 0) {
+        console.warn("[DEBUG] Dados brutos inválidos ou vazios para processamento.");
+        return []; // Retorna um array vazio se não há dados
+    }
+
+    const previsaoPorDia = {}; // Usaremos um objeto para agrupar previsões pelo dia
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0); // Zera horas para comparação de data
+
+    // A API retorna previsões a cada 3 horas. Precisamos selecionar uma por dia.
+    // Vamos pegar a previsão do meio do dia ou próxima a ela para cada um dos próximos 5 dias.
+    // Podemos simplesmente iterar pela lista e pegar a primeira ocorrência de cada novo dia.
+
+    dadosBrutosDaAPI.list.forEach(item => {
+        const data = new Date(item.dt * 1000); // Converter timestamp para Date
+        const dataSemHora = new Date(data);
+        dataSemHora.setHours(0, 0, 0, 0); // Zera hora para usar como chave
+
+        const chaveDia = dataSemHora.toISOString().split('T')[0]; // Ex: '2023-10-27'
+
+        // Se ainda não temos uma previsão para este dia E a data é hoje ou no futuro
+        // (evita adicionar previsões do passado se o forecast inclui)
+        if (!previsaoPorDia[chaveDia] && dataSemHora >= hoje) {
+             // O forecast geralmente retorna 40 entradas (5 dias * 8 entradas de 3h)
+             // Podemos limitar a 5 dias (incluindo hoje, se houver dados para hoje)
+             if (Object.keys(previsaoPorDia).length < 5) {
+                // Pega a temperatura min/max para o DIA todo (não só para este ponto no tempo)
+                // Isso exige encontrar min/max entre todos os itens do mesmo dia na lista da API.
+                // Para simplificar AGORA, vamos apenas usar a temperatura do item atual
+                // e você pode melhorar isso depois buscando o min/max real do dia na lista.
+
+                let temp_min_dia = item.main.temp; // Temp neste ponto
+                let temp_max_dia = item.main.temp; // Temp neste ponto
+
+                // Lógica mais completa para min/max do dia (opcional agora):
+                const itensDoDia = dadosBrutosDaAPI.list.filter(it => {
+                    const itDataSemHora = new Date(it.dt * 1000);
+                    itDataSemHora.setHours(0, 0, 0, 0);
+                    return itDataSemHora.toISOString().split('T')[0] === chaveDia;
+                });
+
+                if(itensDoDia.length > 0){
+                     temp_min_dia = Math.min(...itensDoDia.map(it => it.main.temp_min));
+                     temp_max_dia = Math.max(...itensDoDia.map(it => it.main.temp_max));
+                }
+
+
+                previsaoPorDia[chaveDia] = {
+                    data: data,
+                    temp: item.main.temp, // Temperatura neste ponto do tempo
+                    temp_min: temp_min_dia, // Temperatura mínima do dia
+                    temp_max: temp_max_dia, // Temperatura máxima do dia
+                    descricao: item.weather[0].description,
+                    icone: item.weather[0].icon
+                };
+                 console.log(`[DEBUG] Adicionado previsão para o dia ${chaveDia}.`);
+             }
+        }
+    });
+
+    // Converte o objeto agrupado de volta para um array e ordena por data
+    const previsaoArray = Object.values(previsaoPorDia).sort((a, b) => a.data - b.data);
+    console.log("[DEBUG] Processamento concluído. Retornando array de previsão:", previsaoArray);
+    return previsaoArray;
+}
 // --- Correção de Escopo (Atribuição ao window) ---
 window.carregarGaragemDoLocalStorage = carregarGaragemDoLocalStorage;
 window.salvarGaragemNoLocalStorage = salvarGaragemNoLocalStorage;
