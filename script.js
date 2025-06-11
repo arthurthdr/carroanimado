@@ -1,8 +1,11 @@
 /**
+ * 
  * @file script.js
  * @description Lógica principal da Garagem Inteligente.
  */
-
+// No topo do seu js/script.js
+const backendUrl = 'http://localhost:3001'; // OU 'https://seu-backend-no-render.onrender.com'
+// ... resto do seu código ...
 // --- Variáveis Globais e Elementos DOM ---
 const veiculos = {};
 const GARAGE_STORAGE_KEY = 'garagemInteligenteDadosV3';
