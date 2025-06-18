@@ -34,6 +34,7 @@ const destinoViagemInput = document.getElementById('destino-viagem');
 const verificarClimaBtn = document.getElementById('verificar-clima-btn');
 const previsaoTempoResultado = document.getElementById('previsao-tempo-resultado');
 
+
 // Sons
 const sons = {
     buzina: document.getElementById("som-buzina"),
@@ -44,9 +45,123 @@ const sons = {
     adicionar: document.getElementById("som-adicionar")
 };
 
+ // --- Inicialização ---
+ document.addEventListener('DOMContentLoaded', () => {
+     console.log("[INICIO] Garagem Inteligente inicializando...");
+     const carregou = carregarGaragemDoLocalStorage();
+     console.log("[INICIO] Garagem carregada do LocalStorage:", carregou);
+     renderizarGaragem(); // Renderiza a garagem salva
+     setupEventListeners(); // Configura eventos
+
+     // >>> ADICIONE AS CHAMADAS PARA AS NOVAS FUNÇÕES AQUI:
+     carregarVeiculosDestaque();
+     carregarServicosGaragem();
+     carregarFerramentasEssenciais();
+
+     // ... sua lógica de verificação de agendamentos, etc. ...
+
+     console.log("[INICIO] Garagem pronta!");
+     // exibirNotificacao("Garagem pronta!", "sucesso", 2500); // Se notificações estiverem ativadas
+     console.log('Script FINAL');
+ });
 /**
  * Salva os dados da garagem no LocalStorage.
  */
+// --- FUNÇÕES DE NOTIFICAÇÃO ---
+
+/**
+ * Exibe uma notificação na tela.
+ */
+function exibirNotificacao(message, type = 'info', duration = 5000) {
+    // Se NOTIFICATIONS_ENABLED estiver definida no topo e for false, sai da função
+    // const NOTIFICATIONS_ENABLED = false; // << Esta linha deve estar no topo, se quiser desativar visualmente
+    if (typeof NOTIFICATIONS_ENABLED !== 'undefined' && !NOTIFICATIONS_ENABLED) {
+         // Opcional: Logar no console mesmo quando desativada visualmente
+         // console.log(`[Notificação Desativada] Tipo: ${type}, Mensagem: ${message}`);
+         return; // Sai da função imediatamente
+    }
+
+    try{
+        // console.log("[DEBUG] exibirNotificacao() chamada."); // Comentado para reduzir logs
+        if (!notificacoesContainer || !message) return;
+
+        const notificationDiv = document.createElement('div');
+        notificationDiv.className = `notificacao ${type}`;
+        notificationDiv.textContent = message;
+
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '×';
+        closeButton.className = 'close-btn';
+        closeButton.setAttribute('aria-label', 'Fechar');
+        closeButton.addEventListener('click', (event) => {
+            event.stopPropagation(); // Evita que o clique na notificação feche o modal, etc.
+            fecharNotificacao(notificationDiv);
+        });
+        notificationDiv.appendChild(closeButton);
+
+        // Adiciona a nova notificação no TOPO do container (mais recente aparece primeiro)
+        notificacoesContainer.prepend(notificationDiv);
+
+        // Força um reflow para garantir a transição CSS
+        requestAnimationFrame(() => {
+            notificationDiv.classList.add('show');
+        });
+
+        // Configura um timer para fechar a notificação automaticamente
+        const timerId = setTimeout(() => {
+            fecharNotificacao(notificationDiv);
+        }, duration);
+
+        // Salva o ID do timer no elemento para poder cancelar (ao clicar, por exemplo)
+        notificationDiv.dataset.timerId = timerId;
+
+        // Permite fechar a notificação clicando nela (além do botão X)
+        notificationDiv.addEventListener('click', (event) => {
+             // Só fecha se o clique for no div da notificação, não em elementos filhos
+            if (event.target === notificationDiv) {
+                clearTimeout(timerId); // Cancela o timer
+                fecharNotificacao(notificationDiv);
+            }
+        });
+
+    }catch(e){
+        console.error("Erro ao exibir notificação:", e); // Use console.error para erros
+        // Fallback simples para garantir feedback mesmo se a UI de notificação falhar
+        alert(`Erro de Notificação: ${message}`);
+    }
+}
+
+/**
+ * Fecha uma notificação visível.
+ */
+function fecharNotificacao(notificationDiv) {
+    try{
+        // console.log("[DEBUG] fecharNotificacao() chamada."); // Comentado
+        if (!notificationDiv || !notificationDiv.parentNode) return; // Sai se o elemento não existe ou já foi removido
+
+        // Limpa o timer associado para evitar que ele tente fechar um elemento que já está em transição ou removido
+        const timerId = notificationDiv.dataset.timerId;
+        if (timerId) {
+            clearTimeout(timerId);
+        }
+
+        // Inicia a transição CSS para esconder
+        notificationDiv.style.opacity = '0';
+        notificationDiv.style.transform = 'translateX(110%)';
+
+        // Remove o elemento do DOM após a transição terminar (500ms definido no CSS)
+        setTimeout(() => {
+            if (notificationDiv.parentNode) { // Verifica se o elemento ainda está no DOM antes de tentar remover
+                notificationDiv.remove();
+            }
+        }, 500); // Tempo deve corresponder à duração da transição opacity/transform no CSS
+
+    }catch(e){
+        console.error("Erro ao fechar notificação:", e);
+    }
+}
+
+// --- FIM FUNÇÕES DE NOTIFICAÇÃO ---
 function salvarGaragemNoLocalStorage() {
     try {
         console.log("[DEBUG] salvarGaragemNoLocalStorage() chamada.");
@@ -222,73 +337,7 @@ function atualizarBarraDeProgresso(element, percentage) {
         console.log("erro no atualizarBarraDeProgresso")
     }
 }
-/**
- * Exibe uma notificação na tela.
- */
-function exibirNotificacao(message, type = 'info', duration = 5000) {
-    try{
-        console.log("[DEBUG] exibirNotificacao() chamada.");
-        if (!notificacoesContainer || !message) return;
 
-        const notificationDiv = document.createElement('div');
-        notificationDiv.className = `notificacao ${type}`;
-        notificationDiv.textContent = message;
-
-        const closeButton = document.createElement('button');
-        closeButton.innerHTML = '×';
-        closeButton.className = 'close-btn';
-        closeButton.setAttribute('aria-label', 'Fechar');
-        closeButton.addEventListener('click', (event) => {
-            event.stopPropagation();
-            fecharNotificacao(notificationDiv);
-        });
-        notificationDiv.appendChild(closeButton);
-
-        notificacoesContainer.prepend(notificationDiv);
-
-        requestAnimationFrame(() => {
-            notificationDiv.classList.add('show');
-        });
-
-        const timerId = setTimeout(() => {
-            fecharNotificacao(notificationDiv);
-        }, duration);
-        notificationDiv.dataset.timerId = timerId;
-
-        notificationDiv.addEventListener('click', (event) => {
-            if (event.target === notificationDiv) {
-                clearTimeout(timerId);
-                fecharNotificacao(notificationDiv);
-            }
-        });
-    }catch(e){
-        console.log("erro no exibirNotificacao")
-    }
-}
-
-/**
- * Fecha uma notificação.
- */
-function fecharNotificacao(notificationDiv) {
-    try{
-        console.log("[DEBUG] fecharNotificacao() chamada.");
-        if (!notificationDiv || !notificationDiv.parentNode) return;
-
-        clearTimeout(notificationDiv.dataset.timerId);
-        notificationDiv.style.opacity = '0';
-        notificationDiv.style.transform = 'translateX(110%)';
-
-        setTimeout(() => {
-            if (notificationDiv.parentNode) notificationDiv.remove();
-        }, 500);
-    }catch(e){
-        console.log("erro no fecharNotificacao")
-    }
-}
-
-/**
- * Remove um veículo da garagem.
- */
 function removerVeiculo(id) {
     try{
         console.log("[DEBUG] removerVeiculo() chamada com id =", id);
@@ -613,6 +662,141 @@ function handleAgendamentoSubmit(event) {
     }
 }
 
+// Lembre-se de ter a URL base do seu backend definida aqui!
+// Se você está usando o deploy no Render, use a URL pública dele:
+// const backendBaseUrl = 'https://seu-backend-render.onrender.com';
+// Se está testando localmente APÓS instalar Node.js, use:
+const backendBaseUrl = 'http://localhost:3001'; // <<< Ajuste esta URL conforme necessário para testar!
+
+
+// --- Funções para Carregar e Exibir Veículos em Destaque ---
+async function carregarVeiculosDestaque() {
+    const container = document.getElementById('cards-veiculos-destaque');
+    if (!container) return; // Sai se o container não existir
+
+    container.innerHTML = '<p>Carregando veículos em destaque...</p>'; // Mensagem de loading
+
+    try {
+        const response = await fetch(`${backendBaseUrl}/api/garagem/veiculos-destaque`);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `Erro ${response.status} ao carregar destaques.`);
+        }
+
+        const veiculos = await response.json();
+        console.log("[Frontend] Dados de Veículos Destaque recebidos:", veiculos);
+
+        container.innerHTML = ''; // Limpa a mensagem de loading
+
+        if (veiculos.length === 0) {
+            container.innerHTML = '<p>Nenhum veículo em destaque no momento.</p>';
+            return;
+        }
+
+        // Itera sobre os dados e cria o HTML para cada veículo
+        veiculos.forEach(veiculo => {
+            const card = document.createElement('div');
+            card.className = 'veiculo-destaque-card'; // Classe CSS para estilizar
+            card.innerHTML = `
+                <img src="${veiculo.imagemUrl || 'img/placeholder.png'}" alt="${veiculo.modelo}" onerror="this.src='img/placeholder.png';">
+                <h3>${veiculo.modelo} (${veiculo.ano})</h3>
+                <p>${veiculo.destaque}</p>
+            `;
+            container.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("[Frontend] Erro ao carregar veículos destaque:", error);
+        container.innerHTML = `<p style="color:red;">Falha ao carregar destaques: ${error.message}</p>`;
+    }
+}
+
+// --- Funções para Carregar e Exibir Serviços Oferecidos ---
+async function carregarServicosGaragem() {
+    const lista = document.getElementById('lista-servicos-oferecidos');
+     if (!lista) return;
+
+    lista.innerHTML = '<li>Carregando serviços...</li>'; // Mensagem de loading
+
+    try {
+        const response = await fetch(`${backendBaseUrl}/api/garagem/servicos-oferecidos`);
+
+        if (!response.ok) {
+             const errorData = await response.json().catch(() => ({}));
+             throw new Error(errorData.error || `Erro ${response.status} ao carregar serviços.`);
+        }
+
+        const servicos = await response.json();
+        console.log("[Frontend] Dados de Serviços recebidos:", servicos);
+
+        lista.innerHTML = ''; // Limpa o loading
+
+        if (servicos.length === 0) {
+            lista.innerHTML = '<li>Nenhum serviço disponível no momento.</li>';
+            return;
+        }
+
+        // Itera sobre os dados e cria o HTML para cada serviço (lista)
+        servicos.forEach(servico => {
+            const li = document.createElement('li');
+            li.className = 'servico-item'; // Classe CSS para estilizar
+            li.innerHTML = `
+                <strong>${servico.nome}</strong>: ${servico.descricao} <em>(Estimado: ${servico.precoEstimado})</em>
+            `;
+            lista.appendChild(li);
+        });
+
+    } catch (error) {
+        console.error("[Frontend] Erro ao carregar serviços:", error);
+        lista.innerHTML = `<li style="color:red;">Falha ao carregar serviços: ${error.message}</li>`;
+    }
+}
+
+// --- Funções para Carregar e Exibir Ferramentas Essenciais ---
+ async function carregarFerramentasEssenciais() {
+     const container = document.getElementById('lista-ferramentas-essenciais'); // Usei um div, não ul, no HTML
+      if (!container) return;
+
+     container.innerHTML = '<p>Carregando ferramentas...</p>'; // Mensagem de loading
+
+     try {
+         const response = await fetch(`${backendBaseUrl}/api/garagem/ferramentas-essenciais`);
+
+         if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              throw new Error(errorData.error || `Erro ${response.status} ao carregar ferramentas.`);
+         }
+
+         const ferramentas = await response.json();
+         console.log("[Frontend] Dados de Ferramentas recebidos:", ferramentas);
+
+         container.innerHTML = ''; // Limpa o loading
+
+         if (ferramentas.length === 0) {
+             container.innerHTML = '<p>Nenhuma ferramenta listada no momento.</p>';
+             return;
+         }
+
+         // Itera sobre os dados e cria o HTML para cada ferramenta
+         ferramentas.forEach(ferramenta => {
+             const itemDiv = document.createElement('div');
+             itemDiv.className = 'ferramenta-item'; // Classe CSS para estilizar
+             itemDiv.innerHTML = `
+                 <strong>${ferramenta.nome}</strong>: ${ferramenta.utilidade}
+                 ${ferramenta.linkCompra ? `<a href="${ferramenta.linkCompra}" target="_blank"> [Link]</a>` : ''}
+             `;
+             container.appendChild(itemDiv);
+         });
+
+     } catch (error) {
+         console.error("[Frontend] Erro ao carregar ferramentas:", error);
+         container.innerHTML = `<p style="color:red;">Falha ao carregar ferramentas: ${error.message}</p>`;
+     }
+ }
+
+
+// --- Fim Funções de Carregamento de Dados ---
 /**
  * Busca os detalhes de um veículo na API simulada.
  */

@@ -52,14 +52,29 @@ Agora, o frontend no seu navegador se comunicará com o backend rodando localmen
 
 ## Endpoint do Backend
 
-O backend expõe o seguinte endpoint para buscar a previsão do tempo:
+O backend expõe os seguintes endpoints GET:
 
 *   **GET `/api/previsao/:cidade`**
-    *   **Descrição:** Busca a previsão do tempo detalhada (forecast) para a cidade especificada.
-    *   **Parâmetros de Rota:** `:cidade` (string, nome da cidade)
-    *   **Resposta de Sucesso (200 OK):** Retorna um objeto JSON com os dados do forecast da OpenWeatherMap.
-    *   **Resposta de Erro (400 Bad Request):** `{ "error": "Nome da cidade é obrigatório." }`
-    *   **Resposta de Erro (401 Unauthorized / 500 Internal Server Error):** `{ "error": "Mensagem de erro..." }` (Erros na chave da API ou na comunicação com a OpenWeatherMap são tratados e retornados aqui).
+    *   Descrição: Busca a previsão do tempo detalhada (forecast) para a cidade especificada.
+    *   Parâmetros de Rota: `:cidade` (string, nome da cidade)
+    *   Resposta: Objeto JSON com dados do forecast da OpenWeatherMap.
+
+*   **GET `/api/garagem/veiculos-destaque`**
+    *   Descrição: Retorna uma lista de veículos em destaque da garagem.
+    *   Resposta: Array de objetos JSON, cada um representando um veículo em destaque (`{ id, modelo, ano, destaque, imagemUrl }`).
+
+*   **GET `/api/garagem/servicos-oferecidos`**
+    *   Descrição: Retorna a lista de serviços oferecidos pela garagem.
+    *   Resposta: Array de objetos JSON, cada um representando um serviço (`{ id, nome, descricao, precoEstimado }`).
+
+*   **GET `/api/garagem/servicos-oferecidos/:idServico`**
+    *   Descrição: Retorna os detalhes de um serviço específico pelo seu ID.
+    *   Parâmetros de Rota: `:idServico` (string, ID do serviço)
+    *   Resposta: Objeto JSON do serviço encontrado ou erro 404 se não existir.
+
+*   **GET `/api/garagem/ferramentas-essenciais`**
+    *   Descrição: Retorna uma lista de ferramentas essenciais.
+    *   Resposta: Array de objetos JSON, cada um representando uma ferramenta (`{ id, nome, utilidade, linkCompra }`).
 
 ## Estrutura do Projeto
 garagem-inteligente/
