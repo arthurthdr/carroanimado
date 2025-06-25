@@ -362,29 +362,40 @@ function removerVeiculo(id) {
 /**
  * Alterna a visibilidade do formulário de adicionar veículo.
  */
-function toggleFormAddVeiculo(show = true) {
-    try{
-        console.log("[DEBUG] toggleFormAddVeiculo() chamada com show =", show);
-        if (!addVeiculoFormContainer) {
-            console.error("Container do formulário de adicionar veículo não encontrado!");
-            return;
-        }
+function toggleFormAddVeiculo(show) { // Removi o "= true" padrão por segurança
+    console.log("[DEBUG] toggleFormAddVeiculo() chamada com show =", show);
+     // VERIFIQUE SE ESTES CONSOLE.LOGS APARECEM E MOSTRAM OS ELEMENTOS CORRETOS
+     // console.log('Elemento do botão:', btnMostrarFormAdd);
+     // console.log('Elemento do formulário:', addVeiculoFormContainer);
 
-        addVeiculoFormContainer.style.display = show ? 'block' : 'none';
-        if (btnMostrarFormAdd) {
-            btnMostrarFormAdd.textContent = show ? 'Cancelar Adição' : 'Adicionar Novo Veículo +';
-        }
-
-        if (show && formAddVeiculo) {
-            formAddVeiculo.reset();
-            atualizarCamposOpcionaisFormAdd();
-            addTipoSelect?.focus();
-        }
-    }catch(e){
-        console.log("erro no toggleFormAddVeiculo")
+    if (!addVeiculoFormContainer) {
+        console.error("Container do formulário de adicionar veículo não encontrado!");
+        return;
     }
+
+    // Lógica mais simples de toggle
+    if (addVeiculoFormContainer.style.display === 'none' || addVeiculoFormContainer.style.display === '') {
+         addVeiculoFormContainer.style.display = 'block'; // Use 'block' ou 'grid' conforme seu layout CSS
+         if (btnMostrarFormAdd) btnMostrarFormAdd.textContent = 'Cancelar Adição';
+    } else {
+         addVeiculoFormContainer.style.display = 'none';
+         if (btnMostrarFormAdd) btnMostrarFormAdd.textContent = 'Adicionar Novo Veículo +';
+         if (formAddVeiculo) formAddVeiculo.reset(); // Reseta o form ao esconder
+    }
+
+    // Remova ou comente a lógica original que dependia do parâmetro 'show'
+    // addVeiculoFormContainer.style.display = show ? 'block' : 'none';
+    // if (btnMostrarFormAdd) { btnMostrarFormAdd.textContent = show ? 'Cancelar Adição' : 'Adicionar Novo Veículo +'; }
+    // if (show && formAddVeiculo) { formAddVeiculo.reset(); atualizarCamposOpcionaisFormAdd(); addTipoSelect?.focus(); }
+     atualizarCamposOpcionaisFormAdd(); // Chame sempre para garantir o estado correto
+
 }
 
+// E mude o event listener para apenas chamar o toggle sem parâmetro
+ btnMostrarFormAdd?.addEventListener('click', () => {
+     console.log("[DEBUG] Botão 'Adicionar Novo Veículo' clicado!");
+     toggleFormAddVeiculo(); // Apenas chama a função sem parâmetro
+ });
 /**
  * Atualiza os campos opcionais do formulário de adicionar veículo.
  */
