@@ -109,7 +109,28 @@
         <!-- Cards/itens de ferramentas serão carregados aqui pelo JS -->
     </div>
 </div>
+<!-- NOVO: Seção para Dicas de Manutenção (A8) -->
+<div class="container" id="secao-dicas">
+    <h2>Dicas de Manutenção</h2>
+    <div id="dicas-gerais-container" class="dados-container">
+        <h4>Dicas Gerais</h4>
+        <ul id="lista-dicas-gerais">
+            <!-- Dicas gerais serão carregadas aqui -->
+        </ul>
+    </div>
+    <div id="dicas-especificas-container" class="dados-container" style="margin-top: 20px;">
+        <h4>Dicas Específicas</h4>
+        <p>Busque dicas para um tipo de veículo:</p>
+        <button class="dica-tipo-btn" data-tipo="carro">Carro</button>
+        <button class="dica-tipo-btn" data-tipo="moto">Moto</button>
+        <button class="dica-tipo-btn" data-tipo="caminhao">Caminhão</button>
+        <ul id="lista-dicas-especificas" style="margin-top: 10px;">
+            <!-- Dicas específicas serão carregadas aqui -->
+        </ul>
+    </div>
+</div>
 
+<!-- --- Fim Novas Seções --- -->
 <!-- --- Fim Novas Seções --- -->
     <audio id="som-buzina" src="sounds/buzina.mp3" preload="auto"></audio>
     <audio id="som-acelerar" src="sounds/carroacelerando.mp3" preload="auto"></audio>

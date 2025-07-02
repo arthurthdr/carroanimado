@@ -1,112 +1,124 @@
 # Projeto Garagem Inteligente
 
-Este é o projeto da Garagem Inteligente desenvolvido como parte do curso de Informática para Internet no IFPR.
+Este é o projeto da Garagem Inteligente desenvolvido como parte do curso de Informática para Internet no IFPR, por Arthur.
 
 ## Descrição do Projeto
 
-A Garagem Inteligente permite gerenciar diferentes tipos de veículos, visualizar seus detalhes, histórico de manutenção e planejar viagens com base na previsão do tempo.
+A Garagem Inteligente é uma aplicação web completa com frontend e backend. Ela permite gerenciar uma frota de veículos (carros, motos, caminhões), simular suas ações (ligar, acelerar), registrar manutenções e planejar viagens consultando a previsão do tempo.
 
-## Novidades desta Atividade (B2.P1.A5 - Ponte para o Backend)
+O projeto utiliza um frontend em HTML, CSS e JavaScript puro (com POO) e um backend em Node.js com Express, que serve como uma API para fornecer dados da aplicação (veículos em destaque, serviços, dicas) e como um proxy seguro para APIs externas (OpenWeatherMap).
 
-Nesta fase, foi implementado um servidor backend utilizando Node.js e Express para atuar como um proxy seguro para a API OpenWeatherMap. Isso garante que a chave de API da OpenWeatherMap não fique exposta no código frontend que roda no navegador.
+## Links Públicos
 
-O fluxo da aplicação agora é: Frontend (Navegador) -> Nosso Backend (Node.js) -> API OpenWeatherMap -> Nosso Backend -> Frontend.
+*   **Frontend (Vercel):** [https://carroanimado.vercel.app/](https://carroanimado.vercel.app/)  <-- *Verifique se este é seu link correto!*
+*   **Backend (Render):** [https://carroanimado-1.onrender.com/](https://carroanimado-1.onrender.com/) <-- *Verifique se este é seu link correto!*
 
-## Requisitos para Rodar
+## Como Rodar Localmente
 
+### Pré-requisitos
 *   Node.js e npm instalados.
-*   Uma chave de API da OpenWeatherMap.
+*   Uma chave de API da [OpenWeatherMap](https://openweathermap.org/api).
 
-## Configuração
+### Configuração
 
 1.  **Clone o Repositório:**
     ```bash
     git clone https://github.com/arthurthdr/carroanimado
-    cd carro
+    cd carroanimado
     ```
 
-2.  **Crie o Arquivo `.env`:** Na raiz do projeto, crie um arquivo chamado `.env` e adicione sua chave da OpenWeatherMap:
-    ```dotenv
-    OPENWEATHER_API_KEY=b35a17a87dd4682376499cc8ba4658abI
-    PORT=3001
-    ```
-
-3.  **Instale as Dependências do Backend:** No terminal, na pasta raiz do projeto, execute:
+2.  **Instale as Dependências do Backend:**
     ```bash
     npm install
     ```
 
-## Como Rodar a Aplicação
+3.  **Crie o Arquivo `.env`:** Na raiz do projeto, crie um arquivo chamado `.env` e adicione suas variáveis:
+    ```dotenv
+    # Substitua pelo sua chave da API OpenWeatherMap
+    OPENWEATHER_API_KEY=sua_chave_aqui
+    
+    # Porta para o servidor backend rodar localmente
+    PORT=3001
+    ```
 
-Para rodar a aplicação completa, você precisa iniciar o servidor backend e depois abrir o frontend.
+### Execução
 
-1.  **Inicie o Backend:** No terminal, na pasta raiz do projeto, execute:
+1.  **Inicie o Servidor Backend:** No terminal, execute:
     ```bash
     node server.js
     ```
-    Este comando iniciará o servidor backend, que ficará escutando na porta 3001 (ou na porta definida na variável `PORT` do `.env`). Mantenha este terminal aberto.
+    O servidor estará rodando em `http://localhost:3001`. Mantenha este terminal aberto.
 
-2.  **Abra o Frontend:** Em um navegador web, abra o arquivo `index.html` que está na raiz do projeto. (Alternativamente, se você usa um servidor local para o frontend, inicie-o em outro terminal).
+2.  **Abra o Frontend:** Abra o arquivo `index.html` em um navegador web. A aplicação frontend se conectará automaticamente ao backend local.
 
-Agora, o frontend no seu navegador se comunicará com o backend rodando localmente para obter a previsão do tempo.
-
-## Endpoint do Backend
+## Documentação da API do Backend
 
 O backend expõe os seguintes endpoints GET:
 
-*   **GET `/api/previsao/:cidade`**
-    *   Descrição: Busca a previsão do tempo detalhada (forecast) para a cidade especificada.
-    *   Parâmetros de Rota: `:cidade` (string, nome da cidade)
-    *   Resposta: Objeto JSON com dados do forecast da OpenWeatherMap.
+---
 
-*   **GET `/api/garagem/veiculos-destaque`**
-    *   Descrição: Retorna uma lista de veículos em destaque da garagem.
-    *   Resposta: Array de objetos JSON, cada um representando um veículo em destaque (`{ id, modelo, ano, destaque, imagemUrl }`).
+### Previsão do Tempo
 
-*   **GET `/api/garagem/servicos-oferecidos`**
-    *   Descrição: Retorna a lista de serviços oferecidos pela garagem.
-    *   Resposta: Array de objetos JSON, cada um representando um serviço (`{ id, nome, descricao, precoEstimado }`).
-
-*   **GET `/api/garagem/servicos-oferecidos/:idServico`**
-    *   Descrição: Retorna os detalhes de um serviço específico pelo seu ID.
-    *   Parâmetros de Rota: `:idServico` (string, ID do serviço)
-    *   Resposta: Objeto JSON do serviço encontrado ou erro 404 se não existir.
-
-*   **GET `/api/garagem/ferramentas-essenciais`**
-    *   Descrição: Retorna uma lista de ferramentas essenciais.
-    *   Resposta: Array de objetos JSON, cada um representando uma ferramenta (`{ id, nome, utilidade, linkCompra }`).
-
-## Estrutura do Projeto
-garagem-inteligente/
-├── css/
-│ └── style.css
-├── js/
-│ ├── classes/
-│ │ ├── ... (Arquivos das classes de veículos e Manutencao)
-│ │ └── Veiculo.js
-│ └── script.js <-- Modificado para chamar o backend
-├── img/
-├── sounds/
-├── index.html
-├── .env <-- NOVO (ou atualizado) - Chave de API segura
-├── .gitignore <-- NOVO (ou atualizado) - Ignora .env e node_modules
-├── package.json <-- NOVO (criado por npm init -y, ou manualmente)
-├── package-lock.json <-- NOVO (criado por npm install)
-└── server.js <-- NOVO - O código do backend
-└── README.md <-- ESTE ARQUIVO
-
-## Critérios de Avaliação (Auto-Verificação)
-
-*   [ ] Servidor Backend Funcional (server.js)
-*   [ ] Endpoint `/api/previsao/:cidade` implementado
-*   [ ] Chave OpenWeatherMap carregada do `.env` no backend (NÃO no frontend!)
-*   [ ] Backend faz a requisição HTTP para a OpenWeatherMap (usando axios)
-*   [ ] Frontend ajustado para chamar `http://localhost:3001/api/previsao/...`
-*   [ ] Erros tratados no backend e comunicados ao frontend
-*   [ ] README.md atualizado com instruções e nova arquitetura
-*   [ ] (Bônus) Deploy funcional (frontend + backend)
+*   **`GET /api/previsao/:cidade`**
+    *   **Descrição:** Atua como um proxy para a API de forecast da OpenWeatherMap.
+    *   **Parâmetros de Rota:** `:cidade` (string, nome da cidade).
+    *   **Resposta (Sucesso):** Objeto JSON com os dados da previsão da OpenWeatherMap.
+    *   **Resposta (Erro):** Objeto JSON `{ "error": "mensagem de erro" }` com status 400, 404 ou 500.
 
 ---
-Desenvolvido por: Arthur (e a ajuda do assistente de IA!)
-Curso: Informática para Internet - IFPR
-Ano: 2024
+
+### Dicas de Manutenção
+
+*   **`GET /api/dicas-manutencao`**
+    *   **Descrição:** Retorna uma lista de dicas de manutenção gerais para qualquer veículo.
+    *   **Resposta (Sucesso):** Array de objetos. Exemplo:
+        ```json
+        [
+            { "id": 1, "dica": "Verifique o nível do óleo do motor regularmente." },
+            { "id": 2, "dica": "Calibre os pneus semanalmente..." }
+        ]
+        ```
+
+*   **`GET /api/dicas-manutencao/:tipoVeiculo`**
+    *   **Descrição:** Retorna dicas de manutenção específicas para um tipo de veículo.
+    *   **Parâmetros de Rota:** `:tipoVeiculo` (string, ex: `carro`, `moto`, `caminhao`).
+    *   **Resposta (Sucesso):** Array de objetos com dicas específicas. Exemplo para `/api/dicas-manutencao/moto`:
+        ```json
+        [
+            { "id": 20, "dica": "Lubrifique e ajuste a tensão da corrente a cada 500 km." }
+        ]
+        ```
+    *   **Resposta (Erro 404):** Objeto JSON `{ "error": "Nenhuma dica específica encontrada..." }` se o tipo não existir.
+
+---
+
+### Dados da Garagem
+
+*   **`GET /api/garagem/veiculos-destaque`**
+    *   **Descrição:** Retorna uma lista de veículos em destaque.
+    *   **Resposta (Sucesso):** Array de objetos. Exemplo:
+        ```json
+        [
+            { "id": 1, "modelo": "Ford Maverick Híbrido", "ano": 2024, "destaque": "Economia e Estilo", "imagemUrl": "..." }
+        ]
+        ```
+
+*   **`GET /api/garagem/servicos-oferecidos`**
+    *   **Descrição:** Retorna a lista de serviços oferecidos pela garagem.
+    *   **Resposta (Sucesso):** Array de objetos. Exemplo:
+        ```json
+        [
+            { "id": "svc001", "nome": "Diagnóstico Eletrônico Completo", "descricao": "...", "precoEstimado": "R$ 250,00" }
+        ]
+        ```
+
+*   **`GET /api/garagem/ferramentas-essenciais`**
+    *   **Descrição:** Retorna uma lista de ferramentas essenciais para manutenção.
+    *   **Resposta (Sucesso):** Array de objetos. Exemplo:
+        ```json
+        [
+            { "id": "fer01", "nome": "Chave de Roda Cruz", "utilidade": "Troca rápida de pneus.", "linkCompra": "..." }
+        ]
+        ```
+
+---

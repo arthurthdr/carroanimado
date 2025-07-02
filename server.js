@@ -33,6 +33,36 @@ const ferramentasEssenciais = [
     { id: "fer04", nome: "Kit Chaves Combinadas", utilidade: "Versatilidade para diversos parafusos e porcas.", linkCompra: "https://exemplo.com/kit-chaves" }
 ];
 
+// No server.js
+
+// --- Estoque de Dados Mockados (Simulando Banco de Dados) ---
+
+// ... (seus arrays existentes) ...
+
+// NOVO: Dados para a Atividade A8
+const dicasManutencaoGerais = [
+    { id: 1, dica: "Verifique o nível do óleo do motor regularmente." },
+    { id: 2, dica: "Calibre os pneus semanalmente para maior segurança e economia." },
+    { id: 3, dica: "Confira o fluido de arrefecimento (radiador) com o motor frio." },
+    { id: 4, dica: "Teste os freios e fique atento a ruídos estranhos." }
+];
+
+const dicasPorTipo = {
+    carro: [
+        { id: 10, dica: "Faça o rodízio dos pneus a cada 10.000 km para um desgaste uniforme." },
+        { id: 11, dica: "Verifique o alinhamento e balanceamento anualmente." }
+    ],
+    moto: [
+        { id: 20, dica: "Lubrifique e ajuste a tensão da corrente a cada 500 km." },
+        { id: 21, dica: "Verifique o estado das pastilhas de freio com frequência." }
+    ],
+    caminhao: [
+        { id: 30, dica: "Inspecione o sistema de freios a ar e drene os reservatórios." },
+        { id: 31, dica: "Verifique o aperto das porcas das rodas (torque)." }
+    ]
+};
+
+// --- Fim Estoque de Dados Mockados ---
 // --- Fim Estoque de Dados Mockados ---
 
 // Middleware para permitir que o frontend (rodando em outra porta) acesse este backend
@@ -125,7 +155,32 @@ app.get('/api/garagem/servicos-oferecidos/:idServico', (req, res) => {
 });
 
 // --- Fim Novos Endpoints GET ---
+// No server.js, junto com os outros app.get
 
+// --- Novos Endpoints para a Atividade A8 ---
+
+// Endpoint para retornar todas as dicas de manutenção gerais
+app.get('/api/dicas-manutencao', (req, res) => {
+    console.log(`[Servidor] Requisição GET para /api/dicas-manutencao`);
+    res.json(dicasManutencaoGerais);
+});
+
+// Endpoint para retornar dicas específicas por tipo de veículo
+app.get('/api/dicas-manutencao/:tipoVeiculo', (req, res) => {
+    const { tipoVeiculo } = req.params; // Pega o 'carro', 'moto', etc. da URL
+    console.log(`[Servidor] Requisição GET para dicas do tipo: ${tipoVeiculo}`);
+
+    const dicas = dicasPorTipo[tipoVeiculo.toLowerCase()]; // Busca no nosso objeto de dados
+
+    if (dicas) {
+        res.json(dicas);
+    } else {
+        // Se o tipo não existir (ex: /api/dicas-manutencao/bicicleta), retorna um erro 404
+        res.status(404).json({ error: `Nenhuma dica específica encontrada para o tipo: ${tipoVeiculo}` });
+    }
+});
+
+// --- Fim Novos Endpoints A8 ---
 // Opcional: Rota básica para a raiz do servidor para verificar se está rodando
 app.get('/', (req, res) => {
     res.send('Servidor backend da Garagem Inteligente rodando!');
@@ -136,3 +191,4 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Servidor backend rodando em http://localhost:${port}`);
 });
+
