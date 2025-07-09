@@ -8,8 +8,16 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import mongoose from 'mongoose';
 
-// --- Configuração Inicial ---
-dotenv.config(); // Carrega as variáveis de ambiente do arquivo .env
+// --- Configuração Inicial do dotenv com depuração ---
+const dotEnvResult = dotenv.config();
+if (dotEnvResult.error) {
+    // Se houver um erro ao carregar o .env, ele será mostrado aqui.
+    console.error("❌ Erro ao carregar o arquivo .env:", dotEnvResult.error);
+}
+
+// Para depuração: Imprime as variáveis que o dotenv conseguiu ler do arquivo .env.
+// Se aqui aparecer 'undefined' ou um objeto vazio, o dotenv não encontrou o arquivo.
+console.log("Conteúdo lido do .env:", dotEnvResult.parsed);
 
 // --- Declaração de Constantes da Aplicação (FEITA UMA ÚNICA VEZ) ---
 const app = express();
@@ -26,8 +34,9 @@ async function connectCrudDB() {
         console.log("✅ Mongoose já está conectado.");
         return;
     }
+    // Esta verificação agora vai funcionar, pois as variáveis foram lidas acima.
     if (!mongoUriCrud) {
-        console.error("❌ ERRO FATAL: A variável de ambiente MONGO_URI_CRUD não está definida!");
+        console.error("❌ ERRO FATAL: A variável de ambiente MONGO_URI_CRUD não está definida ou não foi carregada. Verifique o arquivo .env e os logs acima.");
         return;
     }
     try {
@@ -46,7 +55,6 @@ connectCrudDB();
 // --- Middlewares ---
 // =======================================================================
 
-// Middleware para permitir CORS (acesso de outras origens, como o seu frontend)
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
@@ -88,7 +96,6 @@ const ferramentasEssenciais = [
 // --- Rotas da API (Endpoints) ---
 // =======================================================================
 
-// Endpoint para Previsão do Tempo
 app.get('/api/previsao/:cidade', async (req, res) => {
     const { cidade } = req.params;
     if (!apiKey) return res.status(500).json({ error: 'Chave da API não configurada no servidor.' });
@@ -107,13 +114,11 @@ app.get('/api/previsao/:cidade', async (req, res) => {
     }
 });
 
-// Endpoint para Dicas de Manutenção Gerais
 app.get('/api/dicas-manutencao', (req, res) => {
     console.log(`[Servidor] Requisição GET para /api/dicas-manutencao`);
     res.json(dicasManutencaoGerais);
 });
 
-// Endpoint para Dicas de Manutenção por Tipo de Veículo
 app.get('/api/dicas-manutencao/:tipoVeiculo', (req, res) => {
     const { tipoVeiculo } = req.params;
     console.log(`[Servidor] Requisição GET para dicas do tipo: ${tipoVeiculo}`);
@@ -125,25 +130,21 @@ app.get('/api/dicas-manutencao/:tipoVeiculo', (req, res) => {
     }
 });
 
-// Endpoint para Veículos em Destaque
 app.get('/api/garagem/veiculos-destaque', (req, res) => {
     console.log(`[Servidor] Requisição GET para /api/garagem/veiculos-destaque`);
     res.json(veiculosDestaque);
 });
 
-// Endpoint para Serviços Oferecidos
 app.get('/api/garagem/servicos-oferecidos', (req, res) => {
     console.log(`[Servidor] Requisição GET para /api/garagem/servicos-oferecidos`);
     res.json(servicosGaragem);
 });
 
-// Endpoint para Ferramentas Essenciais
 app.get('/api/garagem/ferramentas-essenciais', (req, res) => {
     console.log(`[Servidor] Requisição GET para /api/garagem/ferramentas-essenciais`);
     res.json(ferramentasEssenciais);
 });
 
-// Rota raiz para verificar se o servidor está online
 app.get('/', (req, res) => {
     res.send('Servidor backend da Garagem Inteligente está rodando!');
 });
