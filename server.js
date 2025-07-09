@@ -1,194 +1,157 @@
+// =======================================================================
+// ===                    GARAGEM INTELIGENTE - BACKEND                  ===
+// =======================================================================
+
+// --- Importações de Módulos ---
 import express from 'express';
 import dotenv from 'dotenv';
 import axios from 'axios';
+import mongoose from 'mongoose';
 
-// Carrega variáveis de ambiente do arquivo .env
-dotenv.config();
+// --- Configuração Inicial ---
+dotenv.config(); // Carrega as variáveis de ambiente do arquivo .env
 
-// Inicializa o aplicativo Express
+// --- Declaração de Constantes da Aplicação (FEITA UMA ÚNICA VEZ) ---
 const app = express();
-const port = process.env.PORT || 3001; // Porta para o servidor backend
-                                    // Use uma porta diferente do frontend se rodar ambos localmente
+const port = process.env.PORT || 3001;
 const apiKey = process.env.OPENWEATHER_API_KEY;
+const mongoUriCrud = process.env.MONGO_URI_CRUD;
 
-// --- Estoque de Dados Mockados (Simulando Banco de Dados) ---
+// =======================================================================
+// --- Conexão com o Banco de Dados (MongoDB Atlas) ---
+// =======================================================================
 
-const veiculosDestaque = [
-    { id: 1, modelo: "Ford Maverick Híbrido", ano: 2024, destaque: "Economia e Estilo", imagemUrl: "img/maverick_mock.jpg" },
-    { id: 2, modelo: "VW Kombi Elétrica ID.Buzz", ano: 2025, destaque: "Nostalgia Eletrificada", imagemUrl: "img/kombi_mock.jpg" },
-    { id: 3, modelo: "Cybertruck", ano: 2023, destaque: "Design Futurista", imagemUrl: "img/cybertruck_mock.jpg" },
-    { id: 4, modelo: "Porsche Taycan", ano: 2024, destaque: "Esportivo Elétrico", imagemUrl: "img/taycan_mock.jpg" }
-];
+async function connectCrudDB() {
+    if (mongoose.connections[0].readyState) {
+        console.log("✅ Mongoose já está conectado.");
+        return;
+    }
+    if (!mongoUriCrud) {
+        console.error("❌ ERRO FATAL: A variável de ambiente MONGO_URI_CRUD não está definida!");
+        return;
+    }
+    try {
+        console.log("⏳ Conectando ao MongoDB Atlas...");
+        await mongoose.connect(mongoUriCrud);
+        console.log("🚀 Conectado ao MongoDB Atlas (CRUD) com sucesso!");
+    } catch (err) {
+        console.error("❌ ERRO FATAL ao tentar conectar ao MongoDB (CRUD):", err.message);
+    }
+}
 
-const servicosGaragem = [
-    { id: "svc001", nome: "Diagnóstico Eletrônico Completo", descricao: "Verificação detalhada de todos os sistemas eletrônicos e injeção.", precoEstimado: "R$ 250,00" },
-    { id: "svc002", nome: "Alinhamento e Balanceamento 3D", descricao: "Ajuste preciso para uma direção segura e maior vida útil dos pneus.", precoEstimado: "R$ 180,00" },
-    { id: "svc003", nome: "Revisão Completa Freios", descricao: "Inspeção, limpeza e substituição de pastilhas/discos se necessário.", precoEstimado: "A partir de R$ 300,00" }
-];
+// Inicia a conexão com o banco de dados assim que o servidor é iniciado.
+connectCrudDB();
 
-const ferramentasEssenciais = [
-    { id: "fer01", nome: "Chave de Roda Cruz", utilidade: "Troca rápida de pneus.", linkCompra: "https://exemplo.com/chave-roda" },
-    { id: "fer02", nome: "Macaco Hidráulico", utilidade: "Elevação segura do veículo.", linkCompra: "https://exemplo.com/macaco" },
-    { id: "fer03", nome: "Multímetro Digital", utilidade: "Diagnóstico de problemas elétricos.", linkCompra: "https://exemplo.com/multimetro" },
-    { id: "fer04", nome: "Kit Chaves Combinadas", utilidade: "Versatilidade para diversos parafusos e porcas.", linkCompra: "https://exemplo.com/kit-chaves" }
-];
+// =======================================================================
+// --- Middlewares ---
+// =======================================================================
 
-// No server.js
-
-// --- Estoque de Dados Mockados (Simulando Banco de Dados) ---
-
-// ... (seus arrays existentes) ...
-
-// NOVO: Dados para a Atividade A8
-const dicasManutencaoGerais = [
-    { id: 1, dica: "Verifique o nível do óleo do motor regularmente." },
-    { id: 2, dica: "Calibre os pneus semanalmente para maior segurança e economia." },
-    { id: 3, dica: "Confira o fluido de arrefecimento (radiador) com o motor frio." },
-    { id: 4, dica: "Teste os freios e fique atento a ruídos estranhos." }
-];
-
-const dicasPorTipo = {
-    carro: [
-        { id: 10, dica: "Faça o rodízio dos pneus a cada 10.000 km para um desgaste uniforme." },
-        { id: 11, dica: "Verifique o alinhamento e balanceamento anualmente." }
-    ],
-    moto: [
-        { id: 20, dica: "Lubrifique e ajuste a tensão da corrente a cada 500 km." },
-        { id: 21, dica: "Verifique o estado das pastilhas de freio com frequência." }
-    ],
-    caminhao: [
-        { id: 30, dica: "Inspecione o sistema de freios a ar e drene os reservatórios." },
-        { id: 31, dica: "Verifique o aperto das porcas das rodas (torque)." }
-    ]
-};
-
-// --- Fim Estoque de Dados Mockados ---
-// --- Fim Estoque de Dados Mockados ---
-
-// Middleware para permitir que o frontend (rodando em outra porta) acesse este backend
-// (CORS - Cross-Origin Resource Sharing)
+// Middleware para permitir CORS (acesso de outras origens, como o seu frontend)
 app.use((req, res, next) => {
-    // Em produção, restrinja para o seu domínio frontend (ex: 'https://suagaragem.com')
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    // Se precisar usar métodos como PUT, POST, DELETE com cabeçalhos específicos, adicione:
-    // res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     next();
 });
 
-// ----- NOSSO PRIMEIRO ENDPOINT: Previsão do Tempo -----
-app.get('/api/previsao/:cidade', async (req, res) => {
-    const { cidade } = req.params; // Pega o parâmetro :cidade da URL
+// =======================================================================
+// --- Banco de Dados Mockado (Dados de Exemplo) ---
+// =======================================================================
 
-    if (!apiKey) {
-        console.error("[Servidor] ERRO: Chave da API não configurada.");
-        return res.status(500).json({ error: 'Chave da API OpenWeatherMap não configurada no servidor.' });
-    }
-    if (!cidade) {
-        console.warn("[Servidor] Aviso: Requisição sem nome de cidade.");
-        return res.status(400).json({ error: 'Nome da cidade é obrigatório.' });
-    }
+const dicasManutencaoGerais = [
+    { id: 1, dica: "Verifique o nível do óleo do motor regularmente." },
+    { id: 2, dica: "Calibre os pneus semanalmente para maior segurança e economia." },
+    { id: 3, dica: "Confira o fluido de arrefecimento (radiador) com o motor frio." }
+];
+
+const dicasPorTipo = {
+    carro: [{ id: 10, dica: "Faça o rodízio dos pneus a cada 10.000 km." }],
+    moto: [{ id: 20, dica: "Lubrifique a corrente frequentemente." }],
+    caminhao: [{ id: 30, dica: "Inspecione o sistema de freios a ar." }]
+};
+
+const veiculosDestaque = [
+    { id: 1, modelo: "Ford Maverick Híbrido", ano: 2024, destaque: "Economia e Estilo", imagemUrl: "img/maverick_mock.jpg" },
+    { id: 2, modelo: "VW Kombi Elétrica ID.Buzz", ano: 2025, destaque: "Nostalgia Eletrificada", imagemUrl: "img/kombi_mock.jpg" }
+];
+
+const servicosGaragem = [
+    { id: "svc001", nome: "Diagnóstico Eletrônico Completo", descricao: "Verificação detalhada de sistemas eletrônicos.", precoEstimado: "R$ 250,00" },
+    { id: "svc002", nome: "Alinhamento e Balanceamento 3D", descricao: "Ajuste preciso para direção segura.", precoEstimado: "R$ 180,00" }
+];
+
+const ferramentasEssenciais = [
+    { id: "fer01", nome: "Chave de Roda Cruz", utilidade: "Troca rápida de pneus." },
+    { id: "fer02", nome: "Macaco Hidráulico", utilidade: "Elevação segura do veículo." }
+];
+
+// =======================================================================
+// --- Rotas da API (Endpoints) ---
+// =======================================================================
+
+// Endpoint para Previsão do Tempo
+app.get('/api/previsao/:cidade', async (req, res) => {
+    const { cidade } = req.params;
+    if (!apiKey) return res.status(500).json({ error: 'Chave da API não configurada no servidor.' });
+    if (!cidade) return res.status(400).json({ error: 'Nome da cidade é obrigatório.' });
 
     const weatherAPIUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(cidade)}&appid=${apiKey}&units=metric&lang=pt_br`;
 
     try {
         console.log(`[Servidor] Buscando previsão para: ${cidade}`);
         const apiResponse = await axios.get(weatherAPIUrl);
-        console.log('[Servidor] Dados recebidos da OpenWeatherMap com sucesso.');
-
-        // Enviamos a resposta da API OpenWeatherMap diretamente para o nosso frontend
         res.json(apiResponse.data);
-
     } catch (error) {
-        // Tratamento de erro mais robusto
-        console.error(`[Servidor] Erro ao buscar previsão para "${cidade}":`, error.response?.data || error.message);
         const status = error.response?.status || 500;
-        // Tenta pegar a mensagem de erro da resposta da API ou usa uma genérica
-        const message = error.response?.data?.message || 'Erro ao buscar previsão do tempo no servidor.';
-
-        // Se o erro for 404 (cidade não encontrada), a mensagem geralmente já vem da API
-        if (status === 404 && error.response?.data?.message) {
-             res.status(status).json({ error: error.response.data.message });
-        } else {
-             res.status(status).json({ error: message });
-        }
-
+        const message = error.response?.data?.message || 'Erro ao buscar previsão do tempo.';
+        res.status(status).json({ error: message });
     }
 });
 
-// --- Novos Endpoints GET para os Dados Mockados ---
-
-// Endpoint para obter a lista de Veículos em Destaque
-app.get('/api/garagem/veiculos-destaque', (req, res) => {
-    console.log(`[Servidor] Requisição GET para /api/garagem/veiculos-destaque`);
-    // Retorna o array completo de veículos em destaque
-    res.json(veiculosDestaque);
-});
-
-// Endpoint para obter a lista de Serviços Oferecidos
-app.get('/api/garagem/servicos-oferecidos', (req, res) => {
-    console.log(`[Servidor] Requisição GET para /api/garagem/servicos-oferecidos`);
-    // Retorna o array completo de serviços
-    res.json(servicosGaragem);
-});
-
-// Endpoint para obter a lista de Ferramentas Essenciais
-app.get('/api/garagem/ferramentas-essenciais', (req, res) => {
-    console.log(`[Servidor] Requisição GET para /api/garagem/ferramentas-essenciais`);
-    // Retorna o array completo de ferramentas
-    res.json(ferramentasEssenciais);
-});
-
-// (Opcional) Endpoint para obter um Serviço específico por ID
-app.get('/api/garagem/servicos-oferecidos/:idServico', (req, res) => {
-    const { idServico } = req.params;
-    console.log(`[Servidor] Requisição GET para serviço com ID: ${idServico}`);
-
-    const servico = servicosGaragem.find(s => s.id === idServico);
-
-    if (servico) {
-        res.json(servico);
-    } else {
-        // Se não encontrar, retorna status 404 Not Found
-        res.status(404).json({ error: `Serviço com ID ${idServico} não encontrado.` });
-    }
-});
-
-// --- Fim Novos Endpoints GET ---
-// No server.js, junto com os outros app.get
-
-// --- Novos Endpoints para a Atividade A8 ---
-
-// Endpoint para retornar todas as dicas de manutenção gerais
+// Endpoint para Dicas de Manutenção Gerais
 app.get('/api/dicas-manutencao', (req, res) => {
     console.log(`[Servidor] Requisição GET para /api/dicas-manutencao`);
     res.json(dicasManutencaoGerais);
 });
 
-// Endpoint para retornar dicas específicas por tipo de veículo
+// Endpoint para Dicas de Manutenção por Tipo de Veículo
 app.get('/api/dicas-manutencao/:tipoVeiculo', (req, res) => {
-    const { tipoVeiculo } = req.params; // Pega o 'carro', 'moto', etc. da URL
+    const { tipoVeiculo } = req.params;
     console.log(`[Servidor] Requisição GET para dicas do tipo: ${tipoVeiculo}`);
-
-    const dicas = dicasPorTipo[tipoVeiculo.toLowerCase()]; // Busca no nosso objeto de dados
-
+    const dicas = dicasPorTipo[tipoVeiculo.toLowerCase()];
     if (dicas) {
         res.json(dicas);
     } else {
-        // Se o tipo não existir (ex: /api/dicas-manutencao/bicicleta), retorna um erro 404
         res.status(404).json({ error: `Nenhuma dica específica encontrada para o tipo: ${tipoVeiculo}` });
     }
 });
 
-// --- Fim Novos Endpoints A8 ---
-// Opcional: Rota básica para a raiz do servidor para verificar se está rodando
-app.get('/', (req, res) => {
-    res.send('Servidor backend da Garagem Inteligente rodando!');
+// Endpoint para Veículos em Destaque
+app.get('/api/garagem/veiculos-destaque', (req, res) => {
+    console.log(`[Servidor] Requisição GET para /api/garagem/veiculos-destaque`);
+    res.json(veiculosDestaque);
 });
 
+// Endpoint para Serviços Oferecidos
+app.get('/api/garagem/servicos-oferecidos', (req, res) => {
+    console.log(`[Servidor] Requisição GET para /api/garagem/servicos-oferecidos`);
+    res.json(servicosGaragem);
+});
 
-// Inicia o servidor
+// Endpoint para Ferramentas Essenciais
+app.get('/api/garagem/ferramentas-essenciais', (req, res) => {
+    console.log(`[Servidor] Requisição GET para /api/garagem/ferramentas-essenciais`);
+    res.json(ferramentasEssenciais);
+});
+
+// Rota raiz para verificar se o servidor está online
+app.get('/', (req, res) => {
+    res.send('Servidor backend da Garagem Inteligente está rodando!');
+});
+
+// =======================================================================
+// --- Inicialização do Servidor ---
+// =======================================================================
+
 app.listen(port, () => {
     console.log(`Servidor backend rodando em http://localhost:${port}`);
 });
-

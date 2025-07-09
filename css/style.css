@@ -1,0 +1,1033 @@
+/* --- Reset Básico --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* --- Variáveis CSS (Mistura da sua paleta clara com a estrutura do tema anterior) --- */
+:root {
+    --cor-fundo-principal: #f8f9fa; /* Fundo bem claro, quase branco */
+    --cor-fundo-secundario: #ffffff; /* Branco puro para cards/elementos */
+    --cor-texto-principal: #343a40; /* Cinza escuro para texto principal (da sua paleta) */
+    --cor-texto-secundario: #6c757d; /* Cinza médio para detalhes */
+    --cor-destaque-azul: #0a2540; /* Seu azul escuro original */
+    --cor-destaque-azul-hover: #081f36; /* Versão mais escura do seu azul */
+    --cor-borda-sutil: #dee2e6; /* Sua borda cinza clara original */
+    --cor-sombra-clara: rgba(0, 0, 0, 0.08); /* Sua sombra suave original */
+    --cor-sombra-media: rgba(0, 0, 0, 0.15); /* Sombra um pouco mais forte */
+    --border-radius-padrao: 8px; /* Seu raio arredondado original */
+
+    /* Cores funcionais (para botões ligar/desligar/aviso, mantidas funcionais) */
+    --cor-sucesso-funcional: #28a745; /* Verde */
+    --cor-sucesso-funcional-hover: #218838;
+    --cor-aviso-funcional: #ffc107; /* Amarelo */
+    --cor-aviso-funcional-hover: #e0a800;
+    --cor-erro-funcional: #dc3545; /* Vermelho */
+    --cor-erro-funcional-hover: #c82333;
+    --cor-info-funcional: #17a2b8; /* Ciano */
+    --cor-info-funcional-hover: #138496;
+    --cor-secundaria-funcional: #6c757d; /* Cinza */
+    --cor-secundaria-funcional-hover: #5a6268;
+    --cor-laranja-funcional: #fd7e14; /* Laranja */
+    --cor-laranja-funcional-hover: #e37111;
+    --cor-roxo-funcional: #6f42c1; /* Roxo */
+    --cor-roxo-funcional-hover: #5a32a3;
+}
+
+/* --- Estilo Base --- */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fonte moderna e limpa */
+    background-color: var(--cor-fundo-principal); /* Fundo claro */
+    color: var(--cor-texto-principal); /* Texto principal escuro */
+    line-height: 1.6;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1, h2, h3, h4 {
+    color: var(--cor-texto-principal); /* Títulos em cinza escuro */
+    font-weight: 600;
+    margin-top: 1em;
+    margin-bottom: 0.8em;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 1em;
+    letter-spacing: 0;
+    color: var(--cor-destaque-azul); /* Título principal em azul escuro */
+}
+
+h2 {
+    font-size: 1.8em;
+    border-bottom: 2px solid var(--cor-borda-sutil); /* Borda clara */
+    padding-bottom: 0.4em;
+    margin-bottom: 1em;
+}
+
+h3 { font-size: 1.4em; }
+h4 { font-size: 1.1em; color: var(--cor-texto-secundario); font-weight: 500; margin-top: 1.5em; }
+
+p {
+    margin-bottom: 0.7em;
+    color: var(--cor-texto-secundario);
+    font-size: 0.95em;
+}
+
+a {
+    color: var(--cor-destaque-azul);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: var(--cor-destaque-azul-hover);
+}
+
+/* --- Rodapé --- */
+footer {
+    width: 100%;
+    margin-top: auto;
+    padding: 20px 15px;
+    text-align: center;
+    font-size: 0.85em;
+    color: var(--cor-texto-secundario);
+    background-color: var(--cor-fundo-secundario);
+    border-top: 1px solid var(--cor-borda-sutil);
+    box-sizing: border-box;
+}
+
+footer p {
+    margin: 4px 0;
+    line-height: 1.5;
+    color: inherit;
+}
+
+/* --- Botão Adicionar Veículo (Global) --- */
+.add-veiculo-controls {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+#mostrar-form-add {
+    padding: 12px 28px;
+    font-size: 1.1em;
+    font-weight: 500;
+    background-color: var(--cor-destaque-azul);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-padrao);
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 5px var(--cor-sombra-clara);
+}
+
+#mostrar-form-add:hover {
+    background-color: var(--cor-destaque-azul-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px var(--cor-sombra-media);
+}
+
+#mostrar-form-add:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px var(--cor-sombra-clara);
+}
+
+/* --- Formulário de Adição --- */
+.add-veiculo-container {
+    background-color: var(--cor-fundo-secundario);
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    padding: 25px 30px;
+    margin: 0 auto 30px auto;
+    width: 95%;
+    max-width: 700px;
+    box-shadow: 0 5px 15px var(--cor-sombra-media);
+}
+
+.add-veiculo-container h2 {
+    text-align: center;
+    margin-top: 0;
+    border-bottom: none;
+    margin-bottom: 1.2em;
+    color: var(--cor-destaque-azul);
+}
+
+#form-add-veiculo {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px 18px;
+    align-items: center;
+}
+
+#form-add-veiculo label {
+    text-align: right;
+    font-weight: 500;
+    color: var(--cor-texto-principal);
+    font-size: 1em;
+}
+
+#form-add-veiculo input[type="text"],
+#form-add-veiculo input[type="number"],
+#form-add-veiculo select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    font-size: 1em;
+    box-sizing: border-box;
+    background-color: #fefefe;
+    color: var(--cor-texto-principal);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+#form-add-veiculo input::placeholder {
+    color: var(--cor-texto-secundario);
+    opacity: 0.9;
+}
+
+
+#form-add-veiculo input:focus,
+#form-add-veiculo select:focus {
+    border-color: var(--cor-destaque-azul);
+    box-shadow: 0 0 5px rgba(10, 37, 64, 0.3);
+    outline: none;
+}
+
+.campo-opcional {
+    /* display: none; REMOVIDO: controlado via JS element.style */
+    grid-column: 1 / -1;
+    display: grid; /* Usar grid para o layout interno */
+    grid-template-columns: auto 1fr;
+    gap: 12px 18px;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--cor-borda-sutil);
+}
+
+.campo-opcional.visivel { display: grid; } /* Mantém grid aqui */
+.campo-opcional label { text-align: right; }
+
+
+.form-add-buttons {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.form-add-buttons button {
+    padding: 10px 20px;
+    border-radius: var(--border-radius-padrao);
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 500;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-add-buttons button[type="submit"] {
+    background-color: var(--cor-destaque-azul);
+    color: white;
+}
+
+.form-add-buttons button[type="submit"]:hover {
+    background-color: var(--cor-destaque-azul-hover);
+    box-shadow: 0 2px 5px var(--cor-sombra-clara);
+}
+
+.form-add-buttons button[type="button"] { /* Cancelar */
+    background-color: #e9ecef;
+    color: var(--cor-texto-principal);
+    border: 1px solid var(--cor-borda-sutil);
+}
+
+.form-add-buttons button[type="button"]:hover {
+    background-color: #dee2e6;
+    box-shadow: 0 2px 5px var(--cor-sombra-clara);
+}
+
+/* --- Container da Garagem e Cards --- */
+#garagem-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto 30px auto;
+}
+
+.container {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto 30px auto;
+}
+
+
+.veiculo-container {
+    background-color: var(--cor-fundo-secundario);
+    border: 1px solid var(--cor-borda-sutil);
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 5px 15px var(--cor-sombra-media);
+    border-radius: var(--border-radius-padrao);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    position: relative;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease-out;
+}
+
+.veiculo-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px var(--cor-sombra-media);
+    border-color: var(--cor-destaque-azul);
+}
+
+.veiculo-container h2 {
+    font-size: 1.3em;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--cor-destaque-azul);
+    border-bottom: none;
+}
+
+/* --- IMAGENS --- */
+.veiculo-imagem {
+    width: 100%; /* Ocupa a largura do container pai */
+    max-width: 250px; /* Limita a largura máxima */
+    height: 160px;   /* Altura fixa para consistência visual dos cards */
+    object-fit: contain; /* <<< CORREÇÃO: Mantém a proporção sem cortar */
+    margin: 0 auto 15px auto;
+    display: block;
+    border-radius: var(--border-radius-padrao);
+    background-color: #fefefe; /* Fundo da imagem */
+    padding: 5px; /* Padding interno para garantir que a imagem não toque a borda se usar contain */
+    border: 1px solid #eee;
+}
+
+.veiculo-destaque-card img {
+    width: 100%;
+    max-width: 150px;
+    height: auto; /* <<< CORREÇÃO: Altura se ajusta à proporção */
+    object-fit: contain; /* <<< CORREÇÃO: Mantém a proporção */
+    border-radius: 4px;
+    margin-bottom: 10px;
+    border: 1px solid var(--cor-borda-sutil);
+    background-color: #fefefe; /* Fundo da imagem */
+    padding: 5px;
+}
+
+.detalhes-imagem {
+    max-width: 150px;
+    max-height: 150px;
+    object-fit: contain; /* <<< CORREÇÃO: Mantém a proporção dentro do limite */
+    float: right;
+    margin-left: 25px;
+    margin-bottom: 15px;
+    border-radius: var(--border-radius-padrao);
+    border: 1px solid var(--cor-borda-sutil); background-color: #fefefe; padding: 5px;
+    position: relative; top: -10px;
+}
+/* --- FIM IMAGENS --- */
+
+
+.veiculo-container p {
+    color: var(--cor-texto-secundario);
+    margin: 5px 0;
+    font-size: 1em;
+}
+
+.veiculo-container p strong {
+    font-weight: 600;
+    color: var(--cor-texto-principal);
+}
+
+/* Barra de Progresso */
+.barra-progresso-container {
+    width: 100%;
+    margin: 15px auto;
+    background-color: #e9ecef;
+    border: none;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+.barra-progresso {
+    height: 100%;
+    background-color: var(--cor-destaque-azul);
+    transition: width 0.4s ease-out, background-color 0.4s ease;
+    border-radius: 4px;
+}
+/* As cores da barra de progresso são definidas no JS */
+
+
+/* Controles do Veículo */
+.controles-veiculo {
+    width: 100%;
+    text-align: center;
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid var(--cor-borda-sutil);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Input de Carga */
+.controles-veiculo input[data-input="carga"] {
+    padding: 8px 12px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    margin: 4px;
+    width: 90px;
+    box-sizing: border-box;
+    font-size: 0.9em;
+    vertical-align: middle;
+    text-align: center;
+    background-color: #fefefe;
+    color: var(--cor-texto-principal);
+}
+
+/* --- BOTÕES NOS CARDS (MANTER CORES FUNCIONAIS) --- */
+.controles-veiculo button {
+    padding: 8px 14px;
+    margin: 0;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    border-radius: var(--border-radius-padrao);
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    font-size: 0.9em;
+    vertical-align: middle;
+    box-shadow: 0 1px 3px var(--cor-sombra-clara);
+    flex-grow: 0;
+    flex-shrink: 0;
+}
+
+.controles-veiculo button:hover {
+     transform: translateY(-2px);
+     box-shadow: 0 3px 8px var(--cor-sombra-media);
+}
+
+.controles-veiculo button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px var(--cor-sombra-clara);
+}
+
+.controles-veiculo button:disabled {
+    background-color: #ccc !important;
+    color: #777 !important;
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Cores por Ação (DEFINEM background E color) */
+.controles-veiculo button[data-action="ligar"],
+.controles-veiculo button[data-action="carregar"] { background-color: var(--cor-sucesso-funcional); color: white; }
+.controles-veiculo button[data-action="ligar"]:hover,
+.controles-veiculo button[data-action="carregar"]:hover { background-color: var(--cor-sucesso-funcional-hover); }
+
+.controles-veiculo button[data-action="desligar"] { background-color: var(--cor-erro-funcional); color: white; }
+.controles-veiculo button[data-action="desligar"]:hover { background-color: var(--cor-erro-funcional-hover); }
+
+.controles-veiculo button[data-action="acelerar"],
+.controles-veiculo button[data-action="descarregar"] { background-color: var(--cor-aviso-funcional); color: var(--cor-texto-principal); }
+.controles-veiculo button[data-action="acelerar"]:hover,
+.controles-veiculo button[data-action="descarregar"]:hover { background-color: var(--cor-aviso-funcional-hover); }
+
+.controles-veiculo button[data-action="frear"] { background-color: var(--cor-info-funcional); color: white; }
+.controles-veiculo button[data-action="frear"]:hover { background-color: var(--cor-info-funcional-hover); }
+
+.controles-veiculo button[data-action="mudarCor"] { background-color: var(--cor-roxo-funcional); color: white; }
+.controles-veiculo button[data-action="mudarCor"]:hover { background-color: var(--cor-roxo-funcional-hover); }
+
+.controles-veiculo button[data-action="ativarTurbo"] { background-color: var(--cor-laranja-funcional); color: white; }
+.controles-veiculo button[data-action="ativarTurbo"]:hover { background-color: var(--cor-laranja-funcional-hover); }
+
+.controles-veiculo button[data-action="desativarTurbo"] { background-color: var(--cor-secundaria-funcional); color: white; }
+.controles-veiculo button[data-action="desativarTurbo"]:hover { background-color: var(--cor-secundaria-funcional-hover); }
+
+/* Buzina (adicionada via JS) */
+.controles-veiculo .buzina-btn[data-action="buzinar"] { background-color: var(--cor-secundaria-funcional); color: white; }
+.controles-veiculo .buzina-btn[data-action="buzinar"]:hover { background-color: var(--cor-secundaria-funcional-hover); }
+
+/* Animar */
+.controles-veiculo button[data-action="animar"] { background-color: #0dcaf0; color: var(--cor-texto-principal);}
+.controles-veiculo button[data-action="animar"]:hover { background-color: #0baccc;}
+
+/* Botão Detalhes / Ver Detalhes Extras - Estilo Unificado com Azul Destaque */
+.controles-veiculo button[data-action="detalhes"],
+.controles-veiculo button[data-action="verDetalhesExtras"] {
+    background-color: var(--cor-destaque-azul);
+    color: white;
+    padding: 9px 16px;
+    font-size: 0.9em;
+    margin-top: 12px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: calc(100% - 16px);
+    max-width: 200px;
+}
+
+.controles-veiculo button[data-action="detalhes"]:hover,
+.controles-veiculo button[data-action="verDetalhesExtras"]:hover {
+    background-color: var(--cor-destaque-azul-hover);
+}
+
+
+/* --- FIM BOTÕES NOS CARDS --- */
+
+/* Botão Remover (X) - Estilo Reforçado para Fundo Claro */
+.remover-veiculo-btn[data-action="remover"] {
+    position: absolute;
+    top: 8px; right: 8px; width: 28px; height: 28px;
+    background-color: rgba(200, 200, 200, 0.8);
+    color: var(--cor-texto-principal);
+    border: none; border-radius: 50%; font-size: 16px; font-weight: bold;
+    line-height: 28px; text-align: center; cursor: pointer;
+    transition: all 0.2s ease; padding: 0; z-index: 10; opacity: 0.8;
+    box-shadow: 0 1px 3px var(--cor-sombra-clara);
+}
+
+.veiculo-container:hover .remover-veiculo-btn[data-action="remover"] { opacity: 1; }
+
+.remover-veiculo-btn[data-action="remover"]:hover { background-color: var(--cor-erro-funcional); transform: scale(1.1); opacity: 1; }
+
+.remover-veiculo-btn[data-action="remover"]:active { transform: scale(1.0); }
+
+/* --- Modal de Detalhes --- */
+.detalhes-container {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(255, 255, 255, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050;
+    backdrop-filter: blur(5px);
+    padding: 20px;
+    /* remove display: none aqui, será controlado pelo JS */
+}
+
+/* O conteúdo interno do modal */
+.detalhes-container > div {
+    background-color: var(--cor-fundo-secundario);
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    box-shadow: 0 10px 30px var(--cor-sombra-media);
+    padding: 30px;
+    width: 95%;
+    max-width: 850px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.detalhes-container h2 {
+    margin-top: 0; color: var(--cor-destaque-azul); font-size: 1.8em;
+    border-bottom: 2px solid var(--cor-borda-sutil); padding-bottom: 0.5em;
+    margin-bottom: 1.5em; text-align: left;
+}
+
+#fechar-detalhes.close-btn {
+    position: absolute; top: 15px; right: 20px;
+    background: none; border: none; font-size: 2em; line-height: 1;
+    color: var(--cor-texto-secundario);
+    cursor: pointer; padding: 5px; z-index: 1060; transition: color 0.2s ease;
+}
+
+#fechar-detalhes.close-btn:hover { color: var(--cor-texto-principal); }
+
+/* Conteúdo Interno do Modal */
+#informacoesVeiculo { margin-bottom: 25px; overflow: hidden; }
+
+#informacoesVeiculo h3 {
+    margin-top: 0; margin-bottom: 15px; color: var(--cor-destaque-azul); font-size: 1.5em;
+    float: none; width: 100%; padding-right: 0; text-align: left; font-weight: 600;
+}
+
+#informacoesVeiculo h4 {
+    margin-top: 20px; margin-bottom: 10px; color: var(--cor-texto-principal); font-size: 1.2em;
+    border-bottom: 1px solid var(--cor-borda-sutil); padding-bottom: 8px; clear: both; font-weight: 500;
+}
+
+.detalhes-imagem {
+    max-width: 150px; max-height: 150px; object-fit: contain; float: right;
+    margin-left: 25px; margin-bottom: 15px; border-radius: var(--border-radius-padrao);
+    border: 1px solid var(--cor-borda-sutil); background-color: #fefefe; padding: 5px;
+    position: relative; top: -10px;
+}
+
+.detalhes-info-basica { clear: none; margin-top: 0; padding-right: 180px; }
+
+.detalhes-info-basica p { line-height: 1.7; color: var(--cor-texto-secundario); margin-top: 8px; font-size: 1em; }
+
+.detalhes-info-basica p strong { color: var(--cor-texto-principal); font-weight: 500; }
+
+#detalhesExtrasContainer {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    background-color: #f8f9fa;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+#detalhesExtrasContainer h3 {
+    font-size: 1.3em;
+    margin-bottom: 12px;
+    color: var(--cor-destaque-azul);
+    border-bottom: 1px solid var(--cor-borda-sutil);
+    padding-bottom: 8px;
+}
+
+#detalhesExtrasContainer p {
+    color: var(--cor-texto-secundario);
+    margin-bottom: 8px;
+}
+
+.detalhes-historico pre, #agendamentos-futuros-conteudo {
+    white-space: pre-wrap; word-wrap: break-word; font-size: 0.95em;
+    font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    text-align: left; padding: 15px; border: 1px solid var(--cor-borda-sutil);
+    background-color: #f8f9fa;
+    color: var(--cor-texto-secundario);
+    border-radius: var(--border-radius-padrao);
+    max-height: 200px; overflow-y: auto; line-height: 1.6; clear: both; margin-top: 15px;
+}
+
+#agendamentos-futuros-conteudo { background-color: #fff; border-color: var(--cor-borda-sutil); }
+
+.detalhes-sem-manutencao { font-style: italic; color: var(--cor-texto-secundario); clear: both; margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: var(--border-radius-padrao); text-align: center; border: 1px dashed var(--cor-borda-sutil); }
+
+/* Formulário Agendamento no Modal */
+#agendamento-form-container { margin-top: 30px; padding-top: 25px; border-top: 1px solid var(--cor-borda-sutil); clear: both; }
+
+#agendamento-form-container h3 { text-align: left; color: var(--cor-destaque-azul); margin-bottom: 20px; font-size: 1.25em; border-bottom: none; }
+
+#form-agendamento { display: grid; grid-template-columns: auto 1fr; gap: 12px 18px; align-items: center; }
+
+#form-agendamento label { text-align: right; font-weight: 500; color: var(--cor-texto-principal); font-size: 0.95em; }
+
+/* Inputs dentro do formulário de agendamento */
+#form-agendamento input[type="text"],
+#form-agendamento input[type="number"],
+#form-agendamento input[type="date"],
+#form-agendamento textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    font-size: 1em;
+    box-sizing: border-box;
+    background-color: #fff;
+    color: var(--cor-texto-principal);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+#form-agendamento input::placeholder, #form-agendamento textarea::placeholder {
+    color: var(--cor-texto-secundario);
+    opacity: 0.9;
+}
+
+
+#form-agendamento input:focus, #form-agendamento textarea:focus {
+    border-color: var(--cor-destaque-azul);
+    box-shadow: 0 0 5px rgba(10, 37, 64, 0.3);
+    outline: none;
+}
+
+#form-agendamento textarea {
+    height: 80px;
+    resize: vertical;
+}
+
+#form-agendamento button[type="submit"] {
+     grid-column: 1 / -1;
+     padding: 10px 20px;
+     border-radius: var(--border-radius-padrao);
+     border: none;
+     cursor: pointer;
+     font-size: 1em;
+     font-weight: 500;
+     background-color: var(--cor-destaque-azul);
+     color: white;
+     transition: background-color 0.2s ease, box-shadow 0.2s ease;
+     margin-top: 15px;
+}
+
+#form-agendamento button[type="submit"]:hover {
+    background-color: var(--cor-destaque-azul-hover);
+    box-shadow: 0 2px 5px var(--cor-sombra-clara);
+}
+
+
+/* --- Planejador de Viagem --- */
+.planejar-viagem-container {
+    background-color: var(--cor-fundo-secundario);
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 700px;
+    box-shadow: 0 5px 15px var(--cor-sombra-media);
+}
+
+.planejar-viagem-container h2 {
+    color: var(--cor-destaque-azul);
+    border-bottom: none;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 1.2em;
+}
+
+.planejar-viagem-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--cor-texto-principal);
+}
+
+.planejar-viagem-container input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    margin-bottom: 15px;
+    background-color: #fff;
+    color: var(--cor-texto-principal);
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.planejar-viagem-container input[type="text"]:focus {
+    border-color: var(--cor-destaque-azul);
+    box-shadow: 0 0 5px rgba(10, 37, 64, 0.3);
+    outline: none;
+}
+.planejar-viagem-container input::placeholder {
+    color: var(--cor-texto-secundario);
+    opacity: 0.9;
+}
+
+
+.planejar-viagem-container button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--border-radius-padrao);
+    cursor: pointer;
+    background-color: var(--cor-destaque-azul);
+    color: white;
+    transition: background-color 0.3s ease, box-shadow 0.2s ease;
+    font-size: 1em;
+    font-weight: 500;
+}
+
+.planejar-viagem-container button:hover {
+    background-color: var(--cor-destaque-azul-hover);
+    box-shadow: 0 2px 5px var(--cor-sombra-clara);
+}
+
+
+#previsao-tempo-resultado {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    background-color: #fff;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+#previsao-tempo-resultado h3 {
+    margin-top: 0;
+    color: var(--cor-destaque-azul);
+    border-bottom: 1px dashed var(--cor-borda-sutil);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+/* Estilos para a previsão detalhada */
+.previsao-tempo-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    padding-bottom: 10px;
+    scrollbar-color: var(--cor-destaque-azul) var(--cor-fundo-principal); /* Scrollbar com cores claras */
+    scrollbar-width: thin;
+}
+
+/* Custom Scrollbar (Webkit - Chrome, Safari) */
+.previsao-tempo-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.previsao-tempo-container::-webkit-scrollbar-track {
+    background: var(--cor-fundo-principal); /* Fundo da track claro */
+    border-radius: 10px;
+}
+
+.previsao-tempo-container::-webkit-scrollbar-thumb {
+    background: var(--cor-destaque-azul);
+    border-radius: 10px;
+}
+
+.previsao-tempo-container::-webkit-scrollbar-thumb:hover {
+    background: var(--cor-destaque-azul-hover);
+}
+
+
+.previsao-dia {
+    flex: 0 0 160px;
+    background-color: var(--cor-fundo-secundario);
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    padding: 15px 10px;
+    text-align: center;
+    box-shadow: 0 2px 8px var(--cor-sombra-clara);
+}
+
+.previsao-dia h4 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 1em;
+    color: var(--cor-texto-principal);
+}
+
+.previsao-dia img {
+    width: 50px; height: auto; /* Ajusta altura */
+    vertical-align: middle;
+    margin: 5px 0;
+    /* filter: brightness(1.1); REMOVIDO: para tema claro */
+}
+
+.previsao-dia p {
+    font-size: 0.9em;
+    color: var(--cor-texto-secundario);
+    margin-bottom: 5px;
+}
+
+
+/* --- Notificações (Adaptadas) --- */
+.notificacoes-container {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 1000;
+    max-width: 320px;
+}
+
+.notificacao {
+    background-color: var(--cor-fundo-secundario);
+    color: var(--cor-texto-principal);
+    padding: 15px;
+    border-radius: var(--border-radius-padrao);
+    margin-bottom: 12px;
+    opacity: 0;
+    transform: translateX(110%);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    position: relative;
+    border-left: 5px solid var(--cor-destaque-azul);
+    box-shadow: 0 3px 8px var(--cor-sombra-media);
+    word-break: break-word;
+}
+
+.notificacao.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Cores da borda lateral por tipo */
+.notificacao.sucesso { border-color: var(--cor-sucesso-funcional); }
+.notificacao.aviso { border-color: var(--cor-aviso-funcional); }
+.notificacao.erro { border-color: var(--cor-erro-funcional); background-color: #fff0f0; }
+.notificacao.info { border-color: var(--cor-destaque-azul); }
+
+
+.notificacao .close-btn {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: none;
+    border: none;
+    color: var(--cor-texto-secundario);
+    cursor: pointer;
+    font-size: 1.2em;
+    line-height: 1;
+    padding: 5px;
+}
+.notificacao .close-btn:hover {
+    color: var(--cor-texto-principal);
+}
+
+
+/* --- Estilos Adicionais/Animação --- */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.veiculo-animando {
+   animation: shake 0.5s ease-in-out infinite;
+}
+
+
+/* --- Responsividade --- */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    h2 {
+        font-size: 1.5em;
+    }
+
+    .add-veiculo-container,
+    .planejar-viagem-container {
+        padding: 20px;
+    }
+
+    #form-add-veiculo {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    #form-add-veiculo label {
+        text-align: left;
+    }
+    .campo-opcional, .form-add-buttons {
+         grid-column: auto;
+         gap: 8px;
+    }
+     .campo-opcional label {
+         text-align: left;
+     }
+
+    #garagem-container {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+    }
+
+    .veiculo-container {
+        padding: 15px;
+    }
+
+     .veiculo-imagem {
+        max-width: 200px;
+        height: 150px;
+     }
+
+
+     .controles-veiculo {
+         justify-content: center;
+         gap: 6px;
+         padding-top: 15px;
+     }
+
+     .controles-veiculo button {
+         padding: 6px 10px;
+         font-size: 0.8em;
+     }
+
+     .controles-veiculo input[data-input="carga"] {
+         width: 70px;
+         font-size: 0.8em;
+         padding: 6px 8px;
+     }
+
+     .controles-veiculo button[data-action="detalhes"],
+     .controles-veiculo button[data-action="verDetalhesExtras"] {
+         padding: 8px 12px;
+         font-size: 0.85em;
+         width: calc(100% - 12px);
+     }
+
+
+    .detalhes-container > div {
+        padding: 20px;
+        width: 98%;
+    }
+    .detalhes-container h2 {
+        font-size: 1.6em;
+    }
+    #fechar-detalhes.close-btn {
+        top: 10px; right: 15px; font-size: 2em;
+    }
+    .detalhes-imagem {
+        float: none;
+        margin: 0 auto 15px auto;
+        display: block;
+        max-width: 100px;
+        max-height: 100px;
+        position: static;
+        padding: 0;
+    }
+    .detalhes-info-basica {
+        padding-right: 0;
+    }
+
+    .detalhes-historico pre, #agendamentos-futuros-conteudo {
+        font-size: 0.85em;
+        padding: 10px;
+    }
+
+     #form-agendamento {
+         grid-template-columns: 1fr;
+         gap: 10px;
+     }
+     #form-agendamento label {
+         text-align: left;
+     }
+    #form-agendamento button[type="submit"] {
+        grid-column: auto;
+    }
+
+     .planejar-viagem-container input, .planejar-viagem-container button {
+         font-size: 0.9em;
+         padding: 8px 12px;
+     }
+
+    .previsao-tempo-container {
+        flex-wrap: nowrap;
+        gap: 10px;
+    }
+    .previsao-dia {
+         flex: 0 0 140px;
+         padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 { font-size: 1.6em; }
+    h2 { font-size: 1.3em; }
+    body { padding: 8px; }
+    .container, .add-veiculo-container, .planejar-viagem-container { padding: 15px; margin-bottom: 15px; }
+    #garagem-container { gap: 10px; }
+    .veiculo-container { padding: 10px; }
+    .veiculo-imagem { max-width: 150px; height: 120px; }
+    .controles-veiculo { gap: 4px; padding-top: 10px; }
+    .controles-veiculo button { padding: 5px 8px; font-size: 0.75em; }
+    .detalhes-container > div { padding: 15px; }
+    .detalhes-container h2 { font-size: 1.4em; }
+     #fechar-detalhes.close-btn { font-size: 1.8em; }
+    .detalhes-info-basica { padding-right: 0; }
+     .detalhes-historico pre, #agendamentos-futuros-conteudo { font-size: 0.8em; padding: 8px; }
+     #form-agendamento { gap: 8px; }
+     .planejar-viagem-container input, .planejar-viagem-container button { font-size: 0.8em; padding: 6px 10px; }
+     .previsao-dia { flex: 0 0 120px; padding: 8px; font-size: 0.8em;}
+     .notificacao { padding: 10px; margin-bottom: 8px; font-size: 0.9em; }
+}
