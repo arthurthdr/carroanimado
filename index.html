@@ -19,33 +19,29 @@
 
     <div id="add-veiculo-form-container" class="add-veiculo-container" style="display: none;">
         <h2>Adicionar Novo Veículo</h2>
-        <form id="form-add-veiculo">
-            <label for="add-tipo">Tipo:</label>
-            <select id="add-tipo" required>
-                <option value="" disabled selected>-- Selecione o Tipo --</option>
-                <option value="Carro">Carro Comum</option>
-                <option value="CarroEsportivo">Carro Esportivo</option>
-                <option value="Caminhao">Caminhão</option>
-                <option value="Moto">Moto</option>
-                <option value="Bicicleta">Bicicleta</option>
-            </select>
+        <!-- D:/carro/index.html -->
 
-            <label for="add-modelo">Modelo:</label>
-            <input type="text" id="add-modelo" placeholder="Ex: Onix, XRE 300" required>
+<form id="form-add-veiculo">
+    <label for="add-placa">Placa:</label>
+    <input type="text" id="add-placa" placeholder="ABC1234" required>
 
-            <label for="add-cor">Cor:</label>
-            <input type="text" id="add-cor" placeholder="Ex: Prata, Vermelha" required>
+    <label for="add-marca">Marca:</label>
+    <input type="text" id="add-marca" placeholder="Ex: Chevrolet" required>
+    
+    <label for="add-modelo">Modelo:</label>
+    <input type="text" id="add-modelo" placeholder="Ex: Onix" required>
 
-            <div id="campo-capacidade-carga" class="campo-opcional">
-                <label for="add-capacidade-carga">Capacidade Carga (kg):</label>
-                <input type="number" id="add-capacidade-carga" placeholder="5000" min="0">
-            </div>
+    <label for="add-ano">Ano:</label>
+    <input type="number" id="add-ano" placeholder="2023" required>
 
-            <div class="form-add-buttons">
-                <button type="submit">Adicionar à Garagem</button>
-                <button type="button" id="cancelar-add-veiculo">Cancelar</button>
-            </div>
-        </form>
+    <label for="add-cor">Cor:</label>
+    <input type="text" id="add-cor" placeholder="Ex: Prata" required>
+
+    <div class="form-add-buttons">
+        <button type="submit">Adicionar à Garagem</button>
+        <button type="button" id="cancelar-add-veiculo">Cancelar</button>
+    </div>
+</form>
     </div>
 
     <div id="garagem-container" class="container">
@@ -139,14 +135,7 @@
     <audio id="som-desligar" src="sounds/carrodesligando.mp3" preload="auto"></audio>
     <audio id="som-adicionar" src="sounds/success-add.mp3" preload="auto"></audio>
 
-    <script src="js/classes/Manutencao.js"></script>
-    <script src="js/classes/Veiculo.js"></script>
-    <script src="js/classes/Carro.js"></script>
-    <script src="js/classes/Carroesportivo.js"></script>
-    <script src="js/classes/Caminhao.js"></script>
-    <script src="js/classes/Moto.js"></script>
-    <script src="js/classes/Bicicleta.js"></script>
-    <script src="js/script.js"></script>
+        <script src="js/script.js"></script>
     <footer>
         <p>© 2024 Arthur - IFPR. Todos os direitos reservados.</p>
         <p>Projeto Garagem Inteligente - Informática para Internet</p>

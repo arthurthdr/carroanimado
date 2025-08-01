@@ -7,6 +7,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import mongoose from 'mongoose';
+import Veiculo from './models/Veiculo.js';
 
 // --- Configuração Inicial do dotenv com depuração ---
 const dotEnvResult = dotenv.config();
@@ -54,6 +55,7 @@ connectCrudDB();
 // =======================================================================
 // --- Middlewares ---
 // =======================================================================
+app.use(express.json());
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -149,6 +151,49 @@ app.get('/', (req, res) => {
     res.send('Servidor backend da Garagem Inteligente está rodando!');
 });
 
+app.post('/api/veiculos', async (req, res) => {
+    try {
+        // Precisamos do body-parser do Express para ler o req.body
+        const novoVeiculoData = req.body;
+        
+        console.log('[Servidor] Recebido para criar:', novoVeiculoData);
+
+        // Usamos nosso modelo para criar o veículo no banco de dados.
+        // O Mongoose vai validar os dados automaticamente usando o Schema!
+        const veiculoCriado = await Veiculo.create(novoVeiculoData);
+
+        console.log('[Servidor] Veículo criado com sucesso:', veiculoCriado);
+        res.status(201).json(veiculoCriado); // 201 = Criado com sucesso
+
+    } catch (error) {
+        console.error("[Servidor] Erro ao criar veículo:", error);
+
+        // Tratamento de erros específicos do Mongoose
+        if (error.code === 11000) { // Erro de placa duplicada
+            return res.status(409).json({ error: 'Veículo com esta placa já existe.' });
+        }
+        if (error.name === 'ValidationError') { // Erros de campos obrigatórios, etc.
+             const messages = Object.values(error.errors).map(val => val.message);
+             return res.status(400).json({ error: messages.join(' ') });
+        }
+        // Erro genérico
+        res.status(500).json({ error: 'Erro interno ao criar veículo.' });
+    }
+});
+
+app.get('/api/veiculos', async (req, res) => {
+    try {
+        // Usamos o .find() sem argumentos para buscar todos os documentos da coleção.
+        const todosOsVeiculos = await Veiculo.find();
+        
+        console.log('[Servidor] Buscando todos os veículos do DB.');
+        res.json(todosOsVeiculos); // Retorna a lista de veículos em formato JSON
+
+    } catch (error) {
+        console.error("[Servidor] Erro ao buscar veículos:", error);
+        res.status(500).json({ error: 'Erro interno ao buscar veículos.' });
+    }
+});
 // =======================================================================
 // --- Inicialização do Servidor ---
 // =======================================================================

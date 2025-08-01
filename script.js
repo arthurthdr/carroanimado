@@ -1,1222 +1,205 @@
 /**
- * 
  * @file script.js
- * @description Lógica principal da Garagem Inteligente.
+ * @description Lógica principal da Garagem Inteligente (versão com Banco de Dados).
+ * @author Arthur
  */
-// No topo do seu js/script.js
-const backendUrl = 'http://localhost:3001'; // OU 'https://seu-backend-no-render.onrender.com'
-// ... resto do seu código ...
-// --- Variáveis Globais e Elementos DOM ---
-const veiculos = {};
-const GARAGE_STORAGE_KEY = 'garagemInteligenteDadosV3';
+
+// ===================================================================================
+// Bloco de Configuração e Variáveis Globais
+// ===================================================================================
+
+const RENDER_BACKEND_URL = 'https://carroanimado.onrender.com';
+const LOCAL_BACKEND_URL = 'http://localhost:3001';
+
+const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? LOCAL_BACKEND_URL
+    : RENDER_BACKEND_URL;
+
+console.log(`[CONFIG] Conectando ao backend em: ${backendUrl}`);
 
 // Elementos DOM (cacheados para melhor performance)
 const notificacoesContainer = document.getElementById('notificacoes');
 const garagemContainer = document.getElementById('garagem-container');
-const garagemVaziaMsg = document.getElementById('garagem-vazia-msg');
 const btnMostrarFormAdd = document.getElementById('mostrar-form-add');
 const addVeiculoFormContainer = document.getElementById('add-veiculo-form-container');
 const formAddVeiculo = document.getElementById('form-add-veiculo');
-const addTipoSelect = document.getElementById('add-tipo');
-const addModeloInput = document.getElementById('add-modelo');
-const addCorInput = document.getElementById('add-cor');
-const campoCapacidadeCarga = document.getElementById('campo-capacidade-carga');
-const addCapacidadeCargaInput = document.getElementById('add-capacidade-carga');
 const btnCancelarAdd = document.getElementById('cancelar-add-veiculo');
-const detalhesContainer = document.getElementById('detalhes-e-agendamento');
-const informacoesVeiculoDiv = document.getElementById("informacoesVeiculo");
-const agendamentoFormContainer = document.getElementById('agendamento-form-container');
-const agendamentosFuturosContainer = document.getElementById('agendamentos-futuros-container');
-const agendamentosFuturosConteudo = document.getElementById('agendamentos-futuros-conteudo');
-const formAgendamento = document.getElementById('form-agendamento');
-const btnFecharDetalhes = document.getElementById('fechar-detalhes');
-const destinoViagemInput = document.getElementById('destino-viagem');
-const verificarClimaBtn = document.getElementById('verificar-clima-btn');
-const previsaoTempoResultado = document.getElementById('previsao-tempo-resultado');
 
+// ===================================================================================
+// INICIALIZAÇÃO DA APLICAÇÃO
+// ===================================================================================
 
-// Sons
-const sons = {
-    buzina: document.getElementById("som-buzina"),
-    acelerar: document.getElementById("som-acelerar"),
-    frear: document.getElementById("som-freio"),
-    ligar: document.getElementById("som-ligar"),
-    desligar: document.getElementById("som-desligar"),
-    adicionar: document.getElementById("som-adicionar")
-};
-
- // --- Inicialização ---
- document.addEventListener('DOMContentLoaded', () => {
-     console.log("[INICIO] Garagem Inteligente inicializando...");
-     const carregou = carregarGaragemDoLocalStorage();
-     console.log("[INICIO] Garagem carregada do LocalStorage:", carregou);
-     renderizarGaragem(); // Renderiza a garagem salva
-     setupEventListeners(); // Configura eventos
-
-     // >>> ADICIONE AS CHAMADAS PARA AS NOVAS FUNÇÕES AQUI:
-     carregarVeiculosDestaque();
-     carregarServicosGaragem();
-     carregarFerramentasEssenciais();
-
-     // ... sua lógica de verificação de agendamentos, etc. ...
-
-     console.log("[INICIO] Garagem pronta!");
-     // exibirNotificacao("Garagem pronta!", "sucesso", 2500); // Se notificações estiverem ativadas
-     console.log('Script FINAL');
- });
-/**
- * Salva os dados da garagem no LocalStorage.
- */
-// --- FUNÇÕES DE NOTIFICAÇÃO ---
-
-/**
- * Exibe uma notificação na tela.
- */
-function exibirNotificacao(message, type = 'info', duration = 5000) {
-    // Se NOTIFICATIONS_ENABLED estiver definida no topo e for false, sai da função
-    // const NOTIFICATIONS_ENABLED = false; // << Esta linha deve estar no topo, se quiser desativar visualmente
-    if (typeof NOTIFICATIONS_ENABLED !== 'undefined' && !NOTIFICATIONS_ENABLED) {
-         // Opcional: Logar no console mesmo quando desativada visualmente
-         // console.log(`[Notificação Desativada] Tipo: ${type}, Mensagem: ${message}`);
-         return; // Sai da função imediatamente
-    }
-
-    try{
-        // console.log("[DEBUG] exibirNotificacao() chamada."); // Comentado para reduzir logs
-        if (!notificacoesContainer || !message) return;
-
-        const notificationDiv = document.createElement('div');
-        notificationDiv.className = `notificacao ${type}`;
-        notificationDiv.textContent = message;
-
-        const closeButton = document.createElement('button');
-        closeButton.innerHTML = '×';
-        closeButton.className = 'close-btn';
-        closeButton.setAttribute('aria-label', 'Fechar');
-        closeButton.addEventListener('click', (event) => {
-            event.stopPropagation(); // Evita que o clique na notificação feche o modal, etc.
-            fecharNotificacao(notificationDiv);
-        });
-        notificationDiv.appendChild(closeButton);
-
-        // Adiciona a nova notificação no TOPO do container (mais recente aparece primeiro)
-        notificacoesContainer.prepend(notificationDiv);
-
-        // Força um reflow para garantir a transição CSS
-        requestAnimationFrame(() => {
-            notificationDiv.classList.add('show');
-        });
-
-        // Configura um timer para fechar a notificação automaticamente
-        const timerId = setTimeout(() => {
-            fecharNotificacao(notificationDiv);
-        }, duration);
-
-        // Salva o ID do timer no elemento para poder cancelar (ao clicar, por exemplo)
-        notificationDiv.dataset.timerId = timerId;
-
-        // Permite fechar a notificação clicando nela (além do botão X)
-        notificationDiv.addEventListener('click', (event) => {
-             // Só fecha se o clique for no div da notificação, não em elementos filhos
-            if (event.target === notificationDiv) {
-                clearTimeout(timerId); // Cancela o timer
-                fecharNotificacao(notificationDiv);
-            }
-        });
-
-    }catch(e){
-        console.error("Erro ao exibir notificação:", e); // Use console.error para erros
-        // Fallback simples para garantir feedback mesmo se a UI de notificação falhar
-        alert(`Erro de Notificação: ${message}`);
-    }
-}
-
-/**
- * Fecha uma notificação visível.
- */
-function fecharNotificacao(notificationDiv) {
-    try{
-        // console.log("[DEBUG] fecharNotificacao() chamada."); // Comentado
-        if (!notificationDiv || !notificationDiv.parentNode) return; // Sai se o elemento não existe ou já foi removido
-
-        // Limpa o timer associado para evitar que ele tente fechar um elemento que já está em transição ou removido
-        const timerId = notificationDiv.dataset.timerId;
-        if (timerId) {
-            clearTimeout(timerId);
-        }
-
-        // Inicia a transição CSS para esconder
-        notificationDiv.style.opacity = '0';
-        notificationDiv.style.transform = 'translateX(110%)';
-
-        // Remove o elemento do DOM após a transição terminar (500ms definido no CSS)
-        setTimeout(() => {
-            if (notificationDiv.parentNode) { // Verifica se o elemento ainda está no DOM antes de tentar remover
-                notificationDiv.remove();
-            }
-        }, 500); // Tempo deve corresponder à duração da transição opacity/transform no CSS
-
-    }catch(e){
-        console.error("Erro ao fechar notificação:", e);
-    }
-}
-
-// --- FIM FUNÇÕES DE NOTIFICAÇÃO ---
-function salvarGaragemNoLocalStorage() {
-    try {
-        console.log("[DEBUG] salvarGaragemNoLocalStorage() chamada.");
-        const dataToSave = {};
-        Object.entries(veiculos).forEach(([id, veiculo]) => {
-            if (veiculo && veiculo.toJSON) {
-                dataToSave[id] = veiculo.toJSON();
-            } else {
-                console.warn(`Veículo com ID ${id} não pôde ser serializado.`);
-            }
-        });
-        localStorage.setItem(GARAGE_STORAGE_KEY, JSON.stringify(dataToSave));
-        console.log("Garagem salva no LocalStorage.");
-    } catch (error) {
-        console.error("Erro ao salvar no LocalStorage:", error);
-        if (error.name === 'QuotaExceededError') {
-            exibirNotificacao("Erro: Limite de armazenamento excedido!", 'erro', 10000);
-        } else {
-            exibirNotificacao("Falha ao salvar os dados.", 'erro');
-        }
-    }
-}
-
-/**
- * Carrega os dados da garagem do LocalStorage.
- */
-function carregarGaragemDoLocalStorage() {
-    try {
-        console.log("[DEBUG] carregarGaragemDoLocalStorage() chamada.");
-        const storedData = localStorage.getItem(GARAGE_STORAGE_KEY);
-        if (!storedData) {
-            console.log("Nenhum dado encontrado no LocalStorage.");
-            return false;
-        }
-
-        const parsedData = JSON.parse(storedData);
-        let successCount = 0, failCount = 0;
-
-        Object.entries(parsedData).forEach(([id, data]) => {
-            try {
-                const veiculo = reconstruirVeiculo(data);
-                if (veiculo) {
-                    veiculos[id] = veiculo;
-                    successCount++;
-                } else {
-                    failCount++;
-                    console.warn(`Falha ao reconstruir veículo com ID ${id}.`);
-                }
-            } catch (reconstructError) {
-                failCount++;
-                console.error(`Erro ao reconstruir veículo com ID ${id}:`, reconstructError);
-            }
-        });
-
-        console.log(`Carregamento do LocalStorage: ${successCount} sucesso(s), ${failCount} falha(s).`);
-        if (failCount > 0) {
-            exibirNotificacao(`${failCount} registro(s) corrompido(s) ignorado(s).`, 'aviso', 8000);
-        }
-
-        return successCount > 0 || failCount === 0;
-    } catch (parseError) {
-        console.error("Erro ao analisar dados do LocalStorage:", parseError);
-        exibirNotificacao("Erro grave ao ler os dados. Resetando a garagem.", 'erro', 10000);
-        resetarLocalStorage();
-        return false;
-    }
-}
-
-/**
- * Reseta o LocalStorage, removendo a chave da garagem.
- */
-function resetarLocalStorage() {
-    try {
-        console.log("[DEBUG] resetarLocalStorage() chamada.");
-        localStorage.removeItem(GARAGE_STORAGE_KEY);
-        console.log("Chave do LocalStorage removida.");
-    } catch (removeError) {
-        console.error("Erro ao remover chave do LocalStorage:", removeError);
-    }
-    Object.keys(veiculos).forEach(key => delete veiculos[key]);
-    renderizarGaragem();
-}
-
-/**
- * Gera o HTML para exibir um veículo na garagem.
- */
-function gerarHTMLVeiculo(veiculo) {
-    try{
-        console.log("[DEBUG] gerarHTMLVeiculo() chamada.");
-        if (!veiculo || !veiculo.id) {
-            console.error("Erro ao gerar HTML: Veículo inválido:", veiculo);
-            return '';
-        }
-
-        const { id, tipoVeiculo, modelo, cor, velocidade, ligado } = veiculo;
-        const isBicicleta = veiculo instanceof Bicicleta;
-        const isCaminhao = veiculo instanceof Caminhao;
-        const isCarro = veiculo instanceof Carro;
-        const isCarroEsportivo = veiculo instanceof CarroEsportivo;
-
-        let imageName = tipoVeiculo.toLowerCase();
-        let imageExtension = '.jpg';
-
-        if (tipoVeiculo === 'Moto') imageExtension = '.webp';
-        if (tipoVeiculo === 'CarroEsportivo') imageName = 'carroesportivo';
-
-        const imageSource = `img/${imageName}${imageExtension}`;
-
-        return `
-            <div id="${id}" class="veiculo-container" data-tipo="${tipoVeiculo}">
-                <button class="remover-veiculo-btn" data-action="remover" data-id="${id}" title="Remover ${modelo}">×</button>
-                <h2>${tipoVeiculo.replace(/([A-Z])/g, ' $1').trim()}</h2>
-                <img src="${imageSource}" alt="Imagem ${modelo}" class="veiculo-imagem" onerror="this.src='img/placeholder.png'; console.warn('Imagem não encontrada: ${imageSource}')">
-                <p>Modelo: ${modelo}</p>
-                <p>Cor: ${cor}</p>
-                ${!isBicicleta ? `<p>Estado: ${ligado ? 'Ligado' : 'Desligado'}</p>` : ''}
-                <p>Velocidade: ${velocidade.toFixed(isCaminhao ? 1 : 0)} km/h</p>
-                ${isCarroEsportivo ? `<p>Turbo: ${veiculo.turboAtivado ? 'Ativado' : 'Desativado'}</p>` : ''}
-                ${isCaminhao ? `<p>Capacidade: ${veiculo.capacidadeCarga.toFixed(0)} kg</p>` : ''}
-                ${isCaminhao ? `<p>Carga Atual: ${veiculo.cargaAtual.toFixed(0)} kg</p>` : ''}
-                <div class="barra-progresso-container"><div class="barra-progresso" style="width: 0%;"></div></div>
-                <div class="controles-veiculo">
-                    ${!isBicicleta ? `<button data-action="ligar" data-id="${id}">Ligar</button>` : ''}
-                    ${!isBicicleta ? `<button data-action="desligar" data-id="${id}">Desligar</button>` : ''}
-                    <button data-action="acelerar" data-id="${id}">Acelerar</button>
-                    <button data-action="frear" data-id="${id}">Frear</button>
-                    ${isCaminhao ? `<input type="number" id="${id}_quantidade-carga" data-input="carga" data-id="${id}" placeholder="Qtd (kg)" min="0" style="width:75px; padding:7px;">` : ''}
-                    ${isCaminhao ? `<button data-action="carregar" data-id="${id}">Carregar</button>` : ''}
-                    ${isCaminhao ? `<button data-action="descarregar" data-id="${id}">Descarregar</button>` : ''}
-                    ${isCarroEsportivo ? `<button data-action="ativarTurbo" data-id="${id}">Ativar Turbo</button>` : ''}
-                    ${isCarroEsportivo ? `<button data-action="desativarTurbo" data-id="${id}">Desativar Turbo</button>` : ''}
-                    <button data-action="mudarCor" data-id="${id}">Mudar Cor</button>
-                    ${isCarro ? `<button data-action="animar" data-id="${id}">Animar</button>` : ''}
-                    ${!isBicicleta ? `<button data-action="detalhes" data-id="${id}">Detalhes / Manutenção</button>` : ''}
-                    <button data-action="verDetalhesExtras" data-id="${id}">Ver DetalhesExtras</button>
-                </div>
-            </div>`;
-    }catch(e){
-        console.log("erro no gerarHTMLVeiculo")
-    }
-}
-
-/**
- * Toca um som.
- */
-function tocarSom(element) {
-    try{
-        console.log("[DEBUG] tocarSom() chamada.");
-        if (element?.play) {
-            element.currentTime = 0;
-            element.play().catch(error => console.warn("Erro ao tocar som:", error.name, error.message));
-        }
-    }catch(e){
-        console.log("erro no tocarSom")
-    }
-}
-
-/**
- * Atualiza a barra de progresso.
- */
-function atualizarBarraDeProgresso(element, percentage) {
-    try{
-        console.log("[DEBUG] atualizarBarraDeProgresso() chamada.");
-        if (!element) return;
-
-        const validPercentage = Math.max(0, Math.min(100, percentage));
-        element.style.width = `${validPercentage}%`;
-        element.style.backgroundColor =
-            validPercentage > 85 ? '#dc3545' :
-                validPercentage > 60 ? '#ffc107' :
-                    '#0d6efd';
-    }catch(e){
-        console.log("erro no atualizarBarraDeProgresso")
-    }
-}
-
-function removerVeiculo(id) {
-    try{
-        console.log("[DEBUG] removerVeiculo() chamada com id =", id);
-        if (!id || !veiculos[id]) {
-            console.warn("Erro ao remover veículo: ID inválido:", id);
-            exibirNotificacao("Erro: ID inválido.", 'erro');
-            return;
-        }
-
-        const veiculo = veiculos[id];
-        if (!confirm(`Remover ${veiculo.tipoVeiculo} ${veiculo.modelo}?`)) return;
-
-        delete veiculos[id];
-        salvarGaragemNoLocalStorage();
-        renderizarGaragem();
-        exibirNotificacao(`${veiculo.tipoVeiculo} ${veiculo.modelo} removido(a).`, 'sucesso');
-    }catch(e){
-        console.log("erro no removerVeiculo")
-    }
-}
-
-/**
- * Alterna a visibilidade do formulário de adicionar veículo.
- */
-function toggleFormAddVeiculo(show) { // Removi o "= true" padrão por segurança
-    console.log("[DEBUG] toggleFormAddVeiculo() chamada com show =", show);
-     // VERIFIQUE SE ESTES CONSOLE.LOGS APARECEM E MOSTRAM OS ELEMENTOS CORRETOS
-     // console.log('Elemento do botão:', btnMostrarFormAdd);
-     // console.log('Elemento do formulário:', addVeiculoFormContainer);
-
-    if (!addVeiculoFormContainer) {
-        console.error("Container do formulário de adicionar veículo não encontrado!");
-        return;
-    }
-
-    // Lógica mais simples de toggle
-    if (addVeiculoFormContainer.style.display === 'none' || addVeiculoFormContainer.style.display === '') {
-         addVeiculoFormContainer.style.display = 'block'; // Use 'block' ou 'grid' conforme seu layout CSS
-         if (btnMostrarFormAdd) btnMostrarFormAdd.textContent = 'Cancelar Adição';
-    } else {
-         addVeiculoFormContainer.style.display = 'none';
-         if (btnMostrarFormAdd) btnMostrarFormAdd.textContent = 'Adicionar Novo Veículo +';
-         if (formAddVeiculo) formAddVeiculo.reset(); // Reseta o form ao esconder
-    }
-
-    // Remova ou comente a lógica original que dependia do parâmetro 'show'
-    // addVeiculoFormContainer.style.display = show ? 'block' : 'none';
-    // if (btnMostrarFormAdd) { btnMostrarFormAdd.textContent = show ? 'Cancelar Adição' : 'Adicionar Novo Veículo +'; }
-    // if (show && formAddVeiculo) { formAddVeiculo.reset(); atualizarCamposOpcionaisFormAdd(); addTipoSelect?.focus(); }
-     atualizarCamposOpcionaisFormAdd(); // Chame sempre para garantir o estado correto
-
-}
-
-// E mude o event listener para apenas chamar o toggle sem parâmetro
- btnMostrarFormAdd?.addEventListener('click', () => {
-     console.log("[DEBUG] Botão 'Adicionar Novo Veículo' clicado!");
-     toggleFormAddVeiculo(); // Apenas chama a função sem parâmetro
- });
-/**
- * Atualiza os campos opcionais do formulário de adicionar veículo.
- */
-function atualizarCamposOpcionaisFormAdd() {
-    try{
-        console.log("[DEBUG] atualizarCamposOpcionaisFormAdd() chamada.");
-        if (!addTipoSelect || !campoCapacidadeCarga || !addCapacidadeCargaInput) return;
-
-        const selectedType = addTipoSelect.value;
-        campoCapacidadeCarga.classList.toggle('visivel', selectedType === 'Caminhao');
-        addCapacidadeCargaInput.required = selectedType === 'Caminhao';
-        if (selectedType !== 'Caminhao') {
-            addCapacidadeCargaInput.value = '';
-        }
-    }catch(e){
-        console.log("erro no atualizarCamposOpcionaisFormAdd")
-    }
-}
-
-/**
- * Manipula o envio do formulário de adicionar veículo.
- */
-function handleAddVeiculoSubmit(event) {
-    try{
-        console.log("[DEBUG] handleAddVeiculoSubmit() chamada.");
-        event.preventDefault();
-
-        if (!addTipoSelect || !addModeloInput || !addCorInput) {
-            console.error("Elementos do formulário não encontrados.");
-            exibirNotificacao("Erro: Elementos do formulário não encontrados.", 'erro');
-            return;
-        }
-
-        const tipo = addTipoSelect.value;
-        const modelo = addModeloInput.value.trim();
-        const cor = addCorInput.value.trim();
-
-        if (!tipo || !modelo || !cor) {
-            exibirNotificacao("Preencha Tipo, Modelo e Cor.", 'erro');
-            if (!tipo) addTipoSelect.focus(); else if (!modelo) addModeloInput.focus(); else addCorInput.focus();
-            return;
-        }
-
-        let novoVeiculo = null;
-        const id = `${tipo.toLowerCase()}_${Date.now()}`;
-
-        switch (tipo) {
-            case 'Carro':
-                novoVeiculo = new Carro(modelo, cor, id);
-                break;
-            case 'CarroEsportivo':
-                novoVeiculo = new CarroEsportivo(modelo, cor, id);
-                break;
-            case 'Caminhao':
-                const capacidadeCargaStr = addCapacidadeCargaInput.value;
-                const capacidadeCarga = parseFloat(capacidadeCargaStr);
-
-                if (capacidadeCargaStr === '' || isNaN(capacidadeCarga) || capacidadeCarga < 0) {
-                    exibirNotificacao("Capacidade inválida.", 'erro');
-                    addCapacidadeCargaInput.focus();
-                    return;
-                }
-                novoVeiculo = new Caminhao(modelo, cor, id, capacidadeCarga);
-                break;
-            case 'Moto':
-                novoVeiculo = new Moto(modelo, cor, id);
-                break;
-            case 'Bicicleta':
-                novoVeiculo = new Bicicleta(modelo, cor, id);
-                break;
-            default:
-                exibirNotificacao("Tipo inválido.", 'erro');
-                return;
-        }
-
-        veiculos[id] = novoVeiculo;
-        salvarGaragemNoLocalStorage();
-        renderizarGaragem();
-        toggleFormAddVeiculo(false);
-        exibirNotificacao(`${tipo.replace(/([A-Z])/g, ' $1').trim()} ${modelo} adicionado!`, 'sucesso');
-        tocarSom(sons.adicionar);
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }catch(e){
-        console.log("erro no handleAddVeiculoSubmit")
-    }
-}
-/**
- * Renderiza a garagem, exibindo os veículos na tela.
- */
-function renderizarGaragem() {
-    try{
-        console.log("[DEBUG] renderizarGaragem() chamada.");
-        if (!garagemContainer || !garagemVaziaMsg) {
-            console.error("Elementos da garagem não encontrados.");
-            return;
-        }
-
-        garagemContainer.innerHTML = '';
-        const veiculosArray = Object.values(veiculos);
-
-        if (veiculosArray.length === 0) {
-            garagemVaziaMsg.style.display = 'block';
-        } else {
-            garagemVaziaMsg.style.display = 'none';
-            veiculosArray.forEach(veiculo => {
-                if (veiculo && typeof veiculo === 'object') {
-                    garagemContainer.innerHTML += gerarHTMLVeiculo(veiculo);
-                } else {
-                    console.warn("Veículo inválido encontrado:", veiculo);
-                    exibirNotificacao("Erro: Veículo inválido encontrado.", 'erro');
-                }
-            });
-        }
-    }catch(e){
-        console.log("erro no renderizarGaragem")
-    }
-}
-
-/**
- * Manipula eventos de ações nos veículos (ligar, acelerar, etc.).
- */
-function handleVehicleAction(event) {
-    try{
-        console.log("[DEBUG] handleVehicleAction() chamada.");
-        const targetButton = event.target.closest('button[data-action][data-id]');
-        if (!targetButton) return;
-
-        const action = targetButton.dataset.action;
-        const veiculoId = targetButton.dataset.id;
-        const veiculo = veiculos[veiculoId];
-
-        if (!veiculo) {
-            console.error(`Veículo ID ${veiculoId} não encontrado para ação ${action}.`);
-            exibirNotificacao("Erro: Veículo não encontrado.", "erro");
-            return;
-        }
-
-        switch (action) {
-            case 'ligar':
-                veiculo.ligar();
-                break;
-            case 'desligar':
-                veiculo.desligar();
-                break;
-            case 'acelerar':
-                let incremento = 10;
-                if (veiculo instanceof CarroEsportivo) incremento = 15;
-                else if (veiculo instanceof Caminhao) incremento = 5;
-                else if (veiculo instanceof Moto) incremento = 12;
-                else if (veiculo instanceof Bicicleta) incremento = 3;
-                veiculo.acelerar(incremento);
-                break;
-            case 'frear':
-                let decremento = 7;
-                if (veiculo instanceof CarroEsportivo) decremento = 10;
-                else if (veiculo instanceof Caminhao) decremento = 4;
-                else if (veiculo instanceof Moto) decremento = 9;
-                else if (veiculo instanceof Bicicleta) decremento = 2;
-                veiculo.frear(decremento);
-                break;
-            case 'mudarCor':
-                const novaCor = prompt(`Nova cor para ${veiculo.modelo}:`, veiculo.cor);
-                if (novaCor !== null) veiculo.mudarCor(novaCor);
-                break;
-            case 'remover':
-                removerVeiculo(veiculoId);
-                break;
-            case 'detalhes':
-                if (veiculo instanceof Bicicleta) {
-                    exibirNotificacao("Bicicletas não têm detalhes/manutenção.", 'aviso');
-                } else {
-                    exibirInformacoesNaTela(veiculoId);
-                }
-                break;
-            case 'verDetalhesExtras':
-                exibirDetalhesExtras(veiculoId);
-                break;
-            case 'buzinar':
-                tocarSom(sons.buzina);
-                break;
-            case 'ativarTurbo':
-                if (veiculo instanceof CarroEsportivo) veiculo.ativarTurbo();
-                break;
-            case 'desativarTurbo':
-                if (veiculo instanceof CarroEsportivo) veiculo.desativarTurbo();
-                break;
-            case 'carregar':
-                if (veiculo instanceof Caminhao) {
-                    const inputCarga = document.getElementById(`${veiculoId}_quantidade-carga`);
-                    if (inputCarga) {
-                        veiculo.carregar(inputCarga.value);
-                        inputCarga.value = '';
-                    } else {
-                        console.warn(`Input carga ${veiculoId} não encontrado.`);
-                    }
-                }
-                break;
-            case 'descarregar':
-                if (veiculo instanceof Caminhao) {
-                    const inputCarga = document.getElementById(`${veiculoId}_quantidade-carga`);
-                    if (inputCarga) {
-                        veiculo.descarregar(inputCarga.value);
-                        inputCarga.value = '';
-                    } else {
-                        console.warn(`Input carga ${veiculoId} não encontrado.`);
-                    }
-                }
-                break;
-            default:
-                console.warn(`Ação desconhecida: ${action}`);
-        }
-    }catch(e){
-        console.log("erro no handleVehicleAction")
-    }
-}
-
-/**
- * Exibe as informações detalhadas do veículo no modal.
- */
-function exibirInformacoesNaTela(veiculoId) {
-    try{
-        console.log("[DEBUG] exibirInformacoesNaTela() chamada com veiculoId =", veiculoId);
-        if (!veiculoId || !veiculos[veiculoId]) {
-            console.warn("Erro ao exibir detalhes: ID inválido:", veiculoId);
-            exibirNotificacao("Erro: ID inválido.", 'erro');
-            return;
-        }
-
-        const veiculo = veiculos[veiculoId];
-        window.veiculoSelecionadoId = veiculoId; // Define o ID do veículo selecionado globalmente
-
-        if (!informacoesVeiculoDiv || !detalhesContainer || !agendamentoFormContainer) {
-            console.error("Elementos de detalhes não encontrados.");
-            exibirNotificacao("Erro: Elementos de detalhes não encontrados.", 'erro');
-            return;
-        }
-
-        informacoesVeiculoDiv.innerHTML = veiculo.exibirInformacoesDetalhes();
-        detalhesContainer.style.display = 'block';
-        document.body.classList.add('modal-aberto');
-        agendamentoFormContainer.style.display = 'block'; // Exibe o formulário de agendamento
-    }catch(e){
-        console.log("erro no exibirInformacoesNaTela")
-    }
-}
-
-/**
- * Manipula o envio do formulário de agendamento.
- */
-function handleAgendamentoSubmit(event) {
-    try{
-        console.log("[DEBUG] handleAgendamentoSubmit() chamada.");
-        event.preventDefault();
-
-        const data = document.getElementById('agenda-data').value;
-        const tipo = document.getElementById('agenda-tipo').value;
-        const custo = parseFloat(document.getElementById('agenda-custo').value);
-        const descricao = document.getElementById('agenda-descricao').value;
-
-        if (!data || !tipo || isNaN(custo)) {
-            exibirNotificacao("Preencha todos os campos do agendamento.", 'erro');
-            return;
-        }
-
-        const manutencao = new Manutencao(data, tipo, custo, descricao);
-        if (veiculos[window.veiculoSelecionadoId].adicionarManutencao(manutencao)) {
-            exibirNotificacao("Manutenção agendada/registrada com sucesso!", 'sucesso');
-            agendamentoFormContainer.style.display = 'none';
-            formAgendamento.reset();
-        } else {
-            exibirNotificacao("Erro ao agendar/registrar manutenção.", 'erro');
-        }
-    }catch(e){
-        console.log("erro no handleAgendamentoSubmit")
-    }
-}
-
-// Lembre-se de ter a URL base do seu backend definida aqui!
-// Se você está usando o deploy no Render, use a URL pública dele:
-// const backendBaseUrl = 'https://seu-backend-render.onrender.com';
-// Se está testando localmente APÓS instalar Node.js, use:
-const backendBaseUrl = 'http://localhost:3001'; // <<< Ajuste esta URL conforme necessário para testar!
-
-
-// --- Funções para Carregar e Exibir Veículos em Destaque ---
-async function carregarVeiculosDestaque() {
-    const container = document.getElementById('cards-veiculos-destaque');
-    if (!container) return; // Sai se o container não existir
-
-    container.innerHTML = '<p>Carregando veículos em destaque...</p>'; // Mensagem de loading
-
-    try {
-        const response = await fetch(`${backendBaseUrl}/api/garagem/veiculos-destaque`);
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error || `Erro ${response.status} ao carregar destaques.`);
-        }
-
-        const veiculos = await response.json();
-        console.log("[Frontend] Dados de Veículos Destaque recebidos:", veiculos);
-
-        container.innerHTML = ''; // Limpa a mensagem de loading
-
-        if (veiculos.length === 0) {
-            container.innerHTML = '<p>Nenhum veículo em destaque no momento.</p>';
-            return;
-        }
-
-        // Itera sobre os dados e cria o HTML para cada veículo
-        veiculos.forEach(veiculo => {
-            const card = document.createElement('div');
-            card.className = 'veiculo-destaque-card'; // Classe CSS para estilizar
-            card.innerHTML = `
-                <img src="${veiculo.imagemUrl || 'img/placeholder.png'}" alt="${veiculo.modelo}" onerror="this.src='img/placeholder.png';">
-                <h3>${veiculo.modelo} (${veiculo.ano})</h3>
-                <p>${veiculo.destaque}</p>
-            `;
-            container.appendChild(card);
-        });
-
-    } catch (error) {
-        console.error("[Frontend] Erro ao carregar veículos destaque:", error);
-        container.innerHTML = `<p style="color:red;">Falha ao carregar destaques: ${error.message}</p>`;
-    }
-}
-
-// --- Funções para Carregar e Exibir Serviços Oferecidos ---
-async function carregarServicosGaragem() {
-    const lista = document.getElementById('lista-servicos-oferecidos');
-     if (!lista) return;
-
-    lista.innerHTML = '<li>Carregando serviços...</li>'; // Mensagem de loading
-
-    try {
-        const response = await fetch(`${backendBaseUrl}/api/garagem/servicos-oferecidos`);
-
-        if (!response.ok) {
-             const errorData = await response.json().catch(() => ({}));
-             throw new Error(errorData.error || `Erro ${response.status} ao carregar serviços.`);
-        }
-
-        const servicos = await response.json();
-        console.log("[Frontend] Dados de Serviços recebidos:", servicos);
-
-        lista.innerHTML = ''; // Limpa o loading
-
-        if (servicos.length === 0) {
-            lista.innerHTML = '<li>Nenhum serviço disponível no momento.</li>';
-            return;
-        }
-
-        // Itera sobre os dados e cria o HTML para cada serviço (lista)
-        servicos.forEach(servico => {
-            const li = document.createElement('li');
-            li.className = 'servico-item'; // Classe CSS para estilizar
-            li.innerHTML = `
-                <strong>${servico.nome}</strong>: ${servico.descricao} <em>(Estimado: ${servico.precoEstimado})</em>
-            `;
-            lista.appendChild(li);
-        });
-
-    } catch (error) {
-        console.error("[Frontend] Erro ao carregar serviços:", error);
-        lista.innerHTML = `<li style="color:red;">Falha ao carregar serviços: ${error.message}</li>`;
-    }
-}
-
-// --- Funções para Carregar e Exibir Ferramentas Essenciais ---
- async function carregarFerramentasEssenciais() {
-     const container = document.getElementById('lista-ferramentas-essenciais'); // Usei um div, não ul, no HTML
-      if (!container) return;
-
-     container.innerHTML = '<p>Carregando ferramentas...</p>'; // Mensagem de loading
-
-     try {
-         const response = await fetch(`${backendBaseUrl}/api/garagem/ferramentas-essenciais`);
-
-         if (!response.ok) {
-              const errorData = await response.json().catch(() => ({}));
-              throw new Error(errorData.error || `Erro ${response.status} ao carregar ferramentas.`);
-         }
-
-         const ferramentas = await response.json();
-         console.log("[Frontend] Dados de Ferramentas recebidos:", ferramentas);
-
-         container.innerHTML = ''; // Limpa o loading
-
-         if (ferramentas.length === 0) {
-             container.innerHTML = '<p>Nenhuma ferramenta listada no momento.</p>';
-             return;
-         }
-
-         // Itera sobre os dados e cria o HTML para cada ferramenta
-         ferramentas.forEach(ferramenta => {
-             const itemDiv = document.createElement('div');
-             itemDiv.className = 'ferramenta-item'; // Classe CSS para estilizar
-             itemDiv.innerHTML = `
-                 <strong>${ferramenta.nome}</strong>: ${ferramenta.utilidade}
-                 ${ferramenta.linkCompra ? `<a href="${ferramenta.linkCompra}" target="_blank"> [Link]</a>` : ''}
-             `;
-             container.appendChild(itemDiv);
-         });
-
-     } catch (error) {
-         console.error("[Frontend] Erro ao carregar ferramentas:", error);
-         container.innerHTML = `<p style="color:red;">Falha ao carregar ferramentas: ${error.message}</p>`;
-     }
- }
-
-
-// --- Fim Funções de Carregamento de Dados ---
-/**
- * Busca os detalhes de um veículo na API simulada.
- */
-async function buscarDetalhesVeiculoAPI(veiculoId) {
-    try{
-        console.log("[DEBUG] buscarDetalhesVeiculoAPI() chamada com veiculoId =", veiculoId);
-        const response = await fetch('./dados_veiculos_api.json');
-        if (!response.ok) {
-            throw new Error(`Erro ao buscar dados: ${response.status}`);
-        }
-        const data = await response.json();
-        const veiculo = data.find(v => v.id === veiculoId);
-        return veiculo || null;
-    }catch(e){
-        console.log("erro no buscarDetalhesVeiculoAPI")
-    }
-}
-
-/**
- * Exibe os detalhes extras de um veículo.
- */
-async function exibirDetalhesExtras(veiculoId) {
-    try{
-        console.log("[DEBUG] exibirDetalhesExtras() chamada com veiculoId =", veiculoId);
-        if (!veiculoId || !veiculos[veiculoId]) {
-            console.warn("Erro ao exibir detalhes extras: ID inválido:", veiculoId);
-            exibirNotificacao("Erro: ID inválido.", 'erro');
-            return;
-        }
-
-        const veiculo = veiculos[veiculoId];
-        const detalhes = await buscarDetalhesVeiculoAPI(veiculoId);
-
-        if (detalhes) {
-            const detalhesHTML = `
-                <h3>Detalhes Extras - ${veiculo.modelo}</h3>
-                <p>Valor FIPE: R$ ${detalhes.valorFIPE.toFixed(2)}</p>
-                <p>Recall Pendente: ${detalhes.recallPendente ? 'Sim' : 'Não'}</p>
-                <p>Dica: ${detalhes.dica}</p>
-                <p>Seguradora Recomendada: ${detalhes.seguradoraRecomendada}</p>
-            `;
-
-            if (informacoesVeiculoDiv) {
-                informacoesVeiculoDiv.innerHTML = detalhesHTML;
-                detalhesContainer.style.display = 'block';
-                document.body.classList.add('modal-aberto');
-                agendamentoFormContainer.style.display = 'none'; // Oculta o formulário de agendamento
-            } else {
-                console.error("Container de informações do veículo não encontrado.");
-                exibirNotificacao("Erro: Container de informações do veículo não encontrado.", 'erro');
-            }
-        } else {
-            exibirNotificacao(`Detalhes extras não encontrados para ${veiculo.modelo}.`, 'aviso');
-        }
-    }catch(e){
-        console.log("erro no exibirDetalhesExtras")
-    }
-}
-
-async function buscarPrevisaoDetalhada(cidade) {
-    try {
-        console.log("[DEBUG] buscarPrevisaoDetalhada() chamada com cidade =", cidade);
-        const apiKey = "b35a17a87dd4682376499cc8ba4658ab"; // Substitua pela sua chave!
-        const url = `https://api.openweathermap.org/data/2.5/forecast?q=${cidade}&appid=${apiKey}&units=metric&lang=pt_br`;
-
-        const response = await fetch(url);
-
-        console.log("Status da resposta:", response.status); // ADICIONE ESTA LINHA
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || `Erro ao buscar previsão: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("Dados da previsão detalhada:", data);
-        return data;
-    } catch (e) {
-        console.log("erro no buscarPrevisaoDetalhada:", e); // Modifique esta linha
-    }
-}
-/**
- * Exibe a previsão detalhada na interface do usuário.
- */
-function exibirPrevisaoDetalhada(previsaoDiaria, nomeCidade) {
-    try{
-        console.log("[DEBUG] exibirPrevisaoDetalhada() chamada com nomeCidade =", nomeCidade);
-        if (!previsaoTempoResultado) {
-            console.error("Elemento de resultado da previsão do tempo não encontrado.");
-            return;
-        }
-
-        previsaoTempoResultado.innerHTML = ''; // Limpa o conteúdo anterior
-
-        if (!previsaoDiaria || previsaoDiaria.length === 0) {
-            previsaoTempoResultado.textContent = "Nenhuma previsão encontrada para esta cidade.";
-            return;
-        }
-
-        const titulo = document.createElement('h3');
-        titulo.textContent = `Previsão para ${nomeCidade}`;
-        previsaoTempoResultado.appendChild(titulo);
-
-        const previsaoContainer = document.createElement('div');
-        previsaoContainer.classList.add('previsao-tempo-container');
-        previsaoTempoResultado.appendChild(previsaoContainer);
-
-        previsaoDiaria.forEach(dia => {
-            const previsaoDiaElement = document.createElement('div');
-            previsaoDiaElement.classList.add('previsao-dia');
-
-            const dataFormatada = new Date(dia.data).toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            const dataElement = document.createElement('h4');
-            dataElement.textContent = dataFormatada;
-            previsaoDiaElement.appendChild(dataElement);
-
-            const iconeElement = document.createElement('img');
-            iconeElement.src = `https://openweathermap.org/img/wn/${dia.icone}@2x.png`;
-            iconeElement.alt = dia.descricao;
-            previsaoDiaElement.appendChild(iconeElement);
-
-            const descricaoElement = document.createElement('p');
-            descricaoElement.textContent = dia.descricao;
-            previsaoDiaElement.appendChild(descricaoElement);
-
-            const temperaturasElement = document.createElement('p');
-            temperaturasElement.textContent = `Min: ${dia.temp_min}°C / Max: ${dia.temp_max}°C`;
-            previsaoDiaElement.appendChild(temperaturasElement);
-
-            previsaoContainer.appendChild(previsaoDiaElement);
-        });
-    } catch (e) {
-        console.log("erro no exibirPrevisaoDetalhada")
-    }
-}
-
-/**
- * Manipula o clique no botão de verificar clima.
- */
-async function handleVerificarClimaClick() {
-    try {
-        console.log("[DEBUG] handleVerificarClimaClick() chamada.");
-        if (!destinoViagemInput || !previsaoTempoResultado) {
-            console.error("Elementos de previsão do tempo não encontrados.");
-            exibirNotificacao("Erro: Elementos de previsão do tempo não encontrados.", 'erro');
-            return;
-        }
-
-        const cidade = destinoViagemInput.value;
-        if (!cidade) {
-            exibirNotificacao("Por favor, digite o nome de uma cidade.", 'aviso');
-            return;
-        }
-
-        previsaoTempoResultado.textContent = "Buscando previsão...";
-
-        const previsao = await buscarPrevisaoDetalhada(cidade);
-
-        if (previsao) {
-            const previsaoProcessada = processarDadosForecast(previsao);
-            exibirPrevisaoDetalhada(previsaoProcessada, cidade);
-        } else {
-            previsaoTempoResultado.textContent = "Erro ao buscar previsão.";
-        }
-    } catch (e) {
-    console.error("Erro no handleVerificarClimaClick:", e);
-}
-}
-
-/**
- * Reconstroi um objeto veículo a partir de dados JSON.
- */
-function reconstruirVeiculo(data) {
-    try {
-        console.log("[DEBUG] reconstruirVeiculo() chamada.");
-        if (!data || typeof data !== 'object' || !data.tipoVeiculo) {
-            console.error("Dados inválidos para reconstruir veículo:", data);
-            return null;
-        }
-
-        let veiculo;
-        switch (data.tipoVeiculo) {
-            case 'Carro':
-                veiculo = new Carro(data.modelo, data.cor, data.id);
-                break;
-            case 'CarroEsportivo':
-                veiculo = new CarroEsportivo(data.modelo, data.cor, data.id);
-                veiculo.turboAtivado = data.turboAtivado || false;
-                break;
-            case 'Caminhao':
-                veiculo = new Caminhao(data.modelo, data.cor, data.id, data.capacidadeCarga);
-                veiculo.cargaAtual = data.cargaAtual || 0;
-                break;
-            case 'Moto':
-                veiculo = new Moto(data.modelo, data.cor, data.id);
-                break;
-            case 'Bicicleta':
-                veiculo = new Bicicleta(data.modelo, data.cor, data.id);
-                break;
-            default:
-                console.warn("Tipo de veículo desconhecido:", data.tipoVeiculo);
-                return null;
-        }
-
-        veiculo.velocidade = data.velocidade || 0;
-        veiculo.ligado = data.ligado || false;
-
-        // Recriar o histórico de manutenção
-        if (Array.isArray(data.historicoManutencao)) {
-            veiculo.historicoManutencao = data.historicoManutencao.map(m => {
-                const manutencao = new Manutencao(m.data, m.tipo, m.custo, m.descricao);
-                return manutencao;
-            });
-        }
-
-        return veiculo;
-    } catch (e) {
-        console.log("erro no reconstruirVeiculo");
-    }
-}
-
-
-/**
- * Configura os event listeners para os elementos da página.
- */
-function setupEventListeners() {
-    try{
-        console.log("[DEBUG] setupEventListeners() chamada.");
-
-        btnMostrarFormAdd?.addEventListener('click', () => {
-            console.log("[DEBUG] Botão 'Adicionar Novo Veículo' clicado!");
-            toggleFormAddVeiculo(addVeiculoFormContainer.style.display !== 'block');
-        });
-
-        btnCancelarAdd?.addEventListener('click', () => toggleFormAddVeiculo(false));
-        addTipoSelect?.addEventListener('change', atualizarCamposOpcionaisFormAdd);
-        formAddVeiculo?.addEventListener('submit', handleAddVeiculoSubmit);
-
-        garagemContainer?.addEventListener('click', handleVehicleAction);
-
-        if (verificarClimaBtn) {
-            verificarClimaBtn.addEventListener('click', async () => {
-                console.log("Botão 'Verificar Clima' clicado!");
-                const cidade = destinoViagemInput.value;
-                if (!cidade) {
-                    exibirNotificacao("Por favor, digite o nome de uma cidade.", 'aviso');
-                    return;
-                }
-
-                previsaoTempoResultado.textContent = "Buscando previsão...";
-
-                const previsao = await buscarPrevisaoDetalhada(cidade);
-
-                if (previsao) {
-                    const previsaoProcessada = processarDadosForecast(previsao);
-                    exibirPrevisaoDetalhada(previsaoProcessada, cidade);
-                } else {
-                    previsaoTempoResultado.textContent = "Erro ao buscar previsão.";
-                }
-            });
-        } else {
-            console.warn("Botão 'Verificar Clima' não encontrado!");
-        }
-
-        if (btnFecharDetalhes) {
-            btnFecharDetalhes.addEventListener('click', fecharDetalhes);
-        } else {
-            console.warn("Botão 'Fechar Detalhes' não encontrado.");
-        }
-
-        if (formAgendamento) {
-            formAgendamento.addEventListener('submit', handleAgendamentoSubmit);
-        } else {
-            console.warn("Formulário de agendamento não encontrado.");
-        }
-    }catch(e){
-        console.log("erro no setupEventListeners")
-    }
-}
-
-/**
- * Funções de Inicialização
- */
-function verificarAgendamentosProximos() {
-    try{
-        console.log("[DEBUG] verificarAgendamentosProximos() chamada.");
-    }catch(e){
-        console.log("erro no verificarAgendamentosProximos")
-    }
-    // (Por enquanto, não implementado)
-}
-
-/**
- * Fecha o modal de detalhes.
- */
-function fecharDetalhes() {
-    try{
-        console.log("[DEBUG] fecharDetalhes() chamada.");
-        detalhesContainer.style.display = 'none';
-        document.body.classList.remove('modal-aberto');
-    }catch(e){
-        console.log("erro no fecharDetalhes")
-    }
-}
-
-// --- Inicialização ---
+// Este é o ÚNICO bloco que inicia tudo quando a página carrega.
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("[INICIO] Garagem Inteligente inicializando...");
-    const carregou = carregarGaragemDoLocalStorage();
-    console.log("[INICIO] Garagem carregada do LocalStorage:", carregou);
-    renderizarGaragem();
+    console.log("[INICIO] Garagem Inteligente v2 (com DB) inicializando...");
+    
+    // 1. Configura todos os ouvintes de eventos (cliques em botões, etc.)
     setupEventListeners();
-    console.log("[INICIO] Garagem pronta!");
-    exibirNotificacao("Garagem pronta!", "sucesso", 2500);
-    console.log('Script FINAL');
+    
+    // 2. Busca os veículos do banco de dados e desenha na tela.
+    buscarErenderizarVeiculos();
+
+    // 3. (Opcional) Carrega outros dados dinâmicos do backend.
+    // Deixei comentado por enquanto para focarmos no CRUD de veículos.
+    // carregarVeiculosDestaque();
+    // carregarServicosGaragem();
+    // carregarFerramentasEssenciais();
+    // carregarDicasGerais();
+    
+    exibirNotificacao("Bem-vindo à Garagem Inteligente!", "sucesso", 3000);
 });
 
-function processarDadosForecast(dadosBrutosDaAPI) {
-    console.log("[DEBUG] processarDadosForecast() chamada.");
-    if (!dadosBrutosDaAPI || !dadosBrutosDaAPI.list || dadosBrutosDaAPI.list.length === 0) {
-        console.warn("[DEBUG] Dados brutos inválidos ou vazios para processamento.");
-        return []; // Retorna um array vazio se não há dados
-    }
 
-    const previsaoPorDia = {}; // Usaremos um objeto para agrupar previsões pelo dia
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0); // Zera horas para comparação de data
+// ===================================================================================
+// Funções de Renderização e UI (Interface do Usuário)
+// ===================================================================================
 
-    // A API retorna previsões a cada 3 horas. Precisamos selecionar uma por dia.
-    // Vamos pegar a previsão do meio do dia ou próxima a ela para cada um dos próximos 5 dias.
-    // Podemos simplesmente iterar pela lista e pegar a primeira ocorrência de cada novo dia.
-
-    dadosBrutosDaAPI.list.forEach(item => {
-        const data = new Date(item.dt * 1000); // Converter timestamp para Date
-        const dataSemHora = new Date(data);
-        dataSemHora.setHours(0, 0, 0, 0); // Zera hora para usar como chave
-
-        const chaveDia = dataSemHora.toISOString().split('T')[0]; // Ex: '2023-10-27'
-
-        // Se ainda não temos uma previsão para este dia E a data é hoje ou no futuro
-        // (evita adicionar previsões do passado se o forecast inclui)
-        if (!previsaoPorDia[chaveDia] && dataSemHora >= hoje) {
-             // O forecast geralmente retorna 40 entradas (5 dias * 8 entradas de 3h)
-             // Podemos limitar a 5 dias (incluindo hoje, se houver dados para hoje)
-             if (Object.keys(previsaoPorDia).length < 5) {
-                // Pega a temperatura min/max para o DIA todo (não só para este ponto no tempo)
-                // Isso exige encontrar min/max entre todos os itens do mesmo dia na lista da API.
-                // Para simplificar AGORA, vamos apenas usar a temperatura do item atual
-                // e você pode melhorar isso depois buscando o min/max real do dia na lista.
-
-                let temp_min_dia = item.main.temp; // Temp neste ponto
-                let temp_max_dia = item.main.temp; // Temp neste ponto
-
-                // Lógica mais completa para min/max do dia (opcional agora):
-                const itensDoDia = dadosBrutosDaAPI.list.filter(it => {
-                    const itDataSemHora = new Date(it.dt * 1000);
-                    itDataSemHora.setHours(0, 0, 0, 0);
-                    return itDataSemHora.toISOString().split('T')[0] === chaveDia;
-                });
-
-                if(itensDoDia.length > 0){
-                     temp_min_dia = Math.min(...itensDoDia.map(it => it.main.temp_min));
-                     temp_max_dia = Math.max(...itensDoDia.map(it => it.main.temp_max));
-                }
-
-
-                previsaoPorDia[chaveDia] = {
-                    data: data,
-                    temp: item.main.temp, // Temperatura neste ponto do tempo
-                    temp_min: temp_min_dia, // Temperatura mínima do dia
-                    temp_max: temp_max_dia, // Temperatura máxima do dia
-                    descricao: item.weather[0].description,
-                    icone: item.weather[0].icon
-                };
-                 console.log(`[DEBUG] Adicionado previsão para o dia ${chaveDia}.`);
-             }
+async function buscarErenderizarVeiculos() {
+    if (!garagemContainer) return;
+    
+    try {
+        console.log('[Frontend] Buscando veículos do backend...');
+        const response = await fetch(`${backendUrl}/api/veiculos`);
+        if (!response.ok) {
+            throw new Error('Falha ao buscar veículos do servidor.');
         }
+        const veiculosDoBanco = await response.json();
+        console.log('[Frontend] Veículos recebidos:', veiculosDoBanco);
+
+        if (veiculosDoBanco.length === 0) {
+            garagemContainer.innerHTML = '<p id="garagem-vazia-msg" style="display: block;">Sua garagem está vazia. Adicione um veículo!</p>';
+        } else {
+            garagemContainer.innerHTML = veiculosDoBanco.map(gerarHTMLVeiculoDoBanco).join('');
+        }
+    } catch (error) {
+        console.error('Erro ao buscar veículos:', error);
+        garagemContainer.innerHTML = `<p style="color:red;">Erro ao carregar a garagem. Tente recarregar a página.</p>`;
+        exibirNotificacao(error.message, 'erro');
+    }
+}
+
+function gerarHTMLVeiculoDoBanco(veiculo) {
+    // veiculo aqui é o objeto que vem direto do MongoDB, com _id, placa, marca, etc.
+    return `
+        <div id="${veiculo._id}" class="veiculo-container">
+            <button class="remover-veiculo-btn" data-action="remover" data-id="${veiculo._id}" title="Remover ${veiculo.modelo}">×</button>
+            <h2>${veiculo.marca} ${veiculo.modelo}</h2>
+            <img src="img/carro.jpg" alt="Imagem ${veiculo.modelo}" class="veiculo-imagem" onerror="this.src='img/placeholder.png';">
+            <p><strong>Placa:</strong> ${veiculo.placa}</p>
+            <p><strong>Ano:</strong> ${veiculo.ano}</p>
+            <p><strong>Cor:</strong> ${veiculo.cor}</p>
+            
+            <div class="controles-veiculo">
+                 <p style="font-size: 0.8em; color: #888;">(Controles de simulação a implementar)</p>
+                 <button data-action="detalhes" data-id="${veiculo._id}">Detalhes</button>
+            </div>
+        </div>
+    `;
+}
+
+function toggleFormAddVeiculo(show) {
+    if (!addVeiculoFormContainer || !btnMostrarFormAdd) return;
+
+    if (show) {
+        addVeiculoFormContainer.style.display = 'block';
+        btnMostrarFormAdd.textContent = 'Cancelar Adição';
+        formAddVeiculo.reset();
+    } else {
+        addVeiculoFormContainer.style.display = 'none';
+        btnMostrarFormAdd.textContent = 'Adicionar Novo Veículo +';
+    }
+}
+
+// ===================================================================================
+// Funções de Ação e Eventos
+// ===================================================================================
+
+function setupEventListeners() {
+    // Listener para o botão "Adicionar Novo Veículo +"
+    btnMostrarFormAdd?.addEventListener('click', () => {
+        const isHidden = addVeiculoFormContainer.style.display === 'none' || addVeiculoFormContainer.style.display === '';
+        toggleFormAddVeiculo(isHidden);
     });
 
-    // Converte o objeto agrupado de volta para um array e ordena por data
-    const previsaoArray = Object.values(previsaoPorDia).sort((a, b) => a.data - b.data);
-    console.log("[DEBUG] Processamento concluído. Retornando array de previsão:", previsaoArray);
-    return previsaoArray;
+    // Listener para o botão "Cancelar" do formulário
+    btnCancelarAdd?.addEventListener('click', () => toggleFormAddVeiculo(false));
+    
+    // Listener para o envio do formulário
+    formAddVeiculo?.addEventListener('submit', handleAddVeiculoSubmit);
 }
-// --- Correção de Escopo (Atribuição ao window) ---
-window.carregarGaragemDoLocalStorage = carregarGaragemDoLocalStorage;
-window.salvarGaragemNoLocalStorage = salvarGaragemNoLocalStorage;
-window.gerarHTMLVeiculo = gerarHTMLVeiculo;
-window.tocarSom = tocarSom;
-window.atualizarBarraDeProgresso = atualizarBarraDeProgresso;
-window.exibirNotificacao = exibirNotificacao;
-window.fecharNotificacao = fecharNotificacao;
-window.removerVeiculo = removerVeiculo;
-window.toggleFormAddVeiculo = toggleFormAddVeiculo;
-window.atualizarCamposOpcionaisFormAdd = atualizarCamposOpcionaisFormAdd;
-window.handleAddVeiculoSubmit = handleAddVeiculoSubmit;
-window.renderizarGaragem = renderizarGaragem;
-window.handleVehicleAction = handleVehicleAction;
-window.exibirInformacoesNaTela = exibirInformacoesNaTela;
-window.handleAgendamentoSubmit = handleAgendamentoSubmit;
-window.buscarDetalhesVeiculoAPI = buscarDetalhesVeiculoAPI;
-window.exibirDetalhesExtras = exibirDetalhesExtras;
-window.buscarPrevisaoDetalhada = buscarPrevisaoDetalhada;
-window.processarDadosForecast = processarDadosForecast;
-window.exibirPrevisaoDetalhada = exibirPrevisaoDetalhada;
-window.handleVerificarClimaClick = handleVerificarClimaClick;
-window.setupEventListeners = setupEventListeners;
-window.verificarAgendamentosProximos = verificarAgendamentosProximos;
-window.fecharDetalhes = fecharDetalhes;
-window.reconstruirVeiculo = reconstruirVeiculo;
-window.processarDadosForecast = processarDadosForecast;
-window.exibirPrevisaoDetalhada = exibirPrevisaoDetalhada;
+
+async function handleAddVeiculoSubmit(event) {
+    event.preventDefault(); // Impede o recarregamento da página
+
+    const veiculoParaSalvar = {
+        placa: document.getElementById('add-placa').value.toUpperCase(),
+        marca: document.getElementById('add-marca').value,
+        modelo: document.getElementById('add-modelo').value,
+        ano: document.getElementById('add-ano').value,
+        cor: document.getElementById('add-cor').value
+    };
+
+    try {
+        const response = await fetch(`${backendUrl}/api/veiculos`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(veiculoParaSalvar)
+        });
+
+        const resultado = await response.json();
+
+        if (!response.ok) {
+            // A mensagem de erro virá do nosso backend (ex: 'Placa já existe')
+            throw new Error(resultado.error || 'Erro desconhecido do servidor.');
+        }
+
+        exibirNotificacao('Veículo adicionado com sucesso!', 'sucesso');
+        toggleFormAddVeiculo(false); // Fecha e reseta o formulário
+        
+        // A MÁGICA: Após adicionar, busca a lista atualizada do banco e redesenha a garagem!
+        buscarErenderizarVeiculos();
+
+    } catch (error) {
+        console.error("Erro ao adicionar veículo:", error);
+        exibirNotificacao(error.message, 'erro');
+    }
+}
+
+// ===================================================================================
+// Funções de Notificação (Utilitário)
+// ===================================================================================
+
+function exibirNotificacao(message, type = 'info', duration = 5000) {
+    if (!notificacoesContainer || !message) return;
+
+    const notificationDiv = document.createElement('div');
+    notificationDiv.className = `notificacao ${type}`;
+    
+    const messageSpan = document.createElement('span');
+    messageSpan.textContent = message;
+    notificationDiv.appendChild(messageSpan);
+    
+    const closeButton = document.createElement('button');
+    closeButton.innerHTML = '×';
+    closeButton.className = 'close-btn';
+    closeButton.onclick = () => fecharNotificacao(notificationDiv);
+    notificationDiv.appendChild(closeButton);
+
+    notificacoesContainer.prepend(notificationDiv);
+
+    requestAnimationFrame(() => {
+        notificationDiv.classList.add('show');
+    });
+
+    const timerId = setTimeout(() => fecharNotificacao(notificationDiv), duration);
+    notificationDiv.dataset.timerId = timerId;
+}
+
+function fecharNotificacao(notificationDiv) {
+    if (!notificationDiv || !notificationDiv.parentNode) return;
+    clearTimeout(notificationDiv.dataset.timerId);
+    notificationDiv.classList.remove('show');
+    setTimeout(() => notificationDiv.remove(), 500);
+}
