@@ -59,8 +59,10 @@ app.use(express.json());
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE'); // <--- Ordem correta
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
+    
+    next(); // <--- CHAMADO POR ÚLTIMO
 });
 
 // =======================================================================
@@ -194,6 +196,77 @@ app.get('/api/veiculos', async (req, res) => {
         res.status(500).json({ error: 'Erro interno ao buscar veículos.' });
     }
 });
+
+app.put('/api/veiculos/:id', async (req, res) => {
+    try {
+        const veiculoId = req.params.id; // Pega o ID da URL
+        const dadosAtualizados = req.body; // Pega os novos dados do corpo da requisição
+
+        console.log(`[Servidor] Recebido para atualizar ID ${veiculoId} com:`, dadosAtualizados);
+
+        // Encontra e atualiza o veículo no banco de dados
+        const veiculoAtualizado = await Veiculo.findByIdAndUpdate(
+            veiculoId, 
+            dadosAtualizados,
+            { new: true, runValidators: true } // Opções importantes!
+        );
+
+        if (!veiculoAtualizado) {
+            return res.status(404).json({ error: 'Veículo não encontrado.' });
+        }
+
+        console.log('[Servidor] Veículo atualizado com sucesso:', veiculoAtualizado);
+        res.status(200).json(veiculoAtualizado); // 200 = OK
+
+    } catch (error) {
+        console.error("[Servidor] Erro ao atualizar veículo:", error);
+        if (error.name === 'CastError') {
+             return res.status(400).json({ error: 'ID do veículo em formato inválido.' });
+        }
+        if (error.name === 'ValidationError') {
+             const messages = Object.values(error.errors).map(val => val.message);
+             return res.status(400).json({ error: messages.join(' ') });
+        }
+        res.status(500).json({ error: 'Erro interno ao atualizar veículo.' });
+    }
+});
+
+app.delete('/api/veiculos/:id', async (req, res) => {
+    try {
+        const veiculoId = req.params.id;
+        console.log(`[Servidor] Recebido para deletar ID: ${veiculoId}`);
+
+        const veiculoDeletado = await Veiculo.findByIdAndDelete(veiculoId);
+
+        if (!veiculoDeletado) {
+            return res.status(404).json({ error: 'Veículo não encontrado para deletar.' });
+        }
+
+        console.log('[Servidor] Veículo deletado com sucesso:', veiculoDeletado);
+        res.status(200).json({ message: 'Veículo deletado com sucesso!' });
+
+    } catch (error) {
+        console.error("[Servidor] Erro ao deletar veículo:", error);
+         if (error.name === 'CastError') {
+             return res.status(400).json({ error: 'ID do veículo em formato inválido.' });
+        }
+        res.status(500).json({ error: 'Erro interno ao deletar veículo.' });
+    }
+});
+
+app.get('/api/veiculos/:id', async (req, res) => {
+    try {
+        const veiculo = await Veiculo.findById(req.params.id);
+        if (!veiculo) {
+            return res.status(404).json({ error: 'Veículo não encontrado.' });
+        }
+        res.json(veiculo);
+    } catch (error) {
+        console.error("Erro ao buscar veículo por ID:", error);
+        res.status(500).json({ error: 'Erro interno ao buscar o veículo.' });
+    }
+});
+
 // =======================================================================
 // --- Inicialização do Servidor ---
 // =======================================================================

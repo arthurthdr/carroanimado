@@ -4,20 +4,23 @@ Este é o projeto da Garagem Inteligente desenvolvido como parte do curso de Inf
 
 ## Descrição do Projeto
 
-A Garagem Inteligente é uma aplicação web completa com frontend e backend. Ela permite gerenciar uma frota de veículos (carros, motos, caminhões), simular suas ações (ligar, acelerar), registrar manutenções e planejar viagens consultando a previsão do tempo.
+A Garagem Inteligente é uma aplicação web full-stack que permite o gerenciamento completo de uma frota de veículos. O sistema utiliza um frontend em HTML, CSS e JavaScript para interação do usuário e um backend em Node.js com Express e Mongoose para persistir os dados em um banco de dados MongoDB Atlas.
 
-O projeto utiliza um frontend em HTML, CSS e JavaScript puro (com POO) e um backend em Node.js com Express, que serve como uma API para fornecer dados da aplicação (veículos em destaque, serviços, dicas) e como um proxy seguro para APIs externas (OpenWeatherMap).
+Funcionalidades principais incluem:
+*   Adicionar, listar, editar e remover veículos da garagem (CRUD completo).
+*   Consultar a previsão do tempo para planejar viagens.
 
 ## Links Públicos
 
-*   **Frontend (Vercel):** [https://carroanimado.vercel.app/](https://carroanimado.vercel.app/)  <-- *Verifique se este é seu link correto!*
-*   **Backend (Render):** [https://carroanimado-1.onrender.com/](https://carroanimado-1.onrender.com/) <-- *Verifique se este é seu link correto!*
+*   **Frontend (Vercel):** [https://carroanimado.vercel.app/](https://carroanimado.vercel.app/)
+*   **Backend (Render):** [https://carroanimado-1.onrender.com/](https://carroanimado-1.onrender.com/)
 
 ## Como Rodar Localmente
 
 ### Pré-requisitos
 *   Node.js e npm instalados.
 *   Uma chave de API da [OpenWeatherMap](https://openweathermap.org/api).
+*   Uma string de conexão do [MongoDB Atlas](https://www.mongodb.com/cloud/atlas).
 
 ### Configuração
 
@@ -34,8 +37,11 @@ O projeto utiliza um frontend em HTML, CSS e JavaScript puro (com POO) e um back
 
 3.  **Crie o Arquivo `.env`:** Na raiz do projeto, crie um arquivo chamado `.env` e adicione suas variáveis:
     ```dotenv
-    # Substitua pelo sua chave da API OpenWeatherMap
-    OPENWEATHER_API_KEY=sua_chave_aqui
+    # Chave da API para previsão do tempo
+    OPENWEATHER_API_KEY=sua_chave_aqui_da_openweathermap
+    
+    # String de conexão do seu cluster MongoDB Atlas
+    MONGO_URI_CRUD=sua_string_de_conexao_aqui
     
     # Porta para o servidor backend rodar localmente
     PORT=3001
@@ -51,74 +57,70 @@ O projeto utiliza um frontend em HTML, CSS e JavaScript puro (com POO) e um back
 
 2.  **Abra o Frontend:** Abra o arquivo `index.html` em um navegador web. A aplicação frontend se conectará automaticamente ao backend local.
 
-## Documentação da API do Backend
+---
 
-O backend expõe os seguintes endpoints GET:
+## Documentação da API
+
+### API da Garagem (CRUD com MongoDB)
+
+Estes endpoints interagem diretamente com a coleção de veículos no banco de dados.
+
+#### Listar Todos os Veículos
+*   **Endpoint:** `GET /api/veiculos`
+*   **Descrição:** Retorna uma lista com todos os veículos atualmente na garagem.
+*   **Resposta de Sucesso (200 OK):** Um array de objetos de veículo.
+
+#### Buscar um Veículo Específico
+*   **Endpoint:** `GET /api/veiculos/:id`
+*   **Descrição:** Retorna os detalhes de um único veículo, identificado pelo seu `_id`.
+*   **Parâmetros de Rota:** `:id` (o ID do veículo no MongoDB).
+*   **Resposta de Sucesso (200 OK):** O objeto completo do veículo.
+
+#### Criar um Novo Veículo
+*   **Endpoint:** `POST /api/veiculos`
+*   **Descrição:** Adiciona um novo veículo à garagem.
+*   **Corpo da Requisição (Body):** Um objeto JSON com os dados do veículo.
+    ```json
+    {
+      "placa": "ABC1D23",
+      "marca": "Fiat",
+      "modelo": "Mobi",
+      "ano": 2024,
+      "cor": "Branco"
+    }
+    ```
+*   **Resposta de Sucesso (201 Created):** O objeto do veículo recém-criado, incluindo o `_id` do banco de dados.
+
+#### Atualizar um Veículo Existente
+*   **Endpoint:** `PUT /api/veiculos/:id`
+*   **Descrição:** Modifica os dados de um veículo específico.
+*   **Parâmetros de Rota:** `:id` (o ID do veículo no MongoDB).
+*   **Corpo da Requisição (Body):** Um objeto JSON com os campos a serem atualizados. Ex: `{ "cor": "Vermelho Metálico" }`
+*   **Resposta de Sucesso (200 OK):** O objeto completo do veículo após a atualização.
+
+#### Excluir um Veículo
+*   **Endpoint:** `DELETE /api/veiculos/:id`
+*   **Descrição:** Remove permanentemente um veículo da garagem.
+*   **Parâmetros de Rota:** `:id` (o ID do veículo no MongoDB).
+*   **Resposta de Sucesso (200 OK):** Uma mensagem de confirmação. Ex: `{ "message": "Veículo deletado com sucesso!" }`
 
 ---
 
-### Previsão do Tempo
+### APIs de Informações Adicionais (Dados Mockados)
 
+Estes endpoints fornecem dados de exemplo que estão fixos no código do `server.js`.
+
+#### Previsão do Tempo
 *   **`GET /api/previsao/:cidade`**
-    *   **Descrição:** Atua como um proxy para a API de forecast da OpenWeatherMap.
+    *   **Descrição:** Atua como um proxy seguro para a API de forecast da OpenWeatherMap, protegendo sua chave de API.
     *   **Parâmetros de Rota:** `:cidade` (string, nome da cidade).
     *   **Resposta (Sucesso):** Objeto JSON com os dados da previsão da OpenWeatherMap.
-    *   **Resposta (Erro):** Objeto JSON `{ "error": "mensagem de erro" }` com status 400, 404 ou 500.
 
----
+#### Dicas de Manutenção
+*   **`GET /api/dicas-manutencao`**: Retorna uma lista de dicas de manutenção gerais.
+*   **`GET /api/dicas-manutencao/:tipoVeiculo`**: Retorna dicas específicas para "carro", "moto" ou "caminhao".
 
-### Dicas de Manutenção
-
-*   **`GET /api/dicas-manutencao`**
-    *   **Descrição:** Retorna uma lista de dicas de manutenção gerais para qualquer veículo.
-    *   **Resposta (Sucesso):** Array de objetos. Exemplo:
-        ```json
-        [
-            { "id": 1, "dica": "Verifique o nível do óleo do motor regularmente." },
-            { "id": 2, "dica": "Calibre os pneus semanalmente..." }
-        ]
-        ```
-
-*   **`GET /api/dicas-manutencao/:tipoVeiculo`**
-    *   **Descrição:** Retorna dicas de manutenção específicas para um tipo de veículo.
-    *   **Parâmetros de Rota:** `:tipoVeiculo` (string, ex: `carro`, `moto`, `caminhao`).
-    *   **Resposta (Sucesso):** Array de objetos com dicas específicas. Exemplo para `/api/dicas-manutencao/moto`:
-        ```json
-        [
-            { "id": 20, "dica": "Lubrifique e ajuste a tensão da corrente a cada 500 km." }
-        ]
-        ```
-    *   **Resposta (Erro 404):** Objeto JSON `{ "error": "Nenhuma dica específica encontrada..." }` se o tipo não existir.
-
----
-
-### Dados da Garagem
-
-*   **`GET /api/garagem/veiculos-destaque`**
-    *   **Descrição:** Retorna uma lista de veículos em destaque.
-    *   **Resposta (Sucesso):** Array de objetos. Exemplo:
-        ```json
-        [
-            { "id": 1, "modelo": "Ford Maverick Híbrido", "ano": 2024, "destaque": "Economia e Estilo", "imagemUrl": "..." }
-        ]
-        ```
-
-*   **`GET /api/garagem/servicos-oferecidos`**
-    *   **Descrição:** Retorna a lista de serviços oferecidos pela garagem.
-    *   **Resposta (Sucesso):** Array de objetos. Exemplo:
-        ```json
-        [
-            { "id": "svc001", "nome": "Diagnóstico Eletrônico Completo", "descricao": "...", "precoEstimado": "R$ 250,00" }
-        ]
-        ```
-
-*   **`GET /api/garagem/ferramentas-essenciais`**
-    *   **Descrição:** Retorna uma lista de ferramentas essenciais para manutenção.
-    *   **Resposta (Sucesso):** Array de objetos. Exemplo:
-        ```json
-        [
-            { "id": "fer01", "nome": "Chave de Roda Cruz", "utilidade": "Troca rápida de pneus.", "linkCompra": "..." }
-        ]
-        ```
-
----
+#### Outros Dados da Garagem
+*   **`GET /api/garagem/veiculos-destaque`**: Retorna uma lista de veículos em destaque.
+*   **`GET /api/garagem/servicos-oferecidos`**: Retorna a lista de serviços oferecidos pela garagem.
+*   **`GET /api/garagem/ferramentas-essenciais`**: Retorna uma lista de ferramentas essenciais.
