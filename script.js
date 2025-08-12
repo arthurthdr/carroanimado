@@ -4,7 +4,7 @@
  * @author Arthur
  */
 
-console.log("ESPIÃO 1: Arquivo script.js foi carregado.");
+
 
 // ===================================================================================
 // Bloco de Configuração e Variáveis Globais
@@ -38,7 +38,6 @@ const btnFecharDetalhes = document.getElementById('fechar-detalhes');
 // ===================================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("ESPIÃO 2: DOMContentLoaded disparado. A página HTML terminou de carregar.");
     setupEventListeners();
     buscarErenderizarVeiculos();
 });
@@ -87,6 +86,76 @@ function toggleFormAddVeiculo(show) {
     if(show) formAddVeiculo.reset();
 }
 
+async function carregarManutencoes(veiculoId) {
+    const listaManutencoes = document.getElementById('lista-manutencoes');
+    if (!listaManutencoes) return;
+
+    listaManutencoes.innerHTML = '<li>Carregando manutenções...</li>';
+
+    try {
+        const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}/manutencoes`);
+        const manutenções = await response.json();
+
+        if (!response.ok) {
+            throw new Error(manutenções.error || 'Falha ao carregar manutenções.');
+        }
+
+        if (manutenções.length === 0) {
+            listaManutencoes.innerHTML = '<li>Nenhuma manutenção registrada para este veículo.</li>';
+        } else {
+            listaManutencoes.innerHTML = manutenções.map(m => `
+                <li>
+                    <strong>${new Date(m.data).toLocaleDateString('pt-BR')}</strong> - 
+                    ${m.descricaoServico} - 
+                    R$ ${m.custo.toFixed(2)}
+                    ${m.quilometragem ? `(${m.quilometragem} km)` : ''}
+                </li>
+            `).join('');
+        }
+    } catch (error) {
+        console.error("Erro ao carregar manutenções:", error);
+        listaManutencoes.innerHTML = `<li style="color: red;">${error.message}</li>`;
+    }
+}
+
+// Função para ADICIONAR uma nova manutenção
+async function adicionarManutencao(event) {
+    event.preventDefault(); // Impede o recarregamento da página
+
+    const veiculoId = document.getElementById('manutencao-veiculo-id').value;
+    const form = document.getElementById('form-add-manutencao');
+
+    const dadosFormulario = {
+        descricaoServico: document.getElementById('manutencao-descricao').value,
+        custo: document.getElementById('manutencao-custo').value,
+        quilometragem: document.getElementById('manutencao-km').value
+    };
+
+    try {
+        const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}/manutencoes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dadosFormulario)
+        });
+
+        const novaManutencao = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(novaManutencao.error || 'Falha ao registrar manutenção.');
+        }
+
+        exibirNotificacao('Manutenção registrada com sucesso!', 'sucesso');
+        form.reset(); // Limpa o formulário
+
+        // A MÁGICA: Recarrega a lista para mostrar a nova manutenção instantaneamente
+        await carregarManutencoes(veiculoId);
+
+    } catch (error) {
+        console.error("Erro ao adicionar manutenção:", error);
+        exibirNotificacao(error.message, 'erro');
+    }
+}
+
 // ===================================================================================
 // Funções de Ação e Eventos
 // ===================================================================================
@@ -94,7 +163,6 @@ function toggleFormAddVeiculo(show) {
 // D:/carro/js/script.js
 
 function setupEventListeners() {
-    console.log("ESPIÃO 3: Entrei na função setupEventListeners.");
 
     // --- Listeners dos botões principais ---
     btnMostrarFormAdd?.addEventListener('click', () => toggleFormAddVeiculo(addVeiculoFormContainer.style.display === 'none'));
@@ -103,7 +171,6 @@ function setupEventListeners() {
 
     // Listener do botão de verificar clima
     verificarClimaBtn?.addEventListener('click', handleVerificarClimaClick);
-    console.log("ESPIÃO 4: A variável 'verificarClimaBtn' é:", verificarClimaBtn);
 
 
     // --- Listener para os botões DENTRO da garagem (Editar, Excluir, Detalhes) ---
@@ -242,7 +309,7 @@ async function handleMostrarDetalhes(id) {
             throw new Error(veiculo.error || 'Não foi possível buscar os detalhes do veículo.');
         }
 
-        // Monta o HTML com os detalhes do veículo
+        // Monta o HTML com os detalhes BÁSICOS do veículo
         informacoesVeiculoDiv.innerHTML = `
             <div class="detalhes-info-basica">
                 <h3>${veiculo.marca} ${veiculo.modelo}</h3>
@@ -256,7 +323,10 @@ async function handleMostrarDetalhes(id) {
             </div>
         `;
 
-        // Mostra o modal
+        document.getElementById('manutencao-veiculo-id').value = id;
+        await carregarManutencoes(id);
+        
+        // Finalmente, mostra o modal
         detalhesContainer.style.display = 'flex';
         document.body.style.overflow = 'hidden';
 

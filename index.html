@@ -48,42 +48,65 @@
         <p id="garagem-vazia-msg" style="display: none;">Sua garagem está vazia. Adicione um veículo!</p>
     </div>
 
-    <div id="detalhes-e-agendamento" class="detalhes-container" style="display: none;">
-        <h2>Detalhes e Manutenção do Veículo Selecionado</h2>
-        <button id="fechar-detalhes" class="close-btn">×</button>
-        <div id="informacoesVeiculo">
-            <div id="detalhesExtrasContainer">
-                <!-- Os detalhes extras serão inseridos aqui -->
-            </div>
-        </div>
-        <div id="agendamento-form-container" style="display: none;">
-            <h3>Agendar Nova Manutenção</h3>
-            <form id="form-agendamento">
-                <label for="agenda-data">Data:</label>
-                <input type="date" id="agenda-data" required>
-                <label for="agenda-tipo">Tipo de Serviço:</label>
-                <input type="text" id="agenda-tipo" placeholder="Ex: Troca de óleo" required>
-                <label for="agenda-custo">Custo (R$):</label>
-                <input type="number" id="agenda-custo" step="0.01" min="0" placeholder="150.00" required>
-                <label for="agenda-descricao">Descrição (Opcional):</label>
-                <textarea id="agenda-descricao" rows="2"></textarea>
-                <button type="submit">Agendar/Registrar</button>
+   <div id="detalhes-e-agendamento" class="detalhes-container" style="display: none;">
+    
+    <h2>Detalhes e Manutenção do Veículo Selecionado</h2>
+    <button id="fechar-detalhes" class="close-btn">×</button>
+
+    <!-- ÁREA 1: Informações básicas do Veículo -->
+    <div id="informacoesVeiculo">
+        <!-- O JS preencherá esta parte com os dados do carro (placa, marca, etc.) -->
+        <!-- O div 'detalhesExtrasContainer' que você tinha pode ser removido, pois o 'informacoesVeiculo' já serve a esse propósito -->
+    </div>
+
+    <!-- ÁREA 2: Histórico e Formulário de Manutenções (CORRIGIDO) -->
+    <div id="manutencoes-container" style="margin-top: 20px; width: 100%;">
+        <h4>Histórico de Manutenção</h4>
+        
+        <ul id="lista-manutencoes" class="dados-lista">
+            <li>Carregando manutenções...</li>
+        </ul>
+
+        <div id="form-manutencao-container">
+            <h5>Adicionar Nova Manutenção</h5>
+            <form id="form-add-manutencao">
+                <input type="hidden" id="manutencao-veiculo-id">
+                <div class="form-grid">
+                    <label for="manutencao-descricao">Descrição do Serviço:</label>
+                    <input type="text" id="manutencao-descricao" required placeholder="Ex: Troca de óleo e filtro">
+                    
+                    <label for="manutencao-custo">Custo (R$):</label>
+                    <input type="number" id="manutencao-custo" required min="0" step="0.01" placeholder="150.00">
+                    
+                    <label for="manutencao-km">Quilometragem (Opcional):</label>
+                    <input type="number" id="manutencao-km" min="0" placeholder="50000">
+                </div>
+                <button type="submit">Registrar Manutenção</button>
             </form>
-        </div>
-        <div id="agendamentos-futuros-container" style="display: none;">
-            <h4>Próximos Agendamentos</h4>
-            <pre id="agendamentos-futuros-conteudo"></pre>
         </div>
     </div>
 
-     <div id="planejar-viagem-container" class="planejar-viagem-container">
-        <h2>Planejar Viagem</h2>
-        <label for="destino-viagem">Digite a cidade de destino:</label>
-        <input type="text" id="destino-viagem" placeholder="Digite a cidade de destino">
-        <button id="verificar-clima-btn">Verificar Clima</button>
-        <div id="previsao-tempo-resultado"></div>
+    <!-- ÁREA 3: Seus formulários antigos (mantidos como estavam) -->
+    <div id="agendamento-form-container" style="display: none;">
+        <h3>Agendar Nova Manutenção</h3>
+        <form id="form-agendamento">
+            <label for="agenda-data">Data:</label>
+            <input type="date" id="agenda-data" required>
+            <label for="agenda-tipo">Tipo de Serviço:</label>
+            <input type="text" id="agenda-tipo" placeholder="Ex: Troca de óleo" required>
+            <label for="agenda-custo">Custo (R$):</label>
+            <input type="number" id="agenda-custo" step="0.01" min="0" placeholder="150.00" required>
+            <label for="agenda-descricao">Descrição (Opcional):</label>
+            <textarea id="agenda-descricao" rows="2"></textarea>
+            <button type="submit">Agendar/Registrar</button>
+        </form>
     </div>
-    <!-- --- Novas Seções para Exibir Dados do Backend --- -->
+    <div id="agendamentos-futuros-container" style="display: none;">
+        <h4>Próximos Agendamentos</h4>
+        <pre id="agendamentos-futuros-conteudo"></pre>
+    </div>
+
+</div>
 
 
 <!-- --- Fim Novas Seções --- -->
