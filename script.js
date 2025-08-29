@@ -32,6 +32,7 @@ const previsaoTempoResultado = document.getElementById('previsao-tempo-resultado
 const detalhesContainer = document.getElementById('detalhes-e-agendamento');
 const informacoesVeiculoDiv = document.getElementById("informacoesVeiculo");
 const btnFecharDetalhes = document.getElementById('fechar-detalhes');
+const formAddManutencao = document.getElementById('form-add-manutencao'); 
 
 // ===================================================================================
 // INICIALIZAÇÃO DA APLICAÇÃO
@@ -122,15 +123,30 @@ async function carregarManutencoes(veiculoId) {
 async function adicionarManutencao(event) {
     event.preventDefault(); // Impede o recarregamento da página
 
+    // --- ETAPA 1: Coletar todos os dados do formulário primeiro ---
     const veiculoId = document.getElementById('manutencao-veiculo-id').value;
     const form = document.getElementById('form-add-manutencao');
 
+    // Verificação de segurança
+    if (!veiculoId) {
+        exibirNotificacao('Erro: ID do veículo não encontrado. Tente abrir os detalhes novamente.', 'erro');
+        return;
+    }
+
+    // Pegando os valores de cada campo
+    const descricaoServico = document.getElementById('manutencao-descricao').value;
+    const custoInput = document.getElementById('manutencao-custo').value;
+    const kmInput = document.getElementById('manutencao-km').value;
+
+    // --- ETAPA 2: Montar o objeto para enviar ao backend ---
     const dadosFormulario = {
-        descricaoServico: document.getElementById('manutencao-descricao').value,
-        custo: document.getElementById('manutencao-custo').value,
-        quilometragem: document.getElementById('manutencao-km').value
+        descricaoServico: descricaoServico,
+        custo: parseFloat(custoInput), // Converte para número decimal
+        // Se o campo de km não estiver vazio, converte para número inteiro
+        quilometragem: kmInput ? parseInt(kmInput) : undefined
     };
 
+    // --- ETAPA 3: Tentar enviar os dados ---
     try {
         const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}/manutencoes`, {
             method: 'POST',
@@ -147,7 +163,7 @@ async function adicionarManutencao(event) {
         exibirNotificacao('Manutenção registrada com sucesso!', 'sucesso');
         form.reset(); // Limpa o formulário
 
-        // A MÁGICA: Recarrega a lista para mostrar a nova manutenção instantaneamente
+        // Atualiza a lista na tela (NOME DA FUNÇÃO CORRIGIDO)
         await carregarManutencoes(veiculoId);
 
     } catch (error) {
@@ -172,6 +188,8 @@ function setupEventListeners() {
     // Listener do botão de verificar clima
     verificarClimaBtn?.addEventListener('click', handleVerificarClimaClick);
 
+    // Quando o formulário de manutenção for enviado, chame a função adicionarManutencao
+    formAddManutencao?.addEventListener('submit', adicionarManutencao);
 
     // --- Listener para os botões DENTRO da garagem (Editar, Excluir, Detalhes) ---
     garagemContainer?.addEventListener('click', (event) => {

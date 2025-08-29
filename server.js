@@ -317,6 +317,61 @@ app.get('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
     }
 });
 
+// ROTA PARA CRIAR UMA NOVA MANUTENÇÃO (Anotar o pedido)
+app.post('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
+    try {
+        const { veiculoId } = req.params;
+
+        // 1. Primeiro, o garçom verifica se a mesa (o veículo) existe.
+        const veiculo = await Veiculo.findById(veiculoId);
+        if (!veiculo) {
+            return res.status(404).json({ error: 'Veículo não encontrado.' });
+        }
+
+        // 2. Se a mesa existe, ele anota o pedido (cria a manutenção).
+        const novaManutencao = await Manutencao.create({
+            ...req.body,       // Pega os detalhes do pedido (descrição, custo).
+            veiculo: veiculoId // Amarra o pedido à mesa (o ID do veículo).
+        });
+
+        // 3. Devolve uma confirmação de que o pedido foi anotado.
+        res.status(201).json(novaManutencao);
+
+    } catch (error) {
+        // Se algo der errado (pedido incompleto, etc.), ele avisa.
+        console.error("Erro ao adicionar manutenção:", error);
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(val => val.message);
+            return res.status(400).json({ error: messages.join(' ') });
+        }
+        res.status(500).json({ error: 'Erro interno ao adicionar manutenção.' });
+    }
+});
+
+// ROTA PARA LISTAR AS MANUTENÇÕES (Buscar os pedidos da mesa)
+app.get('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
+    try {
+        const { veiculoId } = req.params;
+
+        // (Opcional, mas bom) O garçom verifica se a mesa existe antes de procurar.
+        const veiculo = await Veiculo.findById(veiculoId);
+        if (!veiculo) {
+            return res.status(404).json({ error: 'Veículo não encontrado.' });
+        }
+
+        // Busca todos os pedidos que têm o "barbante" amarrado a esta mesa.
+        // E organiza do mais novo para o mais antigo.
+        const manutenções = await Manutencao.find({ veiculo: veiculoId }).sort({ data: -1 });
+
+        // Entrega a lista de pedidos.
+        res.status(200).json(manutenções);
+
+    } catch (error) {
+        console.error("Erro ao listar manutenções:", error);
+        res.status(500).json({ error: 'Erro interno ao listar manutenções.' });
+    }
+});
+
 // =======================================================================
 // --- Inicialização do Servidor ---
 // =======================================================================

@@ -1031,3 +1031,80 @@ footer p {
      .previsao-dia { flex: 0 0 120px; padding: 8px; font-size: 0.8em;}
      .notificacao { padding: 10px; margin-bottom: 8px; font-size: 0.9em; }
 }
+
+#form-add-manutencao .form-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+#form-add-manutencao label {
+    text-align: right;
+    font-weight: 500;
+}
+
+/* --- Estilos para o Modal de Manutenção --- */
+
+#manutencoes-container h4, #form-manutencao-container h5 {
+    color: var(--cor-destaque-azul);
+    margin-bottom: 15px;
+}
+
+#lista-manutencoes {
+    list-style-type: none;
+    padding-left: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    padding: 10px;
+    background-color: #f8f9fa;
+}
+
+#lista-manutencoes li {
+    padding: 8px 5px;
+    border-bottom: 1px solid #e9ecef;
+    color: var(--cor-texto-secundario);
+}
+
+#lista-manutencoes li:last-child {
+    border-bottom: none;
+}
+
+#form-add-manutencao .form-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px 15px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+#form-add-manutencao label {
+    text-align: right;
+    font-weight: 500;
+    font-size: 0.9em;
+}
+
+#form-add-manutencao input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+}
+
+#form-add-manutencao button[type="submit"] {
+    grid-column: 2 / 3; /* Alinha o botão com os inputs */
+    justify-self: start; /* Alinha à esquerda */
+    padding: 8px 18px;
+    background-color: var(--cor-sucesso-funcional);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-padrao);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#form-add-manutencao button[type="submit"]:hover {
+    background-color: var(--cor-sucesso-funcional-hover);
+}

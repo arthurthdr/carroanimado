@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Garagem Inteligente</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
-<link rel="icon" type="image/x-icon" href="favicon.ico">
-
 <body>
     <h1>Garagem Inteligente</h1>
 
@@ -19,106 +18,85 @@
 
     <div id="add-veiculo-form-container" class="add-veiculo-container" style="display: none;">
         <h2>Adicionar Novo Veículo</h2>
-        <!-- D:/carro/index.html -->
+        <form id="form-add-veiculo">
+            <label for="add-placa">Placa:</label>
+            <input type="text" id="add-placa" placeholder="ABC1234" required>
 
-<form id="form-add-veiculo">
-    <label for="add-placa">Placa:</label>
-    <input type="text" id="add-placa" placeholder="ABC1234" required>
+            <label for="add-marca">Marca:</label>
+            <input type="text" id="add-marca" placeholder="Ex: Chevrolet" required>
+            
+            <label for="add-modelo">Modelo:</label>
+            <input type="text" id="add-modelo" placeholder="Ex: Onix" required>
 
-    <label for="add-marca">Marca:</label>
-    <input type="text" id="add-marca" placeholder="Ex: Chevrolet" required>
-    
-    <label for="add-modelo">Modelo:</label>
-    <input type="text" id="add-modelo" placeholder="Ex: Onix" required>
+            <label for="add-ano">Ano:</label>
+            <input type="number" id="add-ano" placeholder="2023" required>
 
-    <label for="add-ano">Ano:</label>
-    <input type="number" id="add-ano" placeholder="2023" required>
+            <label for="add-cor">Cor:</label>
+            <input type="text" id="add-cor" placeholder="Ex: Prata" required>
 
-    <label for="add-cor">Cor:</label>
-    <input type="text" id="add-cor" placeholder="Ex: Prata" required>
-
-    <div class="form-add-buttons">
-        <button type="submit">Adicionar à Garagem</button>
-        <button type="button" id="cancelar-add-veiculo">Cancelar</button>
-    </div>
-</form>
+            <div class="form-add-buttons">
+                <button type="submit">Adicionar à Garagem</button>
+                <button type="button" id="cancelar-add-veiculo">Cancelar</button>
+            </div>
+        </form>
     </div>
 
     <div id="garagem-container" class="container">
         <p id="garagem-vazia-msg" style="display: none;">Sua garagem está vazia. Adicione um veículo!</p>
     </div>
 
-   <div id="detalhes-e-agendamento" class="detalhes-container" style="display: none;">
+    <!-- ===== MODAL DE DETALHES E MANUTENÇÃO (ESTRUTURA CORRIGIDA) ===== -->
+    <div id="detalhes-e-agendamento" class="detalhes-container" style="display: none;">
     
-    <h2>Detalhes e Manutenção do Veículo Selecionado</h2>
-    <button id="fechar-detalhes" class="close-btn">×</button>
+        <div class="detalhes-conteudo-interno"> <!-- Adicionado um wrapper para melhor estilização no futuro -->
+            <h2>Detalhes e Manutenção do Veículo</h2>
+            <button id="fechar-detalhes" class="close-btn">×</button>
 
-    <!-- ÁREA 1: Informações básicas do Veículo -->
-    <div id="informacoesVeiculo">
-        <!-- O JS preencherá esta parte com os dados do carro (placa, marca, etc.) -->
-        <!-- O div 'detalhesExtrasContainer' que você tinha pode ser removido, pois o 'informacoesVeiculo' já serve a esse propósito -->
-    </div>
+            <!-- ÁREA 1: Informações básicas do Veículo -->
+            <div id="informacoesVeiculo">
+                <!-- O JS preencherá esta parte -->
+            </div>
 
-    <!-- ÁREA 2: Histórico e Formulário de Manutenções (CORRIGIDO) -->
-    <div id="manutencoes-container" style="margin-top: 20px; width: 100%;">
-        <h4>Histórico de Manutenção</h4>
-        
-        <ul id="lista-manutencoes" class="dados-lista">
-            <li>Carregando manutenções...</li>
-        </ul>
+            <!-- ÁREA 2: Histórico e Formulário de Manutenções (A ÚNICA E CORRETA) -->
+            <div id="manutencoes-container" style="margin-top: 20px; width: 100%;">
+                <h4>Histórico de Manutenção</h4>
+                
+                <ul id="lista-manutencoes" class="dados-lista">
+                    <!-- O JS preencherá esta parte -->
+                </ul>
 
-        <div id="form-manutencao-container">
-            <h5>Adicionar Nova Manutenção</h5>
-            <form id="form-add-manutencao">
-                <input type="hidden" id="manutencao-veiculo-id">
-                <div class="form-grid">
-                    <label for="manutencao-descricao">Descrição do Serviço:</label>
-                    <input type="text" id="manutencao-descricao" required placeholder="Ex: Troca de óleo e filtro">
-                    
-                    <label for="manutencao-custo">Custo (R$):</label>
-                    <input type="number" id="manutencao-custo" required min="0" step="0.01" placeholder="150.00">
-                    
-                    <label for="manutencao-km">Quilometragem (Opcional):</label>
-                    <input type="number" id="manutencao-km" min="0" placeholder="50000">
+                <div id="form-manutencao-wrapper" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                    <h5>Adicionar Nova Manutenção</h5>
+                    <form id="form-add-manutencao">
+                        <input type="hidden" id="manutencao-veiculo-id">
+                        <div class="form-grid">
+                            <label for="manutencao-descricao">Descrição do Serviço:</label>
+                            <input type="text" id="manutencao-descricao" required placeholder="Ex: Troca de óleo e filtro">
+                            
+                            <label for="manutencao-custo">Custo (R$):</label>
+                            <input type="number" id="manutencao-custo" required min="0" step="0.01" placeholder="150.00">
+                            
+                            <label for="manutencao-km">Quilometragem (Opcional):</label>
+                            <input type="number" id="manutencao-km" min="0" placeholder="50000">
+                        </div>
+                        <button type="submit">Registrar Manutenção</button>
+                    </form>
                 </div>
-                <button type="submit">Registrar Manutenção</button>
-            </form>
+            </div>
         </div>
+        
     </div>
+    <!-- ===== FIM DO MODAL ===== -->
 
-    <!-- ÁREA 3: Seus formulários antigos (mantidos como estavam) -->
-    <div id="agendamento-form-container" style="display: none;">
-        <h3>Agendar Nova Manutenção</h3>
-        <form id="form-agendamento">
-            <label for="agenda-data">Data:</label>
-            <input type="date" id="agenda-data" required>
-            <label for="agenda-tipo">Tipo de Serviço:</label>
-            <input type="text" id="agenda-tipo" placeholder="Ex: Troca de óleo" required>
-            <label for="agenda-custo">Custo (R$):</label>
-            <input type="number" id="agenda-custo" step="0.01" min="0" placeholder="150.00" required>
-            <label for="agenda-descricao">Descrição (Opcional):</label>
-            <textarea id="agenda-descricao" rows="2"></textarea>
-            <button type="submit">Agendar/Registrar</button>
-        </form>
-    </div>
-    <div id="agendamentos-futuros-container" style="display: none;">
-        <h4>Próximos Agendamentos</h4>
-        <pre id="agendamentos-futuros-conteudo"></pre>
-    </div>
+    <audio id="som-buzina" src="sons/buzina.mp3" preload="auto"></audio>
+    <audio id="som-acelerar" src="sons/carroacelerando.mp3" preload="auto"></audio>
+    <audio id="som-frear" src="sons/freio.mp3" preload="auto"></audio>
+    <audio id="som-ligar" src="sons/carrodesligando.mp3" preload="auto"></audio>
+    <audio id="som-desligar" src="sons/carrodesligando.mp3" preload="auto"></audio>
+    <audio id="som-adicionar" src="sons/success-add.mp3" preload="auto"></audio>
 
-</div>
-
-
-<!-- --- Fim Novas Seções --- -->
-<!-- --- Fim Novas Seções --- -->
-    <audio id="som-buzina" src="sounds/buzina.mp3" preload="auto"></audio>
-    <audio id="som-acelerar" src="sounds/carroacelerando.mp3" preload="auto"></audio>
-    <audio id="som-frear" src="sounds/freio.mp3" preload="auto"></audio>
-    <audio id="som-ligar" src="sounds/carrodesligando.mp3" preload="auto"></audio>
-    <audio id="som-desligar" src="sounds/carrodesligando.mp3" preload="auto"></audio>
-    <audio id="som-adicionar" src="sounds/success-add.mp3" preload="auto"></audio>
-
-        <script src="js/script.js"></script>
+    <script src="js/script.js"></script>
+    
     <footer>
         <p>© 2024 Arthur - IFPR. Todos os direitos reservados.</p>
         <p>Projeto Garagem Inteligente - Informática para Internet</p>
