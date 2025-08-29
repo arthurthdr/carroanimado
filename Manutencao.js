@@ -1,84 +1,47 @@
-/**
- * Classe que representa uma manutenção de um veículo.
- */
-class Manutencao {
-    /**
-     * Cria uma nova instância de Manutencao.
-     * @param {string} data A data da manutenção (formato string).
-     * @param {string} tipo O tipo de serviço realizado (ex: "Troca de óleo").
-     * @param {number} custo O custo da manutenção.
-     * @param {string} [descricao] Uma descrição opcional da manutenção.
-     */
-    constructor(data, tipo, custo, descricao) {
-        this.data = data;
-        this.tipo = tipo;
-        this.custo = custo;
-        this.descricao = descricao || '';
-    }
+import mongoose from 'mongoose';
 
-    /**
-     * Obtém a data da manutenção como um objeto Date.
-     * @returns {Date|null} A data da manutenção ou null se a data for inválida.
-     */
-    getDataObjeto() {
-        try {
-            return new Date(this.data);
-        } catch (e) {
-            console.error("Erro ao converter data:", e);
-            return null;
-        }
-    }
+// --- A Planta da nossa "Caixinha" de Manutenção ---
+// Aqui descrevemos exatamente o que cada caixinha deve ter.
+const manutencaoSchema = new mongoose.Schema({
+    
+    // O que foi feito? Ex: "Troca de óleo e filtro"
+    descricaoServico: {
+        type: String,
+        required: [true, 'A descrição do serviço é obrigatória.'] // Não pode ficar em branco!
+    },
 
-    /**
-     * Valida os dados da manutenção.
-     * @returns {boolean} True se os dados são válidos, false caso contrário.
-     */
-    validarDados() {
-        const d = this.getDataObjeto();
-        if (!d || isNaN(d.getTime())) {
-            console.error("Data inválida:", this.data);
-            return false;
-        }
-        if (typeof this.tipo !== 'string' || this.tipo.trim() === '') {
-            console.error("Tipo inválido:", this.tipo);
-            return false;
-        }
-        if (typeof this.custo !== 'number' || isNaN(this.custo) || this.custo <= 0) {
-            console.error("Custo inválido:", this.custo);
-            return false;
-        }
-        return true;
-    }
+    // Quando foi feito?
+    data: {
+        type: Date,
+        required: true,
+        default: Date.now // Se não falarmos a data, ele usa a data de agora.
+    },
 
-    /**
-     * Obtém a data da manutenção.
-     * @returns {string} A data da manutenção.
-     */
-    get dataManutencao() {
-        return this.data;
-    }
+    // Quanto custou?
+    custo: {
+        type: Number,
+        required: [true, 'O custo é obrigatório.'],
+        min: [0, 'O custo não pode ser negativo.'] // Não pode ser um número negativo!
+    },
 
-    /**
-     * Obtém o tipo de manutenção.
-     * @returns {string} O tipo de manutenção.
-     */
-    get tipoManutencao() {
-        return this.tipo;
+    // Com quantos quilômetros o carro estava?
+    quilometragem: {
+        type: Number,
+        min: [0, 'A quilometragem não pode ser negativa.']
+    },
+    
+    // --- O BARBANTE MÁGICO! ---
+    // Este é o campo que conecta a manutenção ao veículo.
+    veiculo: {
+        type: mongoose.Schema.Types.ObjectId, // Diz que vamos guardar um ID único de outro lugar.
+        ref: 'Veiculo', // Diz que esse ID é de um documento do modelo 'Veiculo'.
+        required: true // Toda manutenção PRECISA pertencer a um veículo.
     }
+}, {
+    timestamps: true // Adiciona automaticamente os campos 'createdAt' e 'updatedAt'.
+});
 
-    /**
-     * Obtém o custo da manutenção.
-     * @returns {number} O custo da manutenção.
-     */
-    get custoManutencao() {
-        return this.custo;
-    }
+// Criamos o modelo a partir da planta, e agora podemos usá-lo para criar, ler, etc.
+const Manutencao = mongoose.model('Manutencao', manutencaoSchema);
 
-    /**
-     * Obtém a descrição da manutenção.
-     * @returns {string} A descrição da manutenção.
-     */
-    get descricaoManutencao() {
-        return this.descricao;
-    }
-}
+export default Manutencao;
