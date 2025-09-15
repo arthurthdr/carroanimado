@@ -10,15 +10,15 @@
 // Bloco de Configuração e Variáveis Globais
 // ===================================================================================
 
-const RENDER_BACKEND_URL = 'https://api.render.com/deploy/srv-d0rfpb15pdvs73duvoog?key=AZNzBlemwFs';
+const RENDER_BACKEND_URL = 'https://carroanimado.onrender.com';
 const LOCAL_BACKEND_URL = 'http://localhost:3001';
 
-const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? LOCAL_BACKEND_URL
-    : RENDER_BACKEND_URL;
+const backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? LOCAL_BACKEND_URL   // Se for local, usa este
+    : RENDER_BACKEND_URL; // Senão (online), usa este
 
-console.log(`[CONFIG] Conectando ao backend em: ${backendUrl}`);
-
+// Mensagem no console para sabermos para onde estamos tentando conectar.
+console.log(`[CONFIG] Frontend conectando ao backend em: ${backendUrl}`);
 // Elementos DOM (cacheados para melhor performance)
 const notificacoesContainer = document.getElementById('notificacoes');
 const garagemContainer = document.getElementById('garagem-container');
