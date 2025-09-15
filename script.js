@@ -218,31 +218,52 @@ function setupEventListeners() {
 async function handleAddVeiculoSubmit(event) {
     event.preventDefault();
 
-    // Montamos o objeto pegando os valores de cada input pelo seu ID correto.
-    const veiculoParaSalvar = {
-        placa: document.getElementById('add-placa').value.toUpperCase(),
-        marca: document.getElementById('add-marca').value,
-        modelo: document.getElementById('add-modelo').value,
-        ano: parseInt(document.getElementById('add-ano').value),
-        cor: document.getElementById('add-cor').value
-    };
-
     try {
+        // --- ETAPA 1: Selecionar os elementos do formulário ---
+        const placaInput = document.getElementById('add-placa');
+        const marcaInput = document.getElementById('add-marca');
+        const modeloInput = document.getElementById('add-modelo');
+        const anoInput = document.getElementById('add-ano');
+        const corInput = document.getElementById('add-cor');
+
+        // --- ETAPA 2: Verificar se todos os elementos foram encontrados ---
+        // Se algum destes for 'null', o erro vai acontecer.
+        if (!placaInput || !marcaInput || !modeloInput || !anoInput || !corInput) {
+            // Esta mensagem nos dirá exatamente qual campo está com problema de ID
+            console.error('ERRO: Um ou mais campos do formulário de adição não foram encontrados no HTML. Verifique os IDs.');
+            exibirNotificacao('Erro de formulário. Contate o suporte.', 'erro');
+            return; // Para a execução da função aqui.
+        }
+
+        // --- ETAPA 3: Se tudo foi encontrado, pegar os valores e montar o objeto ---
+        const veiculoParaSalvar = {
+            placa: placaInput.value.toUpperCase(),
+            marca: marcaInput.value,
+            modelo: modeloInput.value,
+            ano: parseInt(anoInput.value),
+            cor: corInput.value
+        };
+
+        // --- ETAPA 4: Enviar para o backend ---
         const response = await fetch(`${backendUrl}/api/veiculos`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(veiculoParaSalvar)
         });
+
         const resultado = await response.json();
         if (!response.ok) {
             throw new Error(resultado.error || 'Erro desconhecido do servidor.');
         }
+
         exibirNotificacao('Veículo adicionado com sucesso!', 'sucesso');
         toggleFormAddVeiculo(false);
-        await buscarErenderizarVeiculos(); // Garante que a garagem é atualizada
+        await buscarErenderizarVeiculos();
+
     } catch (error) {
+        // O catch agora pega erros de fetch ou outros erros inesperados.
         console.error("Erro ao adicionar veículo:", error);
-        exibirNotificacao(error.message, 'erro');
+        exibirNotificacao(error.message || 'Ocorreu um erro ao adicionar o veículo.', 'erro');
     }
 }
 
