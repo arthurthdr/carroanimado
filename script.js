@@ -217,13 +217,16 @@ function setupEventListeners() {
 
 async function handleAddVeiculoSubmit(event) {
     event.preventDefault();
+
+    // Montamos o objeto pegando os valores de cada input pelo seu ID correto.
     const veiculoParaSalvar = {
         placa: document.getElementById('add-placa').value.toUpperCase(),
         marca: document.getElementById('add-marca').value,
         modelo: document.getElementById('add-modelo').value,
-        ano: document.getElementById('add-ano').value,
+        ano: parseInt(document.getElementById('add-ano').value),
         cor: document.getElementById('add-cor').value
     };
+
     try {
         const response = await fetch(`${backendUrl}/api/veiculos`, {
             method: 'POST',
@@ -231,10 +234,12 @@ async function handleAddVeiculoSubmit(event) {
             body: JSON.stringify(veiculoParaSalvar)
         });
         const resultado = await response.json();
-        if (!response.ok) throw new Error(resultado.error || 'Erro desconhecido do servidor.');
+        if (!response.ok) {
+            throw new Error(resultado.error || 'Erro desconhecido do servidor.');
+        }
         exibirNotificacao('Veículo adicionado com sucesso!', 'sucesso');
         toggleFormAddVeiculo(false);
-        buscarErenderizarVeiculos();
+        await buscarErenderizarVeiculos(); // Garante que a garagem é atualizada
     } catch (error) {
         console.error("Erro ao adicionar veículo:", error);
         exibirNotificacao(error.message, 'erro');
