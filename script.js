@@ -10,7 +10,7 @@
 // Bloco de Configuração e Variáveis Globais
 // ===================================================================================
 
-const RENDER_BACKEND_URL = 'https://carroanimado.onrender.com';
+const RENDER_BACKEND_URL = 'https://api.render.com/deploy/srv-d0rfpb15pdvs73duvoog?key=AZNzBlemwFs';
 const LOCAL_BACKEND_URL = 'http://localhost:3001';
 
 const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
