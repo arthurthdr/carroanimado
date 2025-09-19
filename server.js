@@ -100,6 +100,40 @@ const ferramentasEssenciais = [
 // =======================================================================
 // --- Rotas da API (Endpoints) ---
 // =======================================================================
+// no arquivo: server.js
+
+// ROTA PARA ADICIONAR UMA NOVA MANUTENÇÃO
+app.post('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
+    try {
+        const { veiculoId } = req.params;
+        const { descricaoServico, custo, quilometragem } = req.body;
+
+        // Validação extra: o veículo existe?
+        const veiculo = await Veiculo.findById(veiculoId);
+        if (!veiculo) {
+            return res.status(404).json({ error: 'Veículo não encontrado para adicionar manutenção.' });
+        }
+
+        // Cria a nova manutenção no banco de dados, já associada ao veículo
+        const novaManutencao = await Manutencao.create({
+            descricaoServico,
+            custo,
+            quilometragem,
+            veiculo: veiculoId
+        });
+
+        res.status(201).json(novaManutencao);
+
+    } catch (error) {
+        console.error("Erro ao adicionar manutenção:", error);
+        // Tratamento de erro de validação do Mongoose
+        if (error.name === 'ValidationError') {
+             const messages = Object.values(error.errors).map(val => val.message);
+             return res.status(400).json({ error: messages.join(' ') });
+        }
+        res.status(500).json({ error: 'Erro interno ao adicionar manutenção.' });
+    }
+});
 
 app.get('/api/previsao/:cidade', async (req, res) => {
     const { cidade } = req.params;

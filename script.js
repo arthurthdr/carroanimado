@@ -342,6 +342,8 @@ function exibirPrevisaoDetalhada(dados) {
     `;
 }
 
+// no arquivo: js/script.js
+
 async function handleMostrarDetalhes(id) {
     if (!detalhesContainer || !informacoesVeiculoDiv) return;
 
@@ -353,24 +355,36 @@ async function handleMostrarDetalhes(id) {
             throw new Error(veiculo.error || 'Não foi possível buscar os detalhes do veículo.');
         }
 
-        // Monta o HTML com os detalhes BÁSICOS do veículo
+        // Lógica para formatar os novos dados
+        const valorFIPEFormatado = veiculo.valorFIPE 
+            ? `R$ ${veiculo.valorFIPE.toFixed(2).replace('.', ',')}` 
+            : 'Não informado';
+            
+        const recallStatus = veiculo.recallPendente 
+            ? '<span class="status-negativo">Sim!</span>' 
+            : '<span class="status-positivo">Não</span>';
+
         informacoesVeiculoDiv.innerHTML = `
             <div class="detalhes-info-basica">
                 <h3>${veiculo.marca} ${veiculo.modelo}</h3>
                 <img src="img/carro.jpg" alt="Imagem ${veiculo.modelo}" class="detalhes-imagem" onerror="this.src='img/placeholder.png';">
                 <p><strong>Placa:</strong> <span>${veiculo.placa}</span></p>
-                <p><strong>Marca:</strong> <span>${veiculo.marca}</span></p>
-                <p><strong>Modelo:</strong> <span>${veiculo.modelo}</span></p>
                 <p><strong>Ano:</strong> <span>${veiculo.ano}</span></p>
                 <p><strong>Cor:</strong> <span>${veiculo.cor}</span></p>
-                <p><strong>Cadastrado em:</strong> <span>${new Date(veiculo.createdAt).toLocaleDateString('pt-BR')}</span></p>
+
+                <!-- Seção de Dados Adicionais -->
+                <div class="detalhes-info-adicional">
+                    <h4>Informações de Mercado</h4>
+                    <p><strong>Valor FIPE (aprox.):</strong> <span>${valorFIPEFormatado}</span></p>
+                    <p><strong>Recall Pendente:</strong> ${recallStatus}</p>
+                    <p><strong>Seguradora Recomendada:</strong> <span>${veiculo.seguradoraRecomendada || 'N/A'}</span></p>
+                </div>
             </div>
         `;
 
         document.getElementById('manutencao-veiculo-id').value = id;
         await carregarManutencoes(id);
         
-        // Finalmente, mostra o modal
         detalhesContainer.style.display = 'flex';
         document.body.style.overflow = 'hidden';
 
@@ -378,12 +392,6 @@ async function handleMostrarDetalhes(id) {
         console.error('Erro ao mostrar detalhes:', error);
         exibirNotificacao(error.message, 'erro');
     }
-}
-
-function fecharDetalhes() {
-    if (!detalhesContainer) return;
-    detalhesContainer.style.display = 'none';
-    document.body.style.overflow = 'auto';
 }
 
 // ===================================================================================
