@@ -3,12 +3,34 @@
 // =======================================================================
 
 // --- Importações de Módulos ---
+import fs from 'fs';
+import path from 'path';
+
+console.log('--- Início da Depuração de Caminhos ---');
+console.log('Diretório de trabalho atual:', process.cwd());
+
+const modelsPath = path.join(process.cwd(), 'models');
+console.log('Tentando ler o diretório:', modelsPath);
+
+try {
+    const files = fs.readdirSync(modelsPath);
+    console.log('Arquivos encontrados na pasta "models":', files);
+} catch (error) {
+    console.error('ERRO ao ler a pasta "models":', error.message);
+}
+
+console.log('--- Fim da Depuração ---');
+
 import express from 'express';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import mongoose from 'mongoose';
 import Veiculo from './models/Veiculo.js';
 import Manutencao from './models/Manutencao.js';
+import User from './models/User.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import authMiddleware from './middleware/auth.js';
 
 // --- Configuração Inicial do dotenv com depuração ---
 const dotEnvResult = dotenv.config();
@@ -101,6 +123,87 @@ const ferramentasEssenciais = [
 // --- Rotas da API (Endpoints) ---
 // =======================================================================
 // no arquivo: server.js
+
+// =======================================================================
+// --- ROTAS DE AUTENTICAÇÃO (REGISTRO E LOGIN) ---
+// =======================================================================
+
+// --- ROTA DE REGISTRO ---
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // 1. Validar se os dados foram enviados
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Por favor, forneça e-mail e senha.' });
+        }
+
+        // 2. Verificar se o usuário já existe
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Este e-mail já está em uso.' });
+        }
+
+        // 3. Criptografar a senha (a mágica do bcrypt)
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // 4. Criar o novo usuário
+        const newUser = new User({
+            email,
+            password: hashedPassword
+        });
+        await newUser.save();
+
+        res.status(201).json({ message: 'Usuário registrado com sucesso!' });
+
+    } catch (error) {
+        console.error("Erro no registro:", error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+});
+
+// --- ROTA DE LOGIN ---
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // 1. Validar se os dados foram enviados
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Por favor, forneça e-mail e senha.' });
+        }
+
+        // 2. Encontrar o usuário
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ error: 'Credenciais inválidas.' }); // Mensagem genérica por segurança
+        }
+
+        // 3. Comparar as senhas
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ error: 'Credenciais inválidas.' }); // Mensagem genérica por segurança
+        }
+
+        // 4. Se tudo estiver certo, criar a "chave mágica" (Token JWT)
+        const payload = {
+            userId: user._id
+        };
+
+        // 'SEGREDO_SUPER_SECRETO' deve ser trocado por uma variável de ambiente!
+        const token = jwt.sign(payload, process.env.JWT_SECRET || 'SEGREDO_SUPER_SECRETO', {
+            expiresIn: '1h' // O token expira em 1 hora
+        });
+
+        res.status(200).json({ token });
+
+    } catch (error) {
+        console.error("Erro no login:", error);
+        res.status(500).json({ error: 'Erro interno no servidor.' });
+    }
+});
+
+
 
 // ROTA PARA ADICIONAR UMA NOVA MANUTENÇÃO
 app.post('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
@@ -324,6 +427,47 @@ app.get('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
     } catch (error) {
         console.error("Erro ao listar manutenções:", error);
         res.status(500).json({ error: 'Erro interno ao listar manutenções.' });
+    }
+});
+
+app.post('/api/veiculos', authMiddleware, async (req, res) => {
+    try {
+        const novoVeiculoData = {
+            ...req.body,
+            // O ID do dono vem do guardião, não do frontend!
+            owner: req.userId 
+        };
+        const veiculoCriado = await Veiculo.create(novoVeiculoData);
+        res.status(201).json(veiculoCriado);
+    } catch (error) {
+        // ... seu tratamento de erro ...
+    }
+});
+
+app.get('/api/veiculos', authMiddleware, async (req, res) => {
+    try {
+        // Busca apenas os veículos cujo dono é o usuário logado
+        const todosOsVeiculos = await Veiculo.find({ owner: req.userId });
+        res.json(todosOsVeiculos);
+    } catch (error) {
+        // ... seu tratamento de erro ...
+    }
+});
+
+// FAÇA O MESMO PARA AS ROTAS PUT, DELETE E AS ROTAS DE MANUTENÇÃO!
+// Sempre adicione `authMiddleware` depois da URL e antes da função async.
+
+// Exemplo para deletar
+app.delete('/api/veiculos/:id', authMiddleware, async (req, res) => {
+    try {
+        const veiculo = await Veiculo.findOne({ _id: req.params.id, owner: req.userId });
+        if(!veiculo) {
+            return res.status(404).json({ error: 'Veículo não encontrado ou você não tem permissão.' });
+        }
+        await Veiculo.findByIdAndDelete(req.params.id);
+        res.status(200).json({ message: 'Veículo deletado com sucesso!' });
+    } catch (error) {
+        // ... seu tratamento de erro ...
     }
 });
 
