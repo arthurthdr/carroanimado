@@ -13,12 +13,12 @@
 const RENDER_BACKEND_URL = 'https://carroanimado.onrender.com';
 const LOCAL_BACKEND_URL = 'http://localhost:3001';
 
-const backendUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? LOCAL_BACKEND_URL
-    : RENDER_BACKEND_URL;
+const backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? LOCAL_BACKEND_URL   // Se for local, usa este
+    : RENDER_BACKEND_URL; // Senão (online), usa este
 
-console.log(`[CONFIG] Conectando ao backend em: ${backendUrl}`);
-
+// Mensagem no console para sabermos para onde estamos tentando conectar.
+console.log(`[CONFIG] Frontend conectando ao backend em: ${backendUrl}`);
 // Elementos DOM (cacheados para melhor performance)
 const notificacoesContainer = document.getElementById('notificacoes');
 const garagemContainer = document.getElementById('garagem-container');
@@ -217,27 +217,53 @@ function setupEventListeners() {
 
 async function handleAddVeiculoSubmit(event) {
     event.preventDefault();
-    const veiculoParaSalvar = {
-        placa: document.getElementById('add-placa').value.toUpperCase(),
-        marca: document.getElementById('add-marca').value,
-        modelo: document.getElementById('add-modelo').value,
-        ano: document.getElementById('add-ano').value,
-        cor: document.getElementById('add-cor').value
-    };
+
     try {
+        // --- ETAPA 1: Selecionar os elementos do formulário ---
+        const placaInput = document.getElementById('add-placa');
+        const marcaInput = document.getElementById('add-marca');
+        const modeloInput = document.getElementById('add-modelo');
+        const anoInput = document.getElementById('add-ano');
+        const corInput = document.getElementById('add-cor');
+
+        // --- ETAPA 2: Verificar se todos os elementos foram encontrados ---
+        // Se algum destes for 'null', o erro vai acontecer.
+        if (!placaInput || !marcaInput || !modeloInput || !anoInput || !corInput) {
+            // Esta mensagem nos dirá exatamente qual campo está com problema de ID
+            console.error('ERRO: Um ou mais campos do formulário de adição não foram encontrados no HTML. Verifique os IDs.');
+            exibirNotificacao('Erro de formulário. Contate o suporte.', 'erro');
+            return; // Para a execução da função aqui.
+        }
+
+        // --- ETAPA 3: Se tudo foi encontrado, pegar os valores e montar o objeto ---
+        const veiculoParaSalvar = {
+            placa: placaInput.value.toUpperCase(),
+            marca: marcaInput.value,
+            modelo: modeloInput.value,
+            ano: parseInt(anoInput.value),
+            cor: corInput.value
+        };
+
+        // --- ETAPA 4: Enviar para o backend ---
         const response = await fetch(`${backendUrl}/api/veiculos`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(veiculoParaSalvar)
         });
+
         const resultado = await response.json();
-        if (!response.ok) throw new Error(resultado.error || 'Erro desconhecido do servidor.');
+        if (!response.ok) {
+            throw new Error(resultado.error || 'Erro desconhecido do servidor.');
+        }
+
         exibirNotificacao('Veículo adicionado com sucesso!', 'sucesso');
         toggleFormAddVeiculo(false);
-        buscarErenderizarVeiculos();
+        await buscarErenderizarVeiculos();
+
     } catch (error) {
+        // O catch agora pega erros de fetch ou outros erros inesperados.
         console.error("Erro ao adicionar veículo:", error);
-        exibirNotificacao(error.message, 'erro');
+        exibirNotificacao(error.message || 'Ocorreu um erro ao adicionar o veículo.', 'erro');
     }
 }
 
@@ -316,6 +342,8 @@ function exibirPrevisaoDetalhada(dados) {
     `;
 }
 
+// no arquivo: js/script.js
+
 async function handleMostrarDetalhes(id) {
     if (!detalhesContainer || !informacoesVeiculoDiv) return;
 
@@ -327,24 +355,36 @@ async function handleMostrarDetalhes(id) {
             throw new Error(veiculo.error || 'Não foi possível buscar os detalhes do veículo.');
         }
 
-        // Monta o HTML com os detalhes BÁSICOS do veículo
+        // Lógica para formatar os novos dados
+        const valorFIPEFormatado = veiculo.valorFIPE 
+            ? `R$ ${veiculo.valorFIPE.toFixed(2).replace('.', ',')}` 
+            : 'Não informado';
+            
+        const recallStatus = veiculo.recallPendente 
+            ? '<span class="status-negativo">Sim!</span>' 
+            : '<span class="status-positivo">Não</span>';
+
         informacoesVeiculoDiv.innerHTML = `
             <div class="detalhes-info-basica">
                 <h3>${veiculo.marca} ${veiculo.modelo}</h3>
                 <img src="img/carro.jpg" alt="Imagem ${veiculo.modelo}" class="detalhes-imagem" onerror="this.src='img/placeholder.png';">
                 <p><strong>Placa:</strong> <span>${veiculo.placa}</span></p>
-                <p><strong>Marca:</strong> <span>${veiculo.marca}</span></p>
-                <p><strong>Modelo:</strong> <span>${veiculo.modelo}</span></p>
                 <p><strong>Ano:</strong> <span>${veiculo.ano}</span></p>
                 <p><strong>Cor:</strong> <span>${veiculo.cor}</span></p>
-                <p><strong>Cadastrado em:</strong> <span>${new Date(veiculo.createdAt).toLocaleDateString('pt-BR')}</span></p>
+
+                <!-- Seção de Dados Adicionais -->
+                <div class="detalhes-info-adicional">
+                    <h4>Informações de Mercado</h4>
+                    <p><strong>Valor FIPE (aprox.):</strong> <span>${valorFIPEFormatado}</span></p>
+                    <p><strong>Recall Pendente:</strong> ${recallStatus}</p>
+                    <p><strong>Seguradora Recomendada:</strong> <span>${veiculo.seguradoraRecomendada || 'N/A'}</span></p>
+                </div>
             </div>
         `;
 
         document.getElementById('manutencao-veiculo-id').value = id;
         await carregarManutencoes(id);
         
-        // Finalmente, mostra o modal
         detalhesContainer.style.display = 'flex';
         document.body.style.overflow = 'hidden';
 
@@ -352,12 +392,6 @@ async function handleMostrarDetalhes(id) {
         console.error('Erro ao mostrar detalhes:', error);
         exibirNotificacao(error.message, 'erro');
     }
-}
-
-function fecharDetalhes() {
-    if (!detalhesContainer) return;
-    detalhesContainer.style.display = 'none';
-    document.body.style.overflow = 'auto';
 }
 
 // ===================================================================================

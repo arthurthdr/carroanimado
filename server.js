@@ -100,6 +100,40 @@ const ferramentasEssenciais = [
 // =======================================================================
 // --- Rotas da API (Endpoints) ---
 // =======================================================================
+// no arquivo: server.js
+
+// ROTA PARA ADICIONAR UMA NOVA MANUTENÇÃO
+app.post('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
+    try {
+        const { veiculoId } = req.params;
+        const { descricaoServico, custo, quilometragem } = req.body;
+
+        // Validação extra: o veículo existe?
+        const veiculo = await Veiculo.findById(veiculoId);
+        if (!veiculo) {
+            return res.status(404).json({ error: 'Veículo não encontrado para adicionar manutenção.' });
+        }
+
+        // Cria a nova manutenção no banco de dados, já associada ao veículo
+        const novaManutencao = await Manutencao.create({
+            descricaoServico,
+            custo,
+            quilometragem,
+            veiculo: veiculoId
+        });
+
+        res.status(201).json(novaManutencao);
+
+    } catch (error) {
+        console.error("Erro ao adicionar manutenção:", error);
+        // Tratamento de erro de validação do Mongoose
+        if (error.name === 'ValidationError') {
+             const messages = Object.values(error.errors).map(val => val.message);
+             return res.status(400).json({ error: messages.join(' ') });
+        }
+        res.status(500).json({ error: 'Erro interno ao adicionar manutenção.' });
+    }
+});
 
 app.get('/api/previsao/:cidade', async (req, res) => {
     const { cidade } = req.params;
@@ -268,85 +302,6 @@ app.get('/api/veiculos/:id', async (req, res) => {
     }
 });
 
-app.post('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
-    try {
-        const { veiculoId } = req.params;
-
-        // 1. Validar se o veículo existe
-        const veiculo = await Veiculo.findById(veiculoId);
-        if (!veiculo) {
-            return res.status(404).json({ error: 'Veículo não encontrado.' });
-        }
-
-        // 2. Criar e Salvar a nova manutenção
-        const novaManutencao = await Manutencao.create({
-            ...req.body, // Pega descricaoServico, custo, etc. do corpo da requisição
-            veiculo: veiculoId // Adiciona a referência ao veículo
-        });
-
-        res.status(201).json(novaManutencao);
-
-    } catch (error) {
-        console.error("Erro ao adicionar manutenção:", error);
-        if (error.name === 'ValidationError') {
-            const messages = Object.values(error.errors).map(val => val.message);
-            return res.status(400).json({ error: messages.join(' ') });
-        }
-        res.status(500).json({ error: 'Erro interno ao adicionar manutenção.' });
-    }
-});
-
-app.get('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
-    try {
-        const { veiculoId } = req.params;
-
-        // Opcional: Validar se o veículo existe
-        const veiculo = await Veiculo.findById(veiculoId);
-        if (!veiculo) {
-            return res.status(404).json({ error: 'Veículo não encontrado.' });
-        }
-
-        // Busca as manutenções associadas e ordena pela data mais recente
-        const manutenções = await Manutencao.find({ veiculo: veiculoId }).sort({ data: -1 });
-
-        res.status(200).json(manutenções);
-
-    } catch (error) {
-        console.error("Erro ao listar manutenções:", error);
-        res.status(500).json({ error: 'Erro interno ao listar manutenções.' });
-    }
-});
-
-// ROTA PARA CRIAR UMA NOVA MANUTENÇÃO (Anotar o pedido)
-app.post('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
-    try {
-        const { veiculoId } = req.params;
-
-        // 1. Primeiro, o garçom verifica se a mesa (o veículo) existe.
-        const veiculo = await Veiculo.findById(veiculoId);
-        if (!veiculo) {
-            return res.status(404).json({ error: 'Veículo não encontrado.' });
-        }
-
-        // 2. Se a mesa existe, ele anota o pedido (cria a manutenção).
-        const novaManutencao = await Manutencao.create({
-            ...req.body,       // Pega os detalhes do pedido (descrição, custo).
-            veiculo: veiculoId // Amarra o pedido à mesa (o ID do veículo).
-        });
-
-        // 3. Devolve uma confirmação de que o pedido foi anotado.
-        res.status(201).json(novaManutencao);
-
-    } catch (error) {
-        // Se algo der errado (pedido incompleto, etc.), ele avisa.
-        console.error("Erro ao adicionar manutenção:", error);
-        if (error.name === 'ValidationError') {
-            const messages = Object.values(error.errors).map(val => val.message);
-            return res.status(400).json({ error: messages.join(' ') });
-        }
-        res.status(500).json({ error: 'Erro interno ao adicionar manutenção.' });
-    }
-});
 
 // ROTA PARA LISTAR AS MANUTENÇÕES (Buscar os pedidos da mesa)
 app.get('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
