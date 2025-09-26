@@ -1,57 +1,175 @@
 /**
  * @file script.js
- * @description Lógica principal da Garagem Inteligente (versão com Banco de Dados).
+ * @description Lógica principal da Garagem Inteligente com Autenticação.
  * @author Arthur
  */
 
-
-
 // ===================================================================================
-// Bloco de Configuração e Variáveis Globais
+// Bloco de Configuração
 // ===================================================================================
 
 const RENDER_BACKEND_URL = 'https://carroanimado.onrender.com';
 const LOCAL_BACKEND_URL = 'http://localhost:3001';
 
 const backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? LOCAL_BACKEND_URL   // Se for local, usa este
-    : RENDER_BACKEND_URL; // Senão (online), usa este
+    ? LOCAL_BACKEND_URL
+    : RENDER_BACKEND_URL;
 
-// Mensagem no console para sabermos para onde estamos tentando conectar.
 console.log(`[CONFIG] Frontend conectando ao backend em: ${backendUrl}`);
-// Elementos DOM (cacheados para melhor performance)
-const notificacoesContainer = document.getElementById('notificacoes');
-const garagemContainer = document.getElementById('garagem-container');
-const btnMostrarFormAdd = document.getElementById('mostrar-form-add');
-const addVeiculoFormContainer = document.getElementById('add-veiculo-form-container');
-const formAddVeiculo = document.getElementById('form-add-veiculo');
-const btnCancelarAdd = document.getElementById('cancelar-add-veiculo');
-const destinoViagemInput = document.getElementById('destino-viagem');
-const verificarClimaBtn = document.getElementById('verificar-clima-btn');
-const previsaoTempoResultado = document.getElementById('previsao-tempo-resultado');
-const detalhesContainer = document.getElementById('detalhes-e-agendamento');
-const informacoesVeiculoDiv = document.getElementById("informacoesVeiculo");
-const btnFecharDetalhes = document.getElementById('fechar-detalhes');
-const formAddManutencao = document.getElementById('form-add-manutencao'); 
 
 // ===================================================================================
 // INICIALIZAÇÃO DA APLICAÇÃO
 // ===================================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    setupEventListeners();
-    buscarErenderizarVeiculos();
+    // 1. Mapeia todos os elementos do DOM para um objeto central.
+    // Fazemos isso aqui para garantir que todos os elementos HTML já existem.
+    const elements = {
+        notificacoesContainer: document.getElementById('notificacoes'),
+        garagemContainer: document.getElementById('garagem-container'),
+        btnMostrarFormAdd: document.getElementById('mostrar-form-add'),
+        addVeiculoFormContainer: document.getElementById('add-veiculo-form-container'),
+        formAddVeiculo: document.getElementById('form-add-veiculo'),
+        btnCancelarAdd: document.getElementById('cancelar-add-veiculo'),
+        detalhesContainer: document.getElementById('detalhes-e-agendamento'),
+        informacoesVeiculoDiv: document.getElementById("informacoesVeiculo"),
+        btnFecharDetalhes: document.getElementById('fechar-detalhes'),
+        formAddManutencao: document.getElementById('form-add-manutencao'),
+        authContainer: document.getElementById('auth-container'),
+        garageMainContent: document.getElementById('garage-main-content'),
+        loginContainer: document.getElementById('login-container'),
+        registerContainer: document.getElementById('register-container'),
+        formLogin: document.getElementById('form-login'),
+        formRegister: document.getElementById('form-register'),
+        showRegisterLink: document.getElementById('show-register'),
+        showLoginLink: document.getElementById('show-login'),
+        logoutButton: document.getElementById('logout-button')
+    };
+
+    // 2. Adiciona todos os "ouvidos" (event listeners) aos elementos.
+    setupEventListeners(elements);
+
+    // 3. Verifica o estado de autenticação para decidir o que mostrar na tela.
+    checkAuthState(elements);
 });
 
 // ===================================================================================
-// Funções de Renderização e UI (Interface do Usuário)
+// Funções de Ação e Eventos
 // ===================================================================================
 
-async function buscarErenderizarVeiculos() {
-    if (!garagemContainer) return;
+function setupEventListeners(elements) {
+    // Listeners de Autenticação
+    elements.formLogin?.addEventListener('submit', (event) => handleLogin(event, elements));
+    elements.formRegister?.addEventListener('submit', (event) => handleRegister(event, elements));
+    elements.logoutButton?.addEventListener('click', handleLogout);
+
+    elements.showRegisterLink?.addEventListener('click', (e) => {
+        e.preventDefault();
+        elements.loginContainer.style.display = 'none';
+        elements.registerContainer.style.display = 'block';
+    });
+
+    elements.showLoginLink?.addEventListener('click', (e) => {
+        e.preventDefault();
+        elements.loginContainer.style.display = 'block';
+        elements.registerContainer.style.display = 'none';
+    });
+
+    // Listeners da Garagem
+    elements.btnMostrarFormAdd?.addEventListener('click', () => toggleFormAddVeiculo(elements, true));
+    elements.btnCancelarAdd?.addEventListener('click', () => toggleFormAddVeiculo(elements, false));
+    elements.formAddVeiculo?.addEventListener('submit', (event) => handleAddVeiculoSubmit(event, elements));
+    elements.formAddManutencao?.addEventListener('submit', (event) => adicionarManutencao(event, elements));
+    elements.btnFecharDetalhes?.addEventListener('click', () => fecharDetalhes(elements));
+
+    // Delegação de eventos para botões dentro da garagem
+    elements.garagemContainer?.addEventListener('click', (event) => {
+        const target = event.target.closest('button');
+        if (!target) return;
+        const { action, id } = target.dataset;
+        if (action === 'excluir') handleExcluirVeiculo(id, elements);
+        if (action === 'editar') handleEditarVeiculo(id, elements);
+        if (action === 'detalhes') handleMostrarDetalhes(id, elements); 
+    });
+}
+
+// ===================================================================================
+// Funções de Autenticação e Controle de Estado
+// ===================================================================================
+
+function checkAuthState(elements) {
+    const token = localStorage.getItem('token');
+    if (token) {
+        elements.authContainer.style.display = 'none';
+        elements.garageMainContent.style.display = 'block';
+        buscarErenderizarVeiculos(elements);
+    } else {
+        elements.authContainer.style.display = 'block';
+        elements.garageMainContent.style.display = 'none';
+    }
+}
+
+async function handleRegister(event, elements) {
+    event.preventDefault();
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
     try {
-        const response = await fetch(`${backendUrl}/api/veiculos`);
+        const response = await fetch(`${backendUrl}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Falha no registro.');
+        exibirNotificacao('Registro bem-sucedido! Agora você pode fazer o login.', 'sucesso');
+        elements.loginContainer.style.display = 'block';
+        elements.registerContainer.style.display = 'none';
+    } catch (error) {
+        exibirNotificacao(error.message, 'erro');
+    }
+}
+
+async function handleLogin(event, elements) {
+    event.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    try {
+        const response = await fetch(`${backendUrl}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Falha no login.');
+        localStorage.setItem('token', data.token);
+        exibirNotificacao('Login bem-sucedido!', 'sucesso');
+        checkAuthState(elements);
+    } catch (error) {
+        exibirNotificacao(error.message, 'erro');
+    }
+}
+
+function handleLogout() {
+    localStorage.removeItem('token');
+    window.location.reload();
+}
+
+// ===================================================================================
+// Funções da Garagem
+// ===================================================================================
+
+async function buscarErenderizarVeiculos(elements) {
+    const { garagemContainer } = elements;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+        const response = await fetch(`${backendUrl}/api/veiculos`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.status === 401) return handleLogout();
         if (!response.ok) throw new Error('Falha ao buscar veículos do servidor.');
+        
         const veiculosDoBanco = await response.json();
         garagemContainer.innerHTML = veiculosDoBanco.length > 0
             ? veiculosDoBanco.map(gerarHTMLVeiculoDoBanco).join('')
@@ -64,6 +182,7 @@ async function buscarErenderizarVeiculos() {
 }
 
 function gerarHTMLVeiculoDoBanco(veiculo) {
+    // Esta função não manipula o DOM diretamente, então não precisa de 'elements'
     return `
         <div id="${veiculo._id}" class="veiculo-container">
             <button class="remover-veiculo-btn" data-action="excluir" data-id="${veiculo._id}" title="Excluir ${veiculo.modelo}">×</button>
@@ -80,199 +199,65 @@ function gerarHTMLVeiculoDoBanco(veiculo) {
     `;
 }
 
-function toggleFormAddVeiculo(show) {
+function toggleFormAddVeiculo(elements, show) {
+    const { addVeiculoFormContainer, btnMostrarFormAdd, formAddVeiculo } = elements;
     if (!addVeiculoFormContainer || !btnMostrarFormAdd) return;
     addVeiculoFormContainer.style.display = show ? 'block' : 'none';
     btnMostrarFormAdd.textContent = show ? 'Cancelar Adição' : 'Adicionar Novo Veículo +';
-    if(show) formAddVeiculo.reset();
+    if (show) formAddVeiculo.reset();
 }
 
-async function carregarManutencoes(veiculoId) {
-    const listaManutencoes = document.getElementById('lista-manutencoes');
-    if (!listaManutencoes) return;
+async function handleAddVeiculoSubmit(event, elements) {
+    event.preventDefault();
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
-    listaManutencoes.innerHTML = '<li>Carregando manutenções...</li>';
-
-    try {
-        const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}/manutencoes`);
-        const manutenções = await response.json();
-
-        if (!response.ok) {
-            throw new Error(manutenções.error || 'Falha ao carregar manutenções.');
-        }
-
-        if (manutenções.length === 0) {
-            listaManutencoes.innerHTML = '<li>Nenhuma manutenção registrada para este veículo.</li>';
-        } else {
-            listaManutencoes.innerHTML = manutenções.map(m => `
-                <li>
-                    <strong>${new Date(m.data).toLocaleDateString('pt-BR')}</strong> - 
-                    ${m.descricaoServico} - 
-                    R$ ${m.custo.toFixed(2)}
-                    ${m.quilometragem ? `(${m.quilometragem} km)` : ''}
-                </li>
-            `).join('');
-        }
-    } catch (error) {
-        console.error("Erro ao carregar manutenções:", error);
-        listaManutencoes.innerHTML = `<li style="color: red;">${error.message}</li>`;
-    }
-}
-
-// Função para ADICIONAR uma nova manutenção
-async function adicionarManutencao(event) {
-    event.preventDefault(); // Impede o recarregamento da página
-
-    // --- ETAPA 1: Coletar todos os dados do formulário primeiro ---
-    const veiculoId = document.getElementById('manutencao-veiculo-id').value;
-    const form = document.getElementById('form-add-manutencao');
-
-    // Verificação de segurança
-    if (!veiculoId) {
-        exibirNotificacao('Erro: ID do veículo não encontrado. Tente abrir os detalhes novamente.', 'erro');
-        return;
-    }
-
-    // Pegando os valores de cada campo
-    const descricaoServico = document.getElementById('manutencao-descricao').value;
-    const custoInput = document.getElementById('manutencao-custo').value;
-    const kmInput = document.getElementById('manutencao-km').value;
-
-    // --- ETAPA 2: Montar o objeto para enviar ao backend ---
-    const dadosFormulario = {
-        descricaoServico: descricaoServico,
-        custo: parseFloat(custoInput), // Converte para número decimal
-        // Se o campo de km não estiver vazio, converte para número inteiro
-        quilometragem: kmInput ? parseInt(kmInput) : undefined
+    const veiculoParaSalvar = {
+        placa: document.getElementById('add-placa').value.toUpperCase(),
+        marca: document.getElementById('add-marca').value,
+        modelo: document.getElementById('add-modelo').value,
+        ano: parseInt(document.getElementById('add-ano').value),
+        cor: document.getElementById('add-cor').value
     };
 
-    // --- ETAPA 3: Tentar enviar os dados ---
     try {
-        const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}/manutencoes`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dadosFormulario)
-        });
-
-        const novaManutencao = await response.json();
-        
-        if (!response.ok) {
-            throw new Error(novaManutencao.error || 'Falha ao registrar manutenção.');
-        }
-
-        exibirNotificacao('Manutenção registrada com sucesso!', 'sucesso');
-        form.reset(); // Limpa o formulário
-
-        // Atualiza a lista na tela (NOME DA FUNÇÃO CORRIGIDO)
-        await carregarManutencoes(veiculoId);
-
-    } catch (error) {
-        console.error("Erro ao adicionar manutenção:", error);
-        exibirNotificacao(error.message, 'erro');
-    }
-}
-
-// ===================================================================================
-// Funções de Ação e Eventos
-// ===================================================================================
-
-// D:/carro/js/script.js
-
-function setupEventListeners() {
-
-    // --- Listeners dos botões principais ---
-    btnMostrarFormAdd?.addEventListener('click', () => toggleFormAddVeiculo(addVeiculoFormContainer.style.display === 'none'));
-    btnCancelarAdd?.addEventListener('click', () => toggleFormAddVeiculo(false));
-    formAddVeiculo?.addEventListener('submit', handleAddVeiculoSubmit);
-
-    // Listener do botão de verificar clima
-    verificarClimaBtn?.addEventListener('click', handleVerificarClimaClick);
-
-    // Quando o formulário de manutenção for enviado, chame a função adicionarManutencao
-    formAddManutencao?.addEventListener('submit', adicionarManutencao);
-
-    // --- Listener para os botões DENTRO da garagem (Editar, Excluir, Detalhes) ---
-    garagemContainer?.addEventListener('click', (event) => {
-        const target = event.target.closest('button');
-        if (!target) return;
-
-        const { action, id } = target.dataset;
-
-        if (action === 'excluir') {
-            handleExcluirVeiculo(id);
-        }
-        if (action === 'editar') {
-            handleEditarVeiculo(id);
-        }
-        if (action === 'detalhes') {
-            // SUBSTITUÍMOS O ALERT PELA CHAMADA DA FUNÇÃO REAL
-            handleMostrarDetalhes(id); 
-        }
-    });
-
-    // --- Listener para o botão de FECHAR o modal de detalhes ---
-    // ADICIONAMOS ESTE NOVO LISTENER
-    btnFecharDetalhes?.addEventListener('click', fecharDetalhes);
-}
-
-async function handleAddVeiculoSubmit(event) {
-    event.preventDefault();
-
-    try {
-        // --- ETAPA 1: Selecionar os elementos do formulário ---
-        const placaInput = document.getElementById('add-placa');
-        const marcaInput = document.getElementById('add-marca');
-        const modeloInput = document.getElementById('add-modelo');
-        const anoInput = document.getElementById('add-ano');
-        const corInput = document.getElementById('add-cor');
-
-        // --- ETAPA 2: Verificar se todos os elementos foram encontrados ---
-        // Se algum destes for 'null', o erro vai acontecer.
-        if (!placaInput || !marcaInput || !modeloInput || !anoInput || !corInput) {
-            // Esta mensagem nos dirá exatamente qual campo está com problema de ID
-            console.error('ERRO: Um ou mais campos do formulário de adição não foram encontrados no HTML. Verifique os IDs.');
-            exibirNotificacao('Erro de formulário. Contate o suporte.', 'erro');
-            return; // Para a execução da função aqui.
-        }
-
-        // --- ETAPA 3: Se tudo foi encontrado, pegar os valores e montar o objeto ---
-        const veiculoParaSalvar = {
-            placa: placaInput.value.toUpperCase(),
-            marca: marcaInput.value,
-            modelo: modeloInput.value,
-            ano: parseInt(anoInput.value),
-            cor: corInput.value
-        };
-
-        // --- ETAPA 4: Enviar para o backend ---
         const response = await fetch(`${backendUrl}/api/veiculos`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify(veiculoParaSalvar)
         });
 
+        if (response.status === 401) return handleLogout();
         const resultado = await response.json();
-        if (!response.ok) {
-            throw new Error(resultado.error || 'Erro desconhecido do servidor.');
-        }
-
+        if (!response.ok) throw new Error(resultado.error || 'Erro desconhecido do servidor.');
+        
         exibirNotificacao('Veículo adicionado com sucesso!', 'sucesso');
-        toggleFormAddVeiculo(false);
-        await buscarErenderizarVeiculos();
-
+        toggleFormAddVeiculo(elements, false);
+        await buscarErenderizarVeiculos(elements);
     } catch (error) {
-        // O catch agora pega erros de fetch ou outros erros inesperados.
         console.error("Erro ao adicionar veículo:", error);
         exibirNotificacao(error.message || 'Ocorreu um erro ao adicionar o veículo.', 'erro');
     }
 }
 
-async function handleExcluirVeiculo(id) {
+async function handleExcluirVeiculo(id, elements) {
     if (!confirm('Tem certeza que deseja excluir este veículo?')) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
     try {
-        const response = await fetch(`${backendUrl}/api/veiculos/${id}`, { method: 'DELETE' });
+        const response = await fetch(`${backendUrl}/api/veiculos/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.status === 401) return handleLogout();
         const resultado = await response.json();
         if (!response.ok) throw new Error(resultado.error || 'Falha ao excluir o veículo.');
+        
         exibirNotificacao(resultado.message, 'sucesso');
         document.getElementById(id)?.remove();
     } catch (error) {
@@ -281,20 +266,30 @@ async function handleExcluirVeiculo(id) {
     }
 }
 
-async function handleEditarVeiculo(id) {
+async function handleEditarVeiculo(id, elements) {
     const cardDoVeiculo = document.getElementById(id);
     if (!cardDoVeiculo) return;
     const corAtual = cardDoVeiculo.querySelector('.veiculo-cor').textContent;
     const novaCor = prompt('Digite a nova cor do veículo:', corAtual);
     if (!novaCor || novaCor === corAtual) return;
+    
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
     try {
         const response = await fetch(`${backendUrl}/api/veiculos/${id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
             body: JSON.stringify({ cor: novaCor })
         });
+        
+        if (response.status === 401) return handleLogout();
         const veiculoAtualizado = await response.json();
         if (!response.ok) throw new Error(veiculoAtualizado.error || 'Falha ao atualizar o veículo.');
+        
         exibirNotificacao('Veículo atualizado com sucesso!', 'sucesso');
         cardDoVeiculo.querySelector('.veiculo-cor').textContent = veiculoAtualizado.cor;
     } catch (error) {
@@ -303,87 +298,39 @@ async function handleEditarVeiculo(id) {
     }
 }
 
-async function handleVerificarClimaClick() {
-    const cidade = destinoViagemInput.value.trim();
-    if (!cidade) return exibirNotificacao("Por favor, digite uma cidade.", 'aviso');
-    previsaoTempoResultado.innerHTML = `<p>Buscando previsão para ${cidade}...</p>`;
-    try {
-        const response = await fetch(`${backendUrl}/api/previsao/${cidade}`);
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `Erro do servidor: ${response.status}`);
-        }
-        const data = await response.json();
-        exibirPrevisaoDetalhada(data);
-    } catch (error) {
-        console.error("Erro ao verificar clima:", error);
-        previsaoTempoResultado.innerHTML = `<p style="color:red;">${error.message}</p>`;
-        exibirNotificacao(error.message, 'erro');
-    }
-}
+// ===================================================================================
+// Funções de Manutenção
+// ===================================================================================
 
-function exibirPrevisaoDetalhada(dados) {
-    if (!dados || !dados.list) {
-        previsaoTempoResultado.innerHTML = `<p>Não foi possível obter dados de previsão.</p>`;
-        return;
-    }
-    const nomeCidade = dados.city.name;
-    const previsaoHoje = dados.list[0];
-    const icone = previsaoHoje.weather[0].icon;
-    const descricao = previsaoHoje.weather[0].description;
-    const temperatura = previsaoHoje.main.temp;
-    previsaoTempoResultado.innerHTML = `
-        <h3>Previsão para ${nomeCidade}</h3>
-        <div class="previsao-dia">
-            <img src="https://openweathermap.org/img/wn/${icone}@2x.png" alt="${descricao}">
-            <p><strong>${temperatura.toFixed(1)}°C</strong></p>
-            <p>${descricao}</p>
-        </div>
-    `;
-}
-
-// no arquivo: js/script.js
-
-async function handleMostrarDetalhes(id) {
-    if (!detalhesContainer || !informacoesVeiculoDiv) return;
+async function handleMostrarDetalhes(id, elements) {
+    const { detalhesContainer, informacoesVeiculoDiv } = elements;
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
     try {
-        const response = await fetch(`${backendUrl}/api/veiculos/${id}`);
+        const response = await fetch(`${backendUrl}/api/veiculos/${id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.status === 401) return handleLogout();
         const veiculo = await response.json();
-
-        if (!response.ok) {
-            throw new Error(veiculo.error || 'Não foi possível buscar os detalhes do veículo.');
-        }
-
-        // Lógica para formatar os novos dados
-        const valorFIPEFormatado = veiculo.valorFIPE 
-            ? `R$ ${veiculo.valorFIPE.toFixed(2).replace('.', ',')}` 
-            : 'Não informado';
-            
-        const recallStatus = veiculo.recallPendente 
-            ? '<span class="status-negativo">Sim!</span>' 
-            : '<span class="status-positivo">Não</span>';
+        if (!response.ok) throw new Error(veiculo.error || 'Não foi possível buscar os detalhes do veículo.');
 
         informacoesVeiculoDiv.innerHTML = `
             <div class="detalhes-info-basica">
                 <h3>${veiculo.marca} ${veiculo.modelo}</h3>
                 <img src="img/carro.jpg" alt="Imagem ${veiculo.modelo}" class="detalhes-imagem" onerror="this.src='img/placeholder.png';">
                 <p><strong>Placa:</strong> <span>${veiculo.placa}</span></p>
+                <p><strong>Marca:</strong> <span>${veiculo.marca}</span></p>
+                <p><strong>Modelo:</strong> <span>${veiculo.modelo}</span></p>
                 <p><strong>Ano:</strong> <span>${veiculo.ano}</span></p>
                 <p><strong>Cor:</strong> <span>${veiculo.cor}</span></p>
-
-                <!-- Seção de Dados Adicionais -->
-                <div class="detalhes-info-adicional">
-                    <h4>Informações de Mercado</h4>
-                    <p><strong>Valor FIPE (aprox.):</strong> <span>${valorFIPEFormatado}</span></p>
-                    <p><strong>Recall Pendente:</strong> ${recallStatus}</p>
-                    <p><strong>Seguradora Recomendada:</strong> <span>${veiculo.seguradoraRecomendada || 'N/A'}</span></p>
-                </div>
+                <p><strong>Cadastrado em:</strong> <span>${new Date(veiculo.createdAt).toLocaleDateString('pt-BR')}</span></p>
             </div>
         `;
 
         document.getElementById('manutencao-veiculo-id').value = id;
-        await carregarManutencoes(id);
+        await carregarManutencoes(id, elements);
         
         detalhesContainer.style.display = 'flex';
         document.body.style.overflow = 'hidden';
@@ -394,11 +341,93 @@ async function handleMostrarDetalhes(id) {
     }
 }
 
+async function carregarManutencoes(veiculoId, elements) {
+    const listaManutencoes = document.getElementById('lista-manutencoes');
+    if (!listaManutencoes) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    listaManutencoes.innerHTML = '<li>Carregando manutenções...</li>';
+    try {
+        const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}/manutencoes`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.status === 401) return handleLogout();
+        const manutenções = await response.json();
+        if (!response.ok) throw new Error(manutenções.error || 'Falha ao carregar manutenções.');
+
+        if (manutenções.length === 0) {
+            listaManutencoes.innerHTML = '<li>Nenhuma manutenção registrada para este veículo.</li>';
+        } else {
+            listaManutencoes.innerHTML = manutenções.map(m => `
+                <li>
+                    <strong>${new Date(m.data).toLocaleDateString('pt-BR')}</strong> - 
+                    ${m.descricaoServico} - R$ ${m.custo.toFixed(2)}
+                    ${m.quilometragem ? `(${m.quilometragem} km)` : ''}
+                </li>
+            `).join('');
+        }
+    } catch (error) {
+        console.error("Erro ao carregar manutenções:", error);
+        listaManutencoes.innerHTML = `<li style="color: red;">${error.message}</li>`;
+    }
+}
+
+async function adicionarManutencao(event, elements) {
+    event.preventDefault();
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    const veiculoId = document.getElementById('manutencao-veiculo-id').value;
+    const { formAddManutencao } = elements;
+    if (!veiculoId) {
+        exibirNotificacao('Erro: ID do veículo não encontrado.', 'erro');
+        return;
+    }
+
+    const dadosFormulario = {
+        descricaoServico: document.getElementById('manutencao-descricao').value,
+        custo: parseFloat(document.getElementById('manutencao-custo').value),
+        quilometragem: document.getElementById('manutencao-km').value ? parseInt(document.getElementById('manutencao-km').value) : undefined
+    };
+
+    try {
+        const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}/manutencoes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(dadosFormulario)
+        });
+
+        if (response.status === 401) return handleLogout();
+        const novaManutencao = await response.json();
+        if (!response.ok) throw new Error(novaManutencao.error || 'Falha ao registrar manutenção.');
+
+        exibirNotificacao('Manutenção registrada com sucesso!', 'sucesso');
+        formAddManutencao.reset();
+        await carregarManutencoes(veiculoId, elements);
+    } catch (error) {
+        console.error("Erro ao adicionar manutenção:", error);
+        exibirNotificacao(error.message, 'erro');
+    }
+}
+
+function fecharDetalhes(elements) {
+    const { detalhesContainer } = elements;
+    if (!detalhesContainer) return;
+    detalhesContainer.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
 // ===================================================================================
-// Funções de Notificação (Utilitário)
+// Funções Utilitárias (Notificação)
 // ===================================================================================
 
 function exibirNotificacao(message, type = 'info', duration = 5000) {
+    const notificacoesContainer = document.getElementById('notificacoes');
     if (!notificacoesContainer || !message) return;
     const notificationDiv = document.createElement('div');
     notificationDiv.className = `notificacao ${type}`;
