@@ -1108,3 +1108,46 @@ footer p {
 #form-add-manutencao button[type="submit"]:hover {
     background-color: var(--cor-sucesso-funcional-hover);
 }
+
+/* style.css */
+.auth-form-container {
+    background-color: var(--cor-fundo-secundario);
+    padding: 30px;
+    border-radius: var(--border-radius-padrao);
+    box-shadow: 0 5px 15px var(--cor-sombra-media);
+    max-width: 400px;
+    margin: 30px auto;
+}
+.auth-form-container h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--cor-destaque-azul);
+}
+.auth-form-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.auth-form-container label {
+    font-weight: 500;
+}
+.auth-form-container input {
+    padding: 10px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+}
+.auth-form-container button {
+    padding: 12px;
+    background-color: var(--cor-destaque-azul);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-padrao);
+    cursor: pointer;
+    font-size: 1.1em;
+    margin-top: 10px;
+}
+.auth-form-container p {
+    text-align: center;
+    margin-top: 15px;
+}
