@@ -25,6 +25,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import mongoose from 'mongoose';
+import cors from 'cors';
 import Veiculo from './models/Veiculo.js';
 import Manutencao from './models/Manutencao.js';
 import User from './models/User.js';
@@ -87,6 +88,8 @@ app.use((req, res, next) => {
     
     next(); // <--- CHAMADO POR ÚLTIMO
 });
+
+app.use(cors());
 
 // =======================================================================
 // --- Banco de Dados Mockado (Dados de Exemplo) ---
