@@ -10,6 +10,42 @@
 <body>
     <h1>Garagem Inteligente</h1>
 
+    <div id="auth-container" class="container">
+    
+    <!-- Formulário de Login (inicialmente visível) -->
+    <div id="login-container" class="auth-form-container">
+        <h2>Acessar minha Garagem</h2>
+        <form id="form-login">
+            <label for="login-email">E-mail:</label>
+            <input type="email" id="login-email" required autocomplete="email">
+            <label for="login-password">Senha:</label>
+            <input type="password" id="login-password" required autocomplete="current-password">
+            <button type="submit">Entrar</button>
+            <p>Não tem uma conta? <a href="#" id="show-register">Registre-se aqui</a></p>
+        </form>
+    </div>
+
+    <!-- Formulário de Registro (inicialmente escondido) -->
+    <div id="register-container" class="auth-form-container" style="display: none;">
+        <h2>Criar minha Garagem</h2>
+        <form id="form-register">
+            <label for="register-email">E-mail:</label>
+            <input type="email" id="register-email" required autocomplete="email">
+            <label for="register-password">Senha:</label>
+            <input type="password" id="register-password" required autocomplete="new-password">
+            <button type="submit">Registrar</button>
+            <p>Já tem uma conta? <a href="#" id="show-login">Faça o login aqui</a></p>
+        </form>
+    </div>
+</div>
+
+<!-- ===== SEÇÃO DA GARAGEM (AGORA COMEÇA ESCONDIDA) ===== -->
+<div id="garage-main-content" style="display: none;">
+    <div class="add-veiculo-controls">
+        <button id="mostrar-form-add">Adicionar Novo Veículo +</button>
+        <button id="logout-button" style="margin-left: 20px; background-color: #dc3545;">Sair</button>
+    </div>
+
     <div id="notificacoes" class="notificacoes-container"></div>
 
     <div class="add-veiculo-controls">
