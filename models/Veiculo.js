@@ -36,13 +36,27 @@ const veiculoSchema = new mongoose.Schema(
             required: true
         }
     },
-    // --- FIM DO OBJETO DE DEFINIÇÃO DOS CAMPOS ---
+   
+    tipo: {
+        type: String,
+        required: true,
+        enum: ['Carro', 'Moto', 'Bicicleta', 'CarroEsportivo'] // Só permite esses valores
+    },
 
-    // --- OBJETO DE OPÇÕES (apenas um) ---
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    }
+    
     {
         timestamps: true // Adiciona createdAt e updatedAt automaticamente
     }
+
+   
 );
+
+
 
 // 2. Criar o Modelo a partir do Schema
 const Veiculo = mongoose.model('Veiculo', veiculoSchema);

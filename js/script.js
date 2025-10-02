@@ -184,23 +184,39 @@ async function buscarErenderizarVeiculos(elements) {
 }
 
 function gerarHTMLVeiculoDoBanco(veiculo) {
-    // Esta função não manipula o DOM diretamente, então não precisa de 'elements'
+    // Escolhe a imagem com base no tipo
+    const imagemSrc = `img/${veiculo.tipo.toLowerCase()}.jpg`;
+
+    // Gera os botões específicos para cada tipo
+    let controlesExtras = '';
+    if (veiculo.tipo === 'CarroEsportivo') {
+        controlesExtras = `<button>Ativar Turbo</button>`; // Adicionaremos a lógica depois
+    } else if (veiculo.tipo === 'Bicicleta') {
+        controlesExtras = `<button>Pedalar</button>`; // Apenas um exemplo
+    }
+    // Carros e Motos não têm botões extras por enquanto
+
     return `
-        <div id="${veiculo._id}" class="veiculo-container">
+        <div id="${veiculo._id}" class="veiculo-container" data-tipo="${veiculo.tipo}">
             <button class="remover-veiculo-btn" data-action="excluir" data-id="${veiculo._id}" title="Excluir ${veiculo.modelo}">×</button>
             <h2>${veiculo.marca} ${veiculo.modelo}</h2>
-            <img src="img/carro.jpg" alt="Imagem ${veiculo.modelo}" class="veiculo-imagem" onerror="this.src='img/placeholder.png';">
+            
+            <!-- Imagem dinâmica -->
+            <img src="${imagemSrc}" alt="Imagem ${veiculo.modelo}" class="veiculo-imagem" onerror="this.src='img/carro.jpg';">
+            
+            <p><strong>Tipo:</strong> ${veiculo.tipo}</p>
             <p><strong>Placa:</strong> ${veiculo.placa}</p>
             <p><strong>Ano:</strong> ${veiculo.ano}</p>
             <p><strong>Cor:</strong> <span class="veiculo-cor">${veiculo.cor}</span></p>
+
             <div class="controles-veiculo">
+                 ${controlesExtras}
                  <button data-action="editar" data-id="${veiculo._id}">Editar</button>
                  <button data-action="detalhes" data-id="${veiculo._id}">Detalhes</button>
             </div>
         </div>
     `;
 }
-
 function toggleFormAddVeiculo(elements, show) {
     const { addVeiculoFormContainer, btnMostrarFormAdd, formAddVeiculo } = elements;
     if (!addVeiculoFormContainer || !btnMostrarFormAdd) return;
@@ -215,6 +231,9 @@ async function handleAddVeiculoSubmit(event, elements) {
     if (!token) return;
 
     const veiculoParaSalvar = {
+        // --- ADICIONE ESTA LINHA ---
+        tipo: document.getElementById('add-tipo').value,
+
         placa: document.getElementById('add-placa').value.toUpperCase(),
         marca: document.getElementById('add-marca').value,
         modelo: document.getElementById('add-modelo').value,
@@ -222,26 +241,16 @@ async function handleAddVeiculoSubmit(event, elements) {
         cor: document.getElementById('add-cor').value
     };
 
-    try {
-        const response = await fetch(`${backendUrl}/api/veiculos`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(veiculoParaSalvar)
-        });
+    // Validação simples para o campo "tipo"
+    if (!veiculoParaSalvar.tipo) {
+        exibirNotificacao('Por favor, selecione um tipo de veículo.', 'erro');
+        return;
+    }
 
-        if (response.status === 401) return handleLogout();
-        const resultado = await response.json();
-        if (!response.ok) throw new Error(resultado.error || 'Erro desconhecido do servidor.');
-        
-        exibirNotificacao('Veículo adicionado com sucesso!', 'sucesso');
-        toggleFormAddVeiculo(elements, false);
-        await buscarErenderizarVeiculos(elements);
+    try {
+        // ... o resto da função continua igual ...
     } catch (error) {
-        console.error("Erro ao adicionar veículo:", error);
-        exibirNotificacao(error.message || 'Ocorreu um erro ao adicionar o veículo.', 'erro');
+        // ...
     }
 }
 

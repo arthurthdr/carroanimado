@@ -57,6 +57,17 @@
         <div id="add-veiculo-form-container" class="add-veiculo-container" style="display: none;">
             <h2>Adicionar Novo Veículo</h2>
             <form id="form-add-veiculo">
+                <label for="add-tipo">Tipo de Veículo:</label>
+    <select id="add-tipo" required>
+        <option value="">-- Selecione o tipo --</option>
+        <option value="Carro">Carro</option>
+        <option value="Moto">Moto</option>
+        <option value="Bicicleta">Bicicleta</option>
+        <option value="CarroEsportivo">Carro Esportivo</option>
+    </select>
+
+    <label for="add-placa">Placa:</label>
+    <input type="text" id="add-placa" placeholder="ABC1234" required>
                 <label for="add-placa">Placa:</label>
                 <input type="text" id="add-placa" placeholder="ABC1234" required>
                 <label for="add-marca">Marca:</label>
