@@ -18,11 +18,16 @@
   ],
   "author": "Seu Nome Aqui",
   "license": "ISC",
-  "dependencies": {
+  "engines": {
+    "node": "20.x"
+  },
+ "dependencies": {
     "axios": "^1.6.8",
-    "cors": "^2.8.5",
+    "bcryptjs": "^2.4.3",  
+    "cors": "^2.8.5",   
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2", 
     "mongoose": "^8.16.2"
   }
 }
