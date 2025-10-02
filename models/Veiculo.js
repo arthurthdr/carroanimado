@@ -34,10 +34,9 @@ const veiculoSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true
-        }
-    },
-   
-    tipo: {
+        },
+
+         tipo: {
         type: String,
         required: true,
         enum: ['Carro', 'Moto', 'Bicicleta', 'CarroEsportivo'] // Só permite esses valores
@@ -48,6 +47,9 @@ const veiculoSchema = new mongoose.Schema(
         ref: 'User',
         required: true
     }
+    },
+   
+   
     
     {
         timestamps: true // Adiciona createdAt e updatedAt automaticamente
