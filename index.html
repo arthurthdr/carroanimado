@@ -10,97 +10,91 @@
 <body>
     <h1>Garagem Inteligente</h1>
 
-    <div id="auth-container" class="container">
-    
-    <!-- Formulário de Login (inicialmente visível) -->
-    <div id="login-container" class="auth-form-container">
-        <h2>Acessar minha Garagem</h2>
-        <form id="form-login">
-            <label for="login-email">E-mail:</label>
-            <input type="email" id="login-email" required autocomplete="email">
-            <label for="login-password">Senha:</label>
-            <input type="password" id="login-password" required autocomplete="current-password">
-            <button type="submit">Entrar</button>
-            <p>Não tem uma conta? <a href="#" id="show-register">Registre-se aqui</a></p>
-        </form>
-    </div>
-
-    <!-- Formulário de Registro (inicialmente escondido) -->
-    <div id="register-container" class="auth-form-container" style="display: none;">
-        <h2>Criar minha Garagem</h2>
-        <form id="form-register">
-            <label for="register-email">E-mail:</label>
-            <input type="email" id="register-email" required autocomplete="email">
-            <label for="register-password">Senha:</label>
-            <input type="password" id="register-password" required autocomplete="new-password">
-            <button type="submit">Registrar</button>
-            <p>Já tem uma conta? <a href="#" id="show-login">Faça o login aqui</a></p>
-        </form>
-    </div>
-</div>
-
-<!-- ===== SEÇÃO DA GARAGEM (AGORA COMEÇA ESCONDIDA) ===== -->
-<div id="garage-main-content" style="display: none;">
-    <div class="add-veiculo-controls">
-        <button id="mostrar-form-add">Adicionar Novo Veículo +</button>
-        <button id="logout-button" style="margin-left: 20px; background-color: #dc3545;">Sair</button>
-    </div>
-
+    <!-- Container para notificações (movido para o topo para melhor visibilidade) -->
     <div id="notificacoes" class="notificacoes-container"></div>
 
-    <div class="add-veiculo-controls">
-        <button id="mostrar-form-add">Adicionar Novo Veículo +</button>
+    <!-- ===== SEÇÃO DE AUTENTICAÇÃO ===== -->
+    <!-- Este container será mostrado ou escondido pelo JavaScript -->
+    <div id="auth-container" class="container">
+        
+        <!-- Formulário de Login (inicialmente visível) -->
+        <div id="login-container" class="auth-form-container">
+            <h2>Acessar minha Garagem</h2>
+            <form id="form-login">
+                <label for="login-email">E-mail:</label>
+                <input type="email" id="login-email" required autocomplete="email">
+                <label for="login-password">Senha:</label>
+                <input type="password" id="login-password" required autocomplete="current-password">
+                <button type="submit">Entrar</button>
+                <p>Não tem uma conta? <a href="#" id="show-register">Registre-se aqui</a></p>
+            </form>
+        </div>
+
+        <!-- Formulário de Registro (inicialmente escondido) -->
+        <div id="register-container" class="auth-form-container" style="display: none;">
+            <h2>Criar minha Garagem</h2>
+            <form id="form-register">
+                <label for="register-email">E-mail:</label>
+                <input type="email" id="register-email" required autocomplete="email">
+                <label for="register-password">Senha:</label>
+                <input type="password" id="register-password" required autocomplete="new-password">
+                <button type="submit">Registrar</button>
+                <p>Já tem uma conta? <a href="#" id="show-login">Faça o login aqui</a></p>
+            </form>
+        </div>
     </div>
 
-    <div id="add-veiculo-form-container" class="add-veiculo-container" style="display: none;">
-        <h2>Adicionar Novo Veículo</h2>
-        <form id="form-add-veiculo">
-    <label for="add-placa">Placa:</label>
-    <input type="text" id="add-placa" placeholder="ABC1234" required>
+    <!-- ===== SEÇÃO PRINCIPAL DA GARAGEM (AGORA UM ÚNICO BLOCO ESCONDIDO) ===== -->
+    <div id="garage-main-content" class="container" style="display: none;">
+        
+        <!-- Controles Principais da Garagem (Adicionar Veículo e Sair) -->
+        <div class="add-veiculo-controls">
+            <button id="mostrar-form-add">Adicionar Novo Veículo +</button>
+            <button id="logout-button" style="margin-left: 20px; background-color: #dc3545;">Sair</button>
+        </div>
+        
+        <!-- Formulário para Adicionar um Novo Veículo -->
+        <div id="add-veiculo-form-container" class="add-veiculo-container" style="display: none;">
+            <h2>Adicionar Novo Veículo</h2>
+            <form id="form-add-veiculo">
+                <label for="add-placa">Placa:</label>
+                <input type="text" id="add-placa" placeholder="ABC1234" required>
+                <label for="add-marca">Marca:</label>
+                <input type="text" id="add-marca" placeholder="Ex: Chevrolet" required>
+                <label for="add-modelo">Modelo:</label>
+                <input type="text" id="add-modelo" placeholder="Ex: Onix" required>
+                <label for="add-ano">Ano:</label>
+                <input type="number" id="add-ano" placeholder="2023" required>
+                <label for="add-cor">Cor:</label>
+                <input type="text" id="add-cor" placeholder="Ex: Prata" required>
+                <div class="form-add-buttons">
+                    <button type="submit">Adicionar à Garagem</button>
+                    <button type="button" id="cancelar-add-veiculo">Cancelar</button>
+                </div>
+            </form>
+        </div>
 
-    <label for="add-marca">Marca:</label>
-    <input type="text" id="add-marca" placeholder="Ex: Chevrolet" required>
-    
-    <label for="add-modelo">Modelo:</label>
-    <input type="text" id="add-modelo" placeholder="Ex: Onix" required>
-
-    <label for="add-ano">Ano:</label>
-    <input type="number" id="add-ano" placeholder="2023" required>
-
-    <label for="add-cor">Cor:</label>
-    <input type="text" id="add-cor" placeholder="Ex: Prata" required>
-
-    <div class="form-add-buttons">
-        <button type="submit">Adicionar à Garagem</button>
-        <button type="button" id="cancelar-add-veiculo">Cancelar</button>
+        <!-- Container onde os Cards dos Veículos serão exibidos -->
+        <div id="garagem-container">
+            <p id="garagem-vazia-msg" style="display: none;">Sua garagem está vazia. Adicione um veículo!</p>
+        </div>
     </div>
-</form>
-    </div>
 
-    <div id="garagem-container" class="container">
-        <p id="garagem-vazia-msg" style="display: none;">Sua garagem está vazia. Adicione um veículo!</p>
-    </div>
-
-    <!-- ===== MODAL DE DETALHES E MANUTENÇÃO (ESTRUTURA CORRIGIDA) ===== -->
+    <!-- ===== MODAL DE DETALHES E MANUTENÇÃO (Estrutura mantida) ===== -->
     <div id="detalhes-e-agendamento" class="detalhes-container" style="display: none;">
-    
-        <div class="detalhes-conteudo-interno"> <!-- Adicionado um wrapper para melhor estilização no futuro -->
+        <div class="detalhes-conteudo-interno">
             <h2>Detalhes e Manutenção do Veículo</h2>
             <button id="fechar-detalhes" class="close-btn">×</button>
-
-            <!-- ÁREA 1: Informações básicas do Veículo -->
+            
             <div id="informacoesVeiculo">
-                <!-- O JS preencherá esta parte -->
+                <!-- Preenchido pelo JavaScript -->
             </div>
 
-            <!-- ÁREA 2: Histórico e Formulário de Manutenções (A ÚNICA E CORRETA) -->
             <div id="manutencoes-container" style="margin-top: 20px; width: 100%;">
                 <h4>Histórico de Manutenção</h4>
-                
                 <ul id="lista-manutencoes" class="dados-lista">
-                    <!-- O JS preencherá esta parte -->
+                    <!-- Preenchido pelo JavaScript -->
                 </ul>
-
                 <div id="form-manutencao-wrapper" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #dee2e6;">
                     <h5>Adicionar Nova Manutenção</h5>
                     <form id="form-add-manutencao">
@@ -108,10 +102,8 @@
                         <div class="form-grid">
                             <label for="manutencao-descricao">Descrição do Serviço:</label>
                             <input type="text" id="manutencao-descricao" required placeholder="Ex: Troca de óleo e filtro">
-                            
                             <label for="manutencao-custo">Custo (R$):</label>
                             <input type="number" id="manutencao-custo" required min="0" step="0.01" placeholder="150.00">
-                            
                             <label for="manutencao-km">Quilometragem (Opcional):</label>
                             <input type="number" id="manutencao-km" min="0" placeholder="50000">
                         </div>
@@ -120,10 +112,9 @@
                 </div>
             </div>
         </div>
-        
     </div>
-    <!-- ===== FIM DO MODAL ===== -->
 
+    <!-- ARQUIVOS DE SOM -->
     <audio id="som-buzina" src="sons/buzina.mp3" preload="auto"></audio>
     <audio id="som-acelerar" src="sons/carroacelerando.mp3" preload="auto"></audio>
     <audio id="som-frear" src="sons/freio.mp3" preload="auto"></audio>
@@ -135,6 +126,8 @@
         <p>© 2024 Arthur - IFPR. Todos os direitos reservados.</p>
         <p>Projeto Garagem Inteligente - Informática para Internet</p>
     </footer>
+
+    <!-- SCRIPT DEVE SER A ÚLTIMA COISA ANTES DE FECHAR O BODY -->
     <script src="js/script.js"></script>
 </body>
 </html>
