@@ -1031,3 +1031,123 @@ footer p {
      .previsao-dia { flex: 0 0 120px; padding: 8px; font-size: 0.8em;}
      .notificacao { padding: 10px; margin-bottom: 8px; font-size: 0.9em; }
 }
+
+#form-add-manutencao .form-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+#form-add-manutencao label {
+    text-align: right;
+    font-weight: 500;
+}
+
+/* --- Estilos para o Modal de Manutenção --- */
+
+#manutencoes-container h4, #form-manutencao-container h5 {
+    color: var(--cor-destaque-azul);
+    margin-bottom: 15px;
+}
+
+#lista-manutencoes {
+    list-style-type: none;
+    padding-left: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+    padding: 10px;
+    background-color: #f8f9fa;
+}
+
+#lista-manutencoes li {
+    padding: 8px 5px;
+    border-bottom: 1px solid #e9ecef;
+    color: var(--cor-texto-secundario);
+}
+
+#lista-manutencoes li:last-child {
+    border-bottom: none;
+}
+
+#form-add-manutencao .form-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px 15px;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+#form-add-manutencao label {
+    text-align: right;
+    font-weight: 500;
+    font-size: 0.9em;
+}
+
+#form-add-manutencao input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+}
+
+#form-add-manutencao button[type="submit"] {
+    grid-column: 2 / 3; /* Alinha o botão com os inputs */
+    justify-self: start; /* Alinha à esquerda */
+    padding: 8px 18px;
+    background-color: var(--cor-sucesso-funcional);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-padrao);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#form-add-manutencao button[type="submit"]:hover {
+    background-color: var(--cor-sucesso-funcional-hover);
+}
+
+/* style.css */
+.auth-form-container {
+    background-color: var(--cor-fundo-secundario);
+    padding: 30px;
+    border-radius: var(--border-radius-padrao);
+    box-shadow: 0 5px 15px var(--cor-sombra-media);
+    max-width: 400px;
+    margin: 30px auto;
+}
+.auth-form-container h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--cor-destaque-azul);
+}
+.auth-form-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.auth-form-container label {
+    font-weight: 500;
+}
+.auth-form-container input {
+    padding: 10px;
+    border: 1px solid var(--cor-borda-sutil);
+    border-radius: var(--border-radius-padrao);
+}
+.auth-form-container button {
+    padding: 12px;
+    background-color: var(--cor-destaque-azul);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-padrao);
+    cursor: pointer;
+    font-size: 1.1em;
+    margin-top: 10px;
+}
+.auth-form-container p {
+    text-align: center;
+    margin-top: 15px;
+}
