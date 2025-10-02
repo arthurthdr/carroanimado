@@ -41,12 +41,6 @@ const manutencaoSchema = new mongoose.Schema({
     timestamps: true // Adiciona automaticamente os campos 'createdAt' e 'updatedAt'.
 });
 
-<<<<<<< HEAD
-// Criamos o modelo a partir da planta, e agora podemos usá-lo para criar, ler, etc.
-const Manutencao = mongoose.model('Manutencao', manutencaoSchema);
-
-export default Manutencao;
-=======
 import mongoose from 'mongoose';
 
 const veiculoSchema = new mongoose.Schema({
@@ -71,4 +65,3 @@ const Manutencao = mongoose.model('Manutencao', manutencaoSchema);
 
 export default Manutencao;
 
->>>>>>> dea50b4b7226a9e68f1a6bb64a3f3be385b2fa0e
