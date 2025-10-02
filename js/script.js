@@ -56,19 +56,30 @@ document.addEventListener('DOMContentLoaded', () => {
 // ===================================================================================
 // Funções de Ação e Eventos
 // ===================================================================================
-
 function setupEventListeners(elements) {
-    // Listeners de Autenticação
-    elements.formLogin?.addEventListener('submit', (event) => handleLogin(event, elements));
-    elements.formRegister?.addEventListener('submit', (event) => handleRegister(event, elements));
-    elements.logoutButton?.addEventListener('click', handleLogout);
+    console.log("[Setup] Iniciando a conexão de eventos...");
 
+    // Listeners de Autenticação
+    if (elements.formLogin) {
+        console.log("[Setup] Conectando evento ao formulário de LOGIN.");
+        elements.formLogin.addEventListener('submit', (event) => handleLogin(event, elements));
+    } else {
+        console.error("[Setup] ERRO: Formulário 'form-login' não encontrado.");
+    }
+
+    if (elements.formRegister) {
+        console.log("[Setup] Conectando evento ao formulário de REGISTRO.");
+        elements.formRegister.addEventListener('submit', (event) => handleRegister(event, elements));
+    } else {
+        console.error("[Setup] ERRO: Formulário 'form-register' não encontrado.");
+    }
+    
+    elements.logoutButton?.addEventListener('click', handleLogout);
     elements.showRegisterLink?.addEventListener('click', (e) => {
         e.preventDefault();
         elements.loginContainer.style.display = 'none';
         elements.registerContainer.style.display = 'block';
     });
-
     elements.showLoginLink?.addEventListener('click', (e) => {
         e.preventDefault();
         elements.loginContainer.style.display = 'block';
@@ -78,7 +89,15 @@ function setupEventListeners(elements) {
     // Listeners da Garagem
     elements.btnMostrarFormAdd?.addEventListener('click', () => toggleFormAddVeiculo(elements, true));
     elements.btnCancelarAdd?.addEventListener('click', () => toggleFormAddVeiculo(elements, false));
-    elements.formAddVeiculo?.addEventListener('submit', (event) => handleAddVeiculoSubmit(event, elements));
+    
+    // Verificação específica para o formulário de adicionar veículo
+    if (elements.formAddVeiculo) {
+        console.log("[Setup] Conectando evento ao formulário de ADICIONAR VEÍCULO.");
+        elements.formAddVeiculo.addEventListener('submit', (event) => handleAddVeiculoSubmit(event, elements));
+    } else {
+        console.error("[Setup] ERRO CRÍTICO: Formulário 'form-add-veiculo' não foi encontrado.");
+    }
+    
     elements.formAddManutencao?.addEventListener('submit', (event) => adicionarManutencao(event, elements));
     elements.btnFecharDetalhes?.addEventListener('click', () => fecharDetalhes(elements));
 
@@ -91,6 +110,8 @@ function setupEventListeners(elements) {
         if (action === 'editar') handleEditarVeiculo(id, elements);
         if (action === 'detalhes') handleMostrarDetalhes(id, elements); 
     });
+
+    console.log("[Setup] Conexão de eventos concluída.");
 }
 
 // ===================================================================================
@@ -227,13 +248,19 @@ function toggleFormAddVeiculo(elements, show) {
 
 async function handleAddVeiculoSubmit(event, elements) {
     event.preventDefault();
+    
+    // --- ESPIÃO PRINCIPAL ---
+    console.log("-> A função handleAddVeiculoSubmit FOI CHAMADA!");
+
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+        console.error("-> Tentativa de adicionar veículo sem token. Abortando.");
+        exibirNotificacao("Você precisa estar logado para adicionar um veículo.", "erro");
+        return;
+    }
 
     const veiculoParaSalvar = {
-        // --- ADICIONE ESTA LINHA ---
         tipo: document.getElementById('add-tipo').value,
-
         placa: document.getElementById('add-placa').value.toUpperCase(),
         marca: document.getElementById('add-marca').value,
         modelo: document.getElementById('add-modelo').value,
@@ -241,16 +268,33 @@ async function handleAddVeiculoSubmit(event, elements) {
         cor: document.getElementById('add-cor').value
     };
 
-    // Validação simples para o campo "tipo"
     if (!veiculoParaSalvar.tipo) {
         exibirNotificacao('Por favor, selecione um tipo de veículo.', 'erro');
         return;
     }
 
+    console.log("-> Dados do veículo a serem enviados:", veiculoParaSalvar);
+
     try {
-        // ... o resto da função continua igual ...
+        const response = await fetch(`${backendUrl}/api/veiculos`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(veiculoParaSalvar)
+        });
+
+        if (response.status === 401) return handleLogout();
+        const resultado = await response.json();
+        if (!response.ok) throw new Error(resultado.error || 'Erro desconhecido do servidor.');
+        
+        exibirNotificacao('Veículo adicionado com sucesso!', 'sucesso');
+        toggleFormAddVeiculo(elements, false);
+        await buscarErenderizarVeiculos(elements);
     } catch (error) {
-        // ...
+        console.error("-> Erro ao adicionar veículo:", error);
+        exibirNotificacao(error.message || 'Ocorreu um erro ao adicionar o veículo.', 'erro');
     }
 }
 
