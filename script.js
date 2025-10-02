@@ -111,8 +111,10 @@ function checkAuthState(elements) {
 
 async function handleRegister(event, elements) {
     event.preventDefault();
+     console.log("Função handleRegister foi chamada!"); 
     const email = document.getElementById('register-email').value;
     const password = document.getElementById('register-password').value;
+     console.log(`Tentando registrar com e-mail: ${email}`);
     try {
         const response = await fetch(`${backendUrl}/api/auth/register`, {
             method: 'POST',
