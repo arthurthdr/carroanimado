@@ -10,14 +10,12 @@
 <body>
     <h1>Garagem Inteligente</h1>
 
-    <!-- Container para notificações (movido para o topo para melhor visibilidade) -->
+    <!-- Container para notificações -->
     <div id="notificacoes" class="notificacoes-container"></div>
 
     <!-- ===== SEÇÃO DE AUTENTICAÇÃO ===== -->
-    <!-- Este container será mostrado ou escondido pelo JavaScript -->
     <div id="auth-container" class="container">
-        
-        <!-- Formulário de Login (inicialmente visível) -->
+        <!-- Formulário de Login -->
         <div id="login-container" class="auth-form-container">
             <h2>Acessar minha Garagem</h2>
             <form id="form-login">
@@ -30,7 +28,7 @@
             </form>
         </div>
 
-        <!-- Formulário de Registro (inicialmente escondido) -->
+        <!-- Formulário de Registro -->
         <div id="register-container" class="auth-form-container" style="display: none;">
             <h2>Criar minha Garagem</h2>
             <form id="form-register">
@@ -44,10 +42,10 @@
         </div>
     </div>
 
-    <!-- ===== SEÇÃO PRINCIPAL DA GARAGEM (AGORA UM ÚNICO BLOCO ESCONDIDO) ===== -->
+    <!-- ===== SEÇÃO PRINCIPAL DA GARAGEM (Começa escondida) ===== -->
     <div id="garage-main-content" class="container" style="display: none;">
         
-        <!-- Controles Principais da Garagem (Adicionar Veículo e Sair) -->
+        <!-- Controles Principais -->
         <div class="add-veiculo-controls">
             <button id="mostrar-form-add">Adicionar Novo Veículo +</button>
             <button id="logout-button" style="margin-left: 20px; background-color: #dc3545;">Sair</button>
@@ -57,26 +55,31 @@
         <div id="add-veiculo-form-container" class="add-veiculo-container" style="display: none;">
             <h2>Adicionar Novo Veículo</h2>
             <form id="form-add-veiculo">
+                <!-- Campos organizados -->
                 <label for="add-tipo">Tipo de Veículo:</label>
-    <select id="add-tipo" required>
-        <option value="">-- Selecione o tipo --</option>
-        <option value="Carro">Carro</option>
-        <option value="Moto">Moto</option>
-        <option value="Bicicleta">Bicicleta</option>
-        <option value="CarroEsportivo">Carro Esportivo</option>
-    </select>
+                <select id="add-tipo" required>
+                    <option value="">-- Selecione o tipo --</option>
+                    <option value="Carro">Carro</option>
+                    <option value="Moto">Moto</option>
+                    <option value="Bicicleta">Bicicleta</option>
+                    <option value="CarroEsportivo">Carro Esportivo</option>
+                </select>
 
-    <label for="add-placa">Placa:</label>
-    <input type="text" id="add-placa" placeholder="ABC1234" required>
+                <label for="add-placa">Placa:</label>
+                <input type="text" id="add-placa" placeholder="ABC1234" required>
                
                 <label for="add-marca">Marca:</label>
                 <input type="text" id="add-marca" placeholder="Ex: Chevrolet" required>
+
                 <label for="add-modelo">Modelo:</label>
                 <input type="text" id="add-modelo" placeholder="Ex: Onix" required>
+
                 <label for="add-ano">Ano:</label>
                 <input type="number" id="add-ano" placeholder="2023" required>
+
                 <label for="add-cor">Cor:</label>
                 <input type="text" id="add-cor" placeholder="Ex: Prata" required>
+                
                 <div class="form-add-buttons">
                     <button type="submit">Adicionar à Garagem</button>
                     <button type="button" id="cancelar-add-veiculo">Cancelar</button>
@@ -89,22 +92,30 @@
             <p id="garagem-vazia-msg" style="display: none;">Sua garagem está vazia. Adicione um veículo!</p>
         </div>
     </div>
+    <!-- ===== SEÇÃO PLANEJAR VIAGEM (PREVISÃO DO TEMPO) ===== -->
+        <div class="planejar-viagem-container">
+            <h2>Planejar Viagem com Previsão do Tempo</h2>
+            <form id="form-previsao-tempo">
+                <label for="destino-viagem">Digite o Destino:</label>
+                <input type="text" id="destino-viagem" placeholder="Ex: Curitiba" required>
+                <button type="submit" id="verificar-clima-btn">Verificar Clima</button>
+            </form>
+            <div id="previsao-tempo-resultado" style="display: none;">
+                <!-- O resultado da previsão será inserido aqui pelo script.js -->
+            </div>
+        </div>
 
-    <!-- ===== MODAL DE DETALHES E MANUTENÇÃO (Estrutura mantida) ===== -->
+    <!-- ===== MODAL DE DETALHES E MANUTENÇÃO ===== -->
     <div id="detalhes-e-agendamento" class="detalhes-container" style="display: none;">
         <div class="detalhes-conteudo-interno">
             <h2>Detalhes e Manutenção do Veículo</h2>
             <button id="fechar-detalhes" class="close-btn">×</button>
             
-            <div id="informacoesVeiculo">
-                <!-- Preenchido pelo JavaScript -->
-            </div>
+            <div id="informacoesVeiculo"><!-- Preenchido pelo JS --></div>
 
             <div id="manutencoes-container" style="margin-top: 20px; width: 100%;">
                 <h4>Histórico de Manutenção</h4>
-                <ul id="lista-manutencoes" class="dados-lista">
-                    <!-- Preenchido pelo JavaScript -->
-                </ul>
+                <ul id="lista-manutencoes" class="dados-lista"><!-- Preenchido pelo JS --></ul>
                 <div id="form-manutencao-wrapper" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #dee2e6;">
                     <h5>Adicionar Nova Manutenção</h5>
                     <form id="form-add-manutencao">
@@ -128,7 +139,7 @@
     <audio id="som-buzina" src="sons/buzina.mp3" preload="auto"></audio>
     <audio id="som-acelerar" src="sons/carroacelerando.mp3" preload="auto"></audio>
     <audio id="som-frear" src="sons/freio.mp3" preload="auto"></audio>
-    <audio id="som-ligar" src="sons/carrodesligando.mp3" preload="auto"></audio>
+    <audio id="som-ligar"src="sons/carroligando.mp3" preload="auto"></audio>
     <audio id="som-desligar" src="sons/carrodesligando.mp3" preload="auto"></audio>
     <audio id="som-adicionar" src="sons/success-add.mp3" preload="auto"></audio>
 
@@ -137,7 +148,7 @@
         <p>Projeto Garagem Inteligente - Informática para Internet</p>
     </footer>
 
-    <!-- SCRIPT DEVE SER A ÚLTIMA COISA ANTES DE FECHAR O BODY -->
+    <!-- SCRIPT NO FINAL DO BODY -->
     <script src="js/script.js"></script>
 </body>
 </html>
