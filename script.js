@@ -206,22 +206,26 @@ async function buscarErenderizarVeiculos(elements) {
 }
 
 function gerarHTMLVeiculoDoBanco(veiculo) {
-    // Escolhe a imagem com base no tipo
+    // --- MUDANÇA IMPORTANTE AQUI ---
+    // Escolhe a imagem com base no tipo do veículo.
+    // Garante que o nome do arquivo seja em letras minúsculas (ex: carroesportivo.jpg)
     const imagemSrc = `img/${veiculo.tipo.toLowerCase()}.jpg`;
 
-    // Gera os botões específicos para cada tipo
+    // Gera os botões específicos para cada tipo (pode ser expandido no futuro)
     let controlesExtras = '';
     if (veiculo.tipo === 'CarroEsportivo') {
-        controlesExtras = `<button>Ativar Turbo</button>`; // Adicionaremos a lógica depois
+        controlesExtras = `<button data-action="ativarTurbo" data-id="${veiculo._id}">Ativar Turbo</button>`;
     } else if (veiculo.tipo === 'Bicicleta') {
-        controlesExtras = `<button>Pedalar</button>`; // Apenas um exemplo
+        controlesExtras = `<button data-action="pedalar" data-id="${veiculo._id}">Pedalar</button>`;
     }
-    // Carros e Motos não têm botões extras por enquanto
 
     return `
         <div id="${veiculo._id}" class="veiculo-container" data-tipo="${veiculo.tipo}">
             <button class="remover-veiculo-btn" data-action="excluir" data-id="${veiculo._id}" title="Excluir ${veiculo.modelo}">×</button>
-            <h2>${veiculo.marca} ${veiculo.modelo}</h2>
+            
+            <!-- A ESTRUTURA DO TÍTULO FOI ALTERADA ABAIXO -->
+            <h2 class="veiculo-modelo">${veiculo.modelo}</h2>
+            <h3 class="veiculo-marca">${veiculo.marca}</h3>
             
             <!-- Imagem dinâmica -->
             <img src="${imagemSrc}" alt="Imagem ${veiculo.modelo}" class="veiculo-imagem" onerror="this.src='img/carro.jpg';">
@@ -239,6 +243,7 @@ function gerarHTMLVeiculoDoBanco(veiculo) {
         </div>
     `;
 }
+
 function toggleFormAddVeiculo(elements, show) {
     const { addVeiculoFormContainer, btnMostrarFormAdd, formAddVeiculo } = elements;
     if (!addVeiculoFormContainer || !btnMostrarFormAdd) return;

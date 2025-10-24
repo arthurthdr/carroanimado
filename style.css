@@ -1151,3 +1151,32 @@ footer p {
     text-align: center;
     margin-top: 15px;
 }
+
+/* =============================================== */
+/* --- ESTILOS PARA TÍTULO DO CARD DE VEÍCULO --- */
+/* =============================================== */
+
+/* Estilo para o MODELO (Ex: Onix) */
+.veiculo-modelo {
+    font-size: 1.5em; /* Tamanho da fonte maior */
+    color: var(--cor-destaque-azul); /* Cor principal (azul escuro) */
+    margin-top: 0;
+    margin-bottom: 0; /* Remove a margem inferior para aproximar da marca */
+    font-weight: 600;
+    border-bottom: none; /* Garante que não tenha nenhuma linha embaixo */
+}
+
+/* Estilo para a MARCA (Ex: Chevrolet) */
+.veiculo-marca {
+    font-size: 1.0em; /* Fonte menor */
+    color: var(--cor-texto-secundario); /* Cor cinza claro */
+    font-weight: 400; /* Fonte mais leve (não negrito) */
+    margin-top: 2px; /* Pequeno espaço entre o modelo e a marca */
+    margin-bottom: 15px; /* Espaço antes da imagem */
+    border-bottom: none; /* Garante que não tenha nenhuma linha embaixo */
+}
+
+/* Garante que o h2 original dentro do card não tenha margens indesejadas */
+.veiculo-container h2 {
+    margin-bottom: 0;
+}
