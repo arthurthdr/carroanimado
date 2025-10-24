@@ -246,10 +246,10 @@ function toggleFormAddVeiculo(elements, show) {
     if (show) formAddVeiculo.reset();
 }
 
+// SUBSTITUA A FUNÇÃO ANTIGA POR ESTA
 async function handleAddVeiculoSubmit(event, elements) {
     event.preventDefault();
     
-    // --- ESPIÃO PRINCIPAL ---
     console.log("-> A função handleAddVeiculoSubmit FOI CHAMADA!");
 
     const token = localStorage.getItem('token');
@@ -280,21 +280,27 @@ async function handleAddVeiculoSubmit(event, elements) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
+                // LINHA CRÍTICA ADICIONADA: Enviando o token para o backend
+                'Authorization': `Bearer ${token}` 
             },
             body: JSON.stringify(veiculoParaSalvar)
         });
 
-        if (response.status === 401) return handleLogout();
+        console.log("Resposta do servidor recebida. Status:", response.status);
         const resultado = await response.json();
-        if (!response.ok) throw new Error(resultado.error || 'Erro desconhecido do servidor.');
+        console.log("Dados da resposta (JSON):", resultado);
+
+        if (!response.ok) {
+            throw new Error(resultado.error || 'Erro desconhecido do servidor.');
+        }
         
         exibirNotificacao('Veículo adicionado com sucesso!', 'sucesso');
         toggleFormAddVeiculo(elements, false);
         await buscarErenderizarVeiculos(elements);
+
     } catch (error) {
-        console.error("-> Erro ao adicionar veículo:", error);
-        exibirNotificacao(error.message || 'Ocorreu um erro ao adicionar o veículo.', 'erro');
+        console.error("-> Erro no bloco CATCH do handleAddVeiculoSubmit:", error);
+        exibirNotificacao(error.message, 'erro');
     }
 }
 
