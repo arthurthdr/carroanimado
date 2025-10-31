@@ -200,6 +200,40 @@ app.get('/api/veiculos/:veiculoId/manutencoes', authMiddleware, async (req, res)
 });
 
 app.post('/api/veiculos/:veiculoId/manutencoes', authMiddleware, async (req, res) => {
+    console.log(`\n--- [ROTA POST /api/veiculos/${req.params.veiculoId}/manutencoes] ---`);
+    try {
+        // 1. Verifica se o veículo pertence ao usuário logado
+        const veiculo = await Veiculo.findOne({ _id: req.params.veiculoId, owner: req.userId });
+        if (!veiculo) {
+            console.log(`[ROTA] ERRO: Veículo ${req.params.veiculoId} não encontrado ou não pertence ao usuário ${req.userId}.`);
+            return res.status(404).json({ error: 'Veículo não encontrado.' });
+        }
+
+        console.log('[ROTA] Veículo encontrado. Dados da manutenção recebidos:', req.body);
+
+        // 2. Cria a nova manutenção associando-a ao veículo
+        const novaManutencao = new Manutencao({
+            ...req.body,
+            veiculo: req.params.veiculoId // Associa o ID do veículo
+        });
+        
+        // 3. Salva a manutenção no banco de dados
+        await novaManutencao.save();
+
+        console.log('[ROTA] SUCESSO! Manutenção salva:', novaManutencao);
+        res.status(201).json(novaManutencao); // Retorna a manutenção criada
+
+    } catch (error) {
+        console.error('[ROTA] ERRO no bloco CATCH:', error.message);
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(val => val.message).join(', ');
+            return res.status(400).json({ error: messages });
+        }
+        res.status(500).json({ error: 'Erro ao adicionar manutenção.' });
+    }
+});
+
+app.post('/api/veiculos/:veiculoId/manutencoes', authMiddleware, async (req, res) => {
     try {
         const veiculo = await Veiculo.findOne({ _id: req.params.veiculoId, owner: req.userId });
         if (!veiculo) return res.status(404).json({ error: 'Veículo não encontrado.' });

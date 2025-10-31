@@ -8,15 +8,14 @@
 // Bloco de Configuração
 // ===================================================================================
 
-const RENDER_BACKEND_URL = 'https://carroanimado.onrender.com';
+// ...
 const LOCAL_BACKEND_URL = 'http://localhost:3001';
 
+// Força o uso do backend local para podermos testar nossas mudanças.
 const backendUrl = LOCAL_BACKEND_URL; 
-// const backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-//     ? LOCAL_BACKEND_URL
-//     : RENDER_BACKEND_URL;
 
 console.log(`[CONFIG] Frontend conectando ao backend em: ${backendUrl}`);
+// ...
 
 // ===================================================================================
 // INICIALIZAÇÃO DA APLICAÇÃO
