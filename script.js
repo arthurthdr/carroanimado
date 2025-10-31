@@ -205,28 +205,22 @@ async function buscarErenderizarVeiculos(elements) {
 }
 
 function gerarHTMLVeiculoDoBanco(veiculo) {
-    // --- MUDANÇA IMPORTANTE AQUI ---
-    // Escolhe a imagem com base no tipo do veículo.
-    // Garante que o nome do arquivo seja em letras minúsculas (ex: carroesportivo.jpg)
-    const imagemSrc = `img/${veiculo.tipo.toLowerCase()}.jpg`;
+    // Se o veículo tiver uma imagem, use-a. Senão, use a imagem padrão do tipo.
+    const imagemSrc = veiculo.imageUrl 
+        ? `${backendUrl}/${veiculo.imageUrl}` 
+        : `img/${veiculo.tipo.toLowerCase()}.jpg`;
 
-    // Gera os botões específicos para cada tipo (pode ser expandido no futuro)
-    let controlesExtras = '';
-    if (veiculo.tipo === 'CarroEsportivo') {
-        controlesExtras = `<button data-action="ativarTurbo" data-id="${veiculo._id}">Ativar Turbo</button>`;
-    } else if (veiculo.tipo === 'Bicicleta') {
-        controlesExtras = `<button data-action="pedalar" data-id="${veiculo._id}">Pedalar</button>`;
-    }
+    // (O resto do código da função continua o mesmo...)
+    // ...
 
     return `
         <div id="${veiculo._id}" class="veiculo-container" data-tipo="${veiculo.tipo}">
             <button class="remover-veiculo-btn" data-action="excluir" data-id="${veiculo._id}" title="Excluir ${veiculo.modelo}">×</button>
             
-            <!-- A ESTRUTURA DO TÍTULO FOI ALTERADA ABAIXO -->
             <h2 class="veiculo-modelo">${veiculo.modelo}</h2>
             <h3 class="veiculo-marca">${veiculo.marca}</h3>
             
-            <!-- Imagem dinâmica -->
+            <!-- A tag de imagem agora usa a variável imagemSrc que definimos -->
             <img src="${imagemSrc}" alt="Imagem ${veiculo.modelo}" class="veiculo-imagem" onerror="this.src='img/carro.jpg';">
             
             <p><strong>Tipo:</strong> ${veiculo.tipo}</p>
@@ -235,7 +229,6 @@ function gerarHTMLVeiculoDoBanco(veiculo) {
             <p><strong>Cor:</strong> <span class="veiculo-cor">${veiculo.cor}</span></p>
 
             <div class="controles-veiculo">
-                 ${controlesExtras}
                  <button data-action="editar" data-id="${veiculo._id}">Editar</button>
                  <button data-action="detalhes" data-id="${veiculo._id}">Detalhes</button>
             </div>
@@ -251,50 +244,40 @@ function toggleFormAddVeiculo(elements, show) {
     if (show) formAddVeiculo.reset();
 }
 
-// SUBSTITUA A FUNÇÃO ANTIGA POR ESTA
 async function handleAddVeiculoSubmit(event, elements) {
     event.preventDefault();
+    console.log("-> A função handleAddVeiculoSubmit (com FormData) FOI CHAMADA!");
     
-    console.log("-> A função handleAddVeiculoSubmit FOI CHAMADA!");
-
     const token = localStorage.getItem('token');
     if (!token) {
-        console.error("-> Tentativa de adicionar veículo sem token. Abortando.");
-        exibirNotificacao("Você precisa estar logado para adicionar um veículo.", "erro");
+        exibirNotificacao("Você precisa estar logado.", "erro");
         return;
     }
+    
+    // 1. Pega o elemento do formulário
+    const form = event.target;
+    // 2. Cria um objeto FormData a partir do formulário. Ele automaticamente
+    //    pega todos os valores dos inputs, incluindo o arquivo de imagem!
+    const formData = new FormData(form);
 
-    const veiculoParaSalvar = {
-        tipo: document.getElementById('add-tipo').value,
-        placa: document.getElementById('add-placa').value.toUpperCase(),
-        marca: document.getElementById('add-marca').value,
-        modelo: document.getElementById('add-modelo').value,
-        ano: parseInt(document.getElementById('add-ano').value),
-        cor: document.getElementById('add-cor').value
-    };
-
-    if (!veiculoParaSalvar.tipo) {
-        exibirNotificacao('Por favor, selecione um tipo de veículo.', 'erro');
-        return;
-    }
-
-    console.log("-> Dados do veículo a serem enviados:", veiculoParaSalvar);
+    // Você pode verificar o conteúdo do formData se quiser (opcional)
+    // for (let [key, value] of formData.entries()) {
+    //     console.log(`${key}:`, value);
+    // }
 
     try {
         const response = await fetch(`${backendUrl}/api/veiculos`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                // LINHA CRÍTICA ADICIONADA: Enviando o token para o backend
-                'Authorization': `Bearer ${token}` 
+                // NÃO DEFINA 'Content-Type'. O navegador fará isso automaticamente
+                // para formulários com arquivos. É MUITO IMPORTANTE!
+                'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(veiculoParaSalvar)
+            body: formData // 3. Envia o objeto FormData
         });
 
-        console.log("Resposta do servidor recebida. Status:", response.status);
         const resultado = await response.json();
-        console.log("Dados da resposta (JSON):", resultado);
-
+        
         if (!response.ok) {
             throw new Error(resultado.error || 'Erro desconhecido do servidor.');
         }
@@ -304,7 +287,7 @@ async function handleAddVeiculoSubmit(event, elements) {
         await buscarErenderizarVeiculos(elements);
 
     } catch (error) {
-        console.error("-> Erro no bloco CATCH do handleAddVeiculoSubmit:", error);
+        console.error("-> Erro no handleAddVeiculoSubmit:", error);
         exibirNotificacao(error.message, 'erro');
     }
 }

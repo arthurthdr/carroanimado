@@ -14,6 +14,8 @@ import User from './models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import authMiddleware from './middleware/auth.js';
+import multer from 'multer';
+import path from 'path'; 
 
 // --- Configuração Inicial ---
 dotenv.config();
@@ -22,12 +24,27 @@ const port = process.env.PORT || 3001;
 const apiKey = process.env.OPENWEATHER_API_KEY;
 const mongoUriCrud = process.env.MONGO_URI_CRUD;
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/'); // Onde salvar os arquivos
+  },
+  filename: function (req, file, cb) {
+    // Cria um nome de arquivo único para evitar sobreposição
+    // Ex: 1734567890123-meu-carro.png
+    cb(null, Date.now() + path.extname(file.originalname)); 
+  }
+});
+const upload = multer({ storage: storage });
+
 // =======================================================================
 // --- Middlewares ---
 // =======================================================================
 app.use(cors());
 app.use(express.json());
 
+// 3. TORNE A PASTA UPLOADS PÚBLICA
+// O frontend irá acessar as imagens através de URLs como http://localhost:3001/uploads/nome-da-imagem.jpg
+app.use('/uploads', express.static('uploads'));
 // =======================================================================
 // --- Conexão com o Banco de Dados ---
 // =======================================================================
@@ -116,12 +133,36 @@ app.post('/api/auth/login', async (req, res) => {
 // --- Rotas de Veículos (TODAS PROTEGIDAS) ---
 // =======================================================================
 
-app.get('/api/veiculos', authMiddleware, async (req, res) => {
+// Substitua a sua rota POST /api/veiculos inteira por esta:
+
+app.post('/api/veiculos', authMiddleware, upload.single('imagem'), async (req, res) => {
+    console.log('\n--- [ROTA POST /api/veiculos com Upload] ---');
+    console.log('[ROTA] Corpo da requisição (req.body):', req.body);
+    console.log('[ROTA] Arquivo recebido (req.file):', req.file);
+    console.log(`[ROTA] ID do usuário: '${req.userId}'`);
+
     try {
-        const veiculosDoUsuario = await Veiculo.find({ owner: req.userId });
-        res.status(200).json(veiculosDoUsuario);
+        const veiculoData = {
+            ...req.body,
+            owner: req.userId,
+            // Se um arquivo foi enviado (req.file existe), salve seu caminho.
+            // O caminho será algo como "uploads/1734567890123.png"
+            imageUrl: req.file ? req.file.path.replace(/\\/g, "/") : ''
+        };
+
+        console.log('[ROTA] Objeto final para salvar no banco:', veiculoData);
+        
+        const veiculoCriado = await Veiculo.create(veiculoData);
+        console.log('[ROTA] SUCESSO! Veículo salvo:', veiculoCriado);
+        res.status(201).json(veiculoCriado);
+
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao buscar veículos.' });
+        console.error('[ROTA] ERRO no bloco CATCH:', error.message);
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(val => val.message).join(', ');
+            return res.status(400).json({ error: messages });
+        }
+        res.status(500).json({ error: 'Erro ao criar veículo.' });
     }
 });
 
