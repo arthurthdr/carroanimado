@@ -39,7 +39,12 @@ const upload = multer({ storage: storage });
 // =======================================================================
 // --- Middlewares ---
 // =======================================================================
-app.use(cors());
+const corsOptions = {
+  origin: 'https://carroanimado-bcdf.vercel.app', // Permite requisições SOMENTE deste endereço
+  optionsSuccessStatus: 200 // Para navegadores mais antigos
+};
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
 // 3. TORNE A PASTA UPLOADS PÚBLICA
